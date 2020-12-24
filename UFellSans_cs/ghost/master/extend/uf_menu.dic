@@ -310,12 +310,12 @@ OnUtility
 {
 	_text = ""; _p = ""; _buttons = ""
 	if _argv[0] != "util"; _text = OnUtility_Dialogue
-	if passmintotal <= 10; _p = OnMenu_Render
+	if passmintotal <= 10; _p = "\_l[-10]" + OnMenu_Render
 	else {
-		_p = OnRenderInterface("Utility","",6)
+		_p = "\n[half]" + OnRenderInterface("Utility","",6)
 		_buttons = buttons(2,'Go back','OnMenu')
 	}
-	"\0\_q\b2\n\n\n[half]/
+	"\0\_q\b2\n\n/
 		%(_p)/
 		%(_buttons)/
 		\_q\_l[0,0]%(_text)"

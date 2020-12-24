@@ -363,6 +363,11 @@ TextOnlyTranslator
 	_tag = RE_GETSTR()
 	_tr = ''
 	_qs = 0
+	//this is important so the variables can get evaluated WHILE the script runs through
+	//since \e does not stop processing, just displaying
+	tempphone = phonetrue 
+	tempsleep = sleeptrue
+	tempsit = sittrue
 
 		_transition = IARRAY; _insert = IARRAY; _wait = IARRAY; _surfaces = IARRAY; _positions = IARRAY
 		_lastS = ""; _nextS = ""; _printat = ""; _letters = ""
@@ -401,7 +406,7 @@ TextOnlyTranslator
 	_trans = ""
 	_oldlength = 0
 	_TAG = 0 //IF TAG ONLY STRING; DONT INSERT ANIMATION
-	for _i = 0 ; _i < _n ; _i++ { //fix inserting look at uf_phone.dic example for not working
+	for _i = 0 ; _i < _n ; _i++ {
 	
 		_oldlength = STRLEN(_string[_i])
 			if _oldlength == 0; _TAG = 1
@@ -427,6 +432,7 @@ TextOnlyTranslator
 		if '\_q' _in_ _tag[_i] {
 			_qs = ! _qs
 		}
+		if '\e' _in_ _tag[_i]; _end = !_end
 	}
 	
 		//pause insertion; only insert when not \_q
@@ -448,6 +454,10 @@ TextOnlyTranslator
 		//Replace a talking mouths after \i[298] with non-talking
 	//_tr = RE_REPLACEEX(_tr,'(?<=\\i\[298\])(.*?\i\[2\d\d)\]','$10]')
 	_tr = RE_REPLACEEX(_tr,'\(s_([^\)]*)\)','\![embed,Ons_$1]')
+
+	phonetrue = tempphone //reassign variables from beginning
+	sleeptrue = tempsleep
+	sittrue = tempsit
 	_tr
 }
 TextOnlyTranslatorFunc
@@ -463,12 +473,11 @@ TextOnlyTranslatorFunc
 	_text = REPLACE(_text,"(s_pback)","\![embed,OnPhonefalse](s_0)")
 	_text = REPLACE(_text,"(s_sit)","\![embed,OnSittrue](s_0)")
 	_text = REPLACE(_text,"(s_stand)","\![embed,OnSitfalse](s_0)")
-	//_text = RE_REPLACEEX(_text,'\(s_(?=[^\)]*\))','%(s_')
+		
 	_text = REPLACE(_text,"''","%(CHR(34))")
 		
 	_text
 }
-
 
 //------------------------------------------------------------------------------
 // Anchor selection (enables websites in anchors)

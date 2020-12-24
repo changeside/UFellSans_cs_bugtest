@@ -3,7 +3,7 @@
 //
 //			:Boot and close related.
 //------------------------------------------------------------------------------
-OnVersionSet { TOREAL(2.01) }
+OnVersionSet { TOREAL(2.00) }
 OnUpdateURLSet { //OLD: "http://changeside.usite.pro/ufsans"
 	if _argv[0] == "patreon"; "https://raw.githubusercontent.com/changeside/UFellSans_cs_"+patreonCode+"/main/UFellSans_cs/"
 	else; "https://raw.githubusercontent.com/changeside/UFellSans_cs/main/UFellSans_cs/"

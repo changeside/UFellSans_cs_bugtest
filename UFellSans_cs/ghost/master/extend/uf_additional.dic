@@ -18,17 +18,22 @@
 //------------------------------------------------------------------------------
 OnBIFFBegin
 {
-		//first mail check
-	if togglemail == 1; "\0(s_0)\i[298]%(m)(You ask him to check your email. You show him your account data.)\n\n[half](s_pout)\i[298]%(m)(Hopefully he can decipher it...)\n\n(s_0)\i[203]\i[301]%(m)'m just doin' this out of curiosity...\e"
+		//regular mail check if phone locked
+	if !INV('phone')[0]; "\0\i[298]%(m)(You make to ask him to check your mail- but hesitate and do it yourself.)\e"
+		//first mail check only if phone unlocked
+	if togglemail == 1 && INV('phone')[0]; "\0(s_0)\i[298]%(m)(You ask him to check your email. You show him your account data.)\n\n[half](s_pout)\i[298]%(m)(Hopefully he can decipher it...)\n\n(s_0)\i[203]\i[301]%(m)'m just doin' this out of curiosity...\e"
 	--
-	if ARRINFO("user","loner"); "\0(s_0)%(beginning), maybe ya' have more emails than friends.(s_pout)"
-	"(s_0)%(m)%(beginning), lets see.(s_pout)"
-	"(s_0)%(m)oh, emails, haven't seen those in a while.(s_pout)"
-	"(s_0)%(m)email check, go.(s_pout)"
+	if ARRINFO("user","loner") && INV('phone')[0]; "\0(s_0)%(beginning), maybe ya' have more emails than friends.(s_pout)"
+	if INV('phone')[0]; "(s_0)%(m)%(beginning), lets see.(s_pout)"
+	if INV('phone')[0]; "(s_0)%(m)oh, emails, haven't seen those in a while.(s_pout)"
+	if INV('phone')[0]; "(s_0)%(m)email check, go.(s_pout)"
 }
 OnBIFFComplete
 {
-	if togglemail; ERASEVAR("togglemail")
+		//if phone not yet unlocked
+	if !INV('phone')[0]; "\i[298]%(m)(You have %(reference0) new mails.)\e"
+		//first mail check erase if phone unlocked
+	if togglemail && INV('phone')[0]; ERASEVAR("togglemail")
 	--
 	case reference0 {	//amount of new mails
 		when 0 {
@@ -53,7 +58,12 @@ OnBIFFComplete
 }
 OnBIFFFailure
 {
-	if togglemail; ERASEVAR("togglemail")
+	if !INV('phone')[0] && reference0 == "defect"; "\![open,configurationdialog]"
+	--
+		//if phone not yet unlocked
+	if !INV('phone')[0]; "\i[298]%(m)(Something went wrong... Maybe not correctly set up or %(reference0).)\e"
+		//first mail check erase if phone unlocked
+	if togglemail && INV('phone')[0]; ERASEVAR("togglemail")
 	--
 	case reference0 {	//error message
 		when "timeout"; "\0(s_0)%(m)connection timed out."
@@ -62,14 +72,20 @@ OnBIFFFailure
 		others; "\0(s_0)%(m)%(stuff) went wrong.\n\n[half]%(m)('%(reference0)'was given as error.)"
 	}
 }
-
+isPhone
+{
+	if !INV('phone')[0]; "not unlocked"
+	if INV('phone')[0]; "unlocked"
+}
 //------------------------------------------------------------------------------
 // Clock functions (start @uf_menu.dic)
 //------------------------------------------------------------------------------
 OnSNTPBegin //reference0 = site used to check the clock
 {
-		//first clock check
-	if toggleclock == 1; "\0(s_0)\i[298]%(m)(You ask him how late it is.)\n\n(s_pout)\i[100]\i[304]%(m)don't you have a clock... or is yers off?\e"
+		//regular clock check if phone locked
+	if !INV('phone')[0]; "\0\i[298]%(m)(You make to ask him about the time- but hesitate and look yourself.)\e"
+		//first clock check if phone unlocked
+	if toggleclock == 1 && INV('phone')[0]; "\0(s_0)\i[298]%(m)(You ask him how late it is.)\n\n(s_pout)\i[100]\i[304]%(m)don't you have a clock... or is yers off?\e"
 	--
 	"\0(s_0)%(m)%(beginning), gonna check the time, i guess.(s_pout)"
 	"\0(s_0)\i[298]%(m)(He takes out his phone, checking the time.)(s_pout)"
@@ -80,9 +96,10 @@ OnSNTPCompare
 	//reference1 = check
 	//reference2 = own clock
 	//reference3 = difference
-	if toggleclock; ERASEVAR("toggleclock")
+	if toggleclock && INV('phone')[0]; ERASEVAR("toggleclock")
 	--
-	"\0(s_0)%(m)my phone says '%reference1[1]/%reference1[2]/%reference1[0] %reference1[3]:%reference1[4]:%reference1[5]'.\n\n"
+	if INV('phone')[0]; "\0(s_0)%(m)my phone says ''%reference1[1]/%reference1[2]/%reference1[0] %reference1[3]:%reference1[4]:%reference1[5]''.\n\n"
+	else; "\0\i[298]%(m)(The web says ''%reference1[1]/%reference1[2]/%reference1[0] %reference1[3]:%reference1[4]:%reference1[5]''.)\n\n"
 	--
  	if reference3 == 0 { //clocks are the same
  		//"\0(s_0)%(m)our clocks match %(nickname)."
@@ -94,7 +111,7 @@ OnSNTPCompare
  		\![*]\q[Leave it alone,script:\e]"
 	}
 	--
-	if RND(60); "(s_pback)"
+	if RND(60) && INV('phone')[0]; "(s_pback)"
 }
 OnSNTPEXECUTE
 {
@@ -102,9 +119,10 @@ OnSNTPEXECUTE
 }
 OnSNTPFailure
 {
-	if toggleclock; ERASEVAR("toggleclock")
+	if toggleclock && INV('phone')[0]; ERASEVAR("toggleclock")
 	--
-	"\0(s_0)\i[205]%(m)%(beginning), my phone time looks off too."
+	if INV('phone')[0]; "\0(s_0)\i[205]%(m)%(beginning), my phone time looks off too."
+	else; "\0\i[298]%(m)(You can't connect to the clock server....)"
 }
 
 //------------------------------------------------------------------------------
