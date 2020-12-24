@@ -1,0 +1,68 @@
+charset,UTF-8
+
+version,1
+
+option,DisableNoDefineSurfaces
+
+
+group,stand
+{
+	scope,0
+
+	0,default
+	4,shrug
+	8,head_turn
+	13,sleep
+}
+
+group,sit
+{
+	scope,0
+	
+	1,default
+	5,shrug
+	9,head_turn
+	14,sleep
+}
+
+group,stand_phone
+{
+	scope,0
+	
+	2,default
+	6,shrug
+	11,head_turn
+}
+group,sit_phone
+{
+	scope,0
+	
+	3,default
+	7,shrug
+	12,head_turn
+}
+
+group,transitions
+{
+	scope,0
+	
+	300,default-head_turn_stand
+	301,head_turn-default_stand
+}
+
+group,extra
+{
+	scope,2
+	
+	299,note
+	298,socks
+	297,star1
+	296,star2
+	295,star3
+}
+
+
+
+
+
+

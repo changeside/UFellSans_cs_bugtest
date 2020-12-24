@@ -1,0 +1,421 @@
+//------------------------------------------------------------------------------
+// File		:uf_game.dic
+//
+//			:All available games.
+//
+// Var		:money
+//			 ticAr
+//			 gdigGold
+//			 gdigAr
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Function		:OnGame
+//
+//				:Game menu
+//------------------------------------------------------------------------------
+OnGame
+{
+	_p = OnRenderInterface("Game","",5)
+	if money <= -100; OnGame_No
+	else;
+	"\0\b2(s_0)\_q/
+	\_l[-10]%(b)-------------Games--------------%(def)\n/
+	Bets: win = bet times 2; loss = bet\n\n/
+		%(_p)/
+	%(buttons(2,'Go back','OnMenu'))"
+}
+OnGame_Array //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/color
+{
+	_arr = IARRAY
+	_arr ,= "|Bet *G - Flip a coin||OnCoin"
+	_arr ,= "|Bet *G - Rock Paper Scissors||OnRPS"
+	_arr ,= "1|Tic Tac Toe||OnTic"
+	_arr ,= "*|Gold Digger||OnGDig"
+	_arr
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnGame_No
+//
+//				:Dialogue for refusing to open the games;
+//				 if money too low.
+//------------------------------------------------------------------------------
+OnGame_No
+{
+	"(s_0)\i[302]%(m)ya' like rippin' yerself off, i don't give a fuck, but don't make me work for it.\n\n/
+		%(m)countin' yer debts is enough already."
+	"(s_0)\i[115]%(m)slow down kid, keeping track of debt is work."
+	"(s_0)\i[205]%(m)okay mayyyybe ya' should stop rippin' yourself off.\n\n/
+		%(m)save a lil' money and then come back ta poker."
+	"(s_0)\i[203]\i[304]\i[298]%(m)(He stares at you like he is amused of your behaviour.)\n\n/
+		%(m)(Maybe you should lay off the games for a while...)"
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnCoin_*
+//
+//				:Simple coin flip, includes betting.
+//
+// Var			:reference = (head/tails,[bet amount],start)
+//------------------------------------------------------------------------------
+OnCoin
+{
+	_choice = IARRAY
+	_result = ""
+	if reference0 == "tails"; _choice = (greyedout,lightup,"tails")
+	else; _choice = (lightup,greyedout,"head")
+		//Betting system
+	if reference1 == ""; reference1 = 0
+	if reference2 == "start";
+		_result = OnCoin_Calc(reference0,reference1)
+	
+	"\0\b2\_q/
+	\_l[-10]%(b)------------Flip A Coin------------%(def)\n\n\_l[105]/
+	Choose\n/
+	%(_choice[0])\_l[80]\q[Head,OnCoin,head,%(reference1)]/
+	%(_choice[1])\_l[130]\q[Tails,OnCoin,tails,%(reference1)]%(def)\n/
+	\_l[105]\q[Start,OnCoin,%(_choice[2]),%(reference1),start]\n\n[half]/
+	\q[Betting money: %(reference1),OnCoin_Bet,%(reference1)]/
+	%(_result)/
+	%(buttons(2,'Games','OnGame'))"
+}
+OnCoin_Bet
+{
+	"\![open,sliderinput,OnCoin_Set,-1,%(reference0),0,%(money)]"
+}
+OnCoin_Set
+{
+	"\![raise,OnCoin,'tails',%(reference0)]"
+}
+OnCoin_Calc
+{
+	_draw = IARRAY
+	
+	if RND(50)
+	{
+		_draw ,= "head"
+		if _argv[0] == "head"; _draw ,= "won"
+		else; _draw ,= "lost"
+	}
+	else
+	{
+		_draw ,= "tails"
+		if _argv[0] == "head"; _draw ,= "lost"
+		else; _draw ,= "won"
+	}
+	
+	if _draw[1] == "won"; money += (_argv[1]*2)
+	else; money -= _argv[1]
+	
+	"\n\n\_l[40]/
+	You %(_draw[1]), the coin shows %(_draw[0])."
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnRPS_*
+//
+//				:Rock paper scissors game, includes betting.
+//				 Same mechanic as OnCoin
+//
+// Var			:reference = (rock/paper/scissors,[bet amount],start)
+//------------------------------------------------------------------------------
+OnRPS
+{
+	_choice = IARRAY
+	_result = ""
+	if reference0 == "paper"; _choice = (greyedout,lightup,greyedout,"paper")
+	elseif reference0 == "scissors"; _choice = (greyedout,greyedout,lightup,"scissors")
+	else; _choice = (lightup,greyedout,greyedout,"rock")
+		//Betting system
+	if reference1 == ""; reference1 = 0
+	if reference2 == "start";
+		_result = OnRPS_Calc(reference0,reference1)
+	
+	"\0\b2\_q/
+	\_l[-10]%(b)---------Rock Paper Scissors--------%(def)\n\n\_l[105]/
+	Choose\n/
+	%(_choice[0])\_l[55]\q[Rock,OnRPS,rock,%(reference1)]/
+	%(_choice[1])\_l[108]\q[Paper,OnRPS,paper,%(reference1)]%(def)/
+	%(_choice[2])\_l[160]\q[Scissors,OnRPS,scissors,%(reference1)]%(def)\n/
+	\_l[105]\q[Start,OnRPS,%(_choice[3]),%(reference1),start]\n\n[half]/
+	\q[Betting money: %(reference1),OnRPS_Bet,%(reference1)]/
+	%(_result)/
+	%(buttons(2,'Games','OnGame'))"
+}
+OnRPS_Bet
+{
+	"\![open,sliderinput,OnRPS_Set,-1,%(reference0),0,%(money)]"
+}
+OnRPS_Set
+{
+	"\![raise,OnRPS,'rock',%(reference0)]"
+}
+OnRPS_Calc
+{
+	_draw = IARRAY
+	_i = RAND(3);
+	if _i == 0
+	{
+		_draw ,= "rock"
+		if _argv[0] == "rock"; _draw ,= "tie"
+		elseif _argv[0] == "paper"; _draw ,= "won"
+		else; _draw ,= "lost"
+	}
+	elseif _i == 1
+	{
+		_draw ,= "paper"
+		if _argv[0] == "rock"; _draw ,= "lost"
+		elseif _argv[0] == "paper"; _draw ,= "tie"
+		else; _draw ,= "won"
+	}
+	else
+	{
+		_draw ,= "scissors"
+		if _argv[0] == "rock"; _draw ,= "won"
+		elseif _argv[0] == "paper"; _draw ,= "lost"
+		else; _draw ,= "tie"
+	}
+	
+	if _draw[1] == "won"; money += (_argv[1]*2)
+	elseif _draw[1] == "lost"; money -= _argv[1]
+	
+	if _draw[1] == "tie"; "\n\n\_l[60]No one won, it's a tie."
+	else; "\n\n\_l[60]You %(_draw[1]), he chose %(_draw[0])."
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnTic_*
+//
+//				:Tic tac toe game without AI. Uses sprites.
+//
+// Var			:reference = (/start/delete,0/1/2/3)
+//				 ticAr
+//------------------------------------------------------------------------------
+
+ticAr_Init 
+{
+	ticAr = IARRAY
+	
+	for _x = 0; _x < 9; _x++
+	{
+		ticAr ,= "E"
+	}
+}
+
+OnTic
+{
+	if ISVAR("ticAr") == 0 || reference0 == "delete" || reference0 != "start"; ticAr_Init
+	_result = ""; _new = ""; _pauseSans = ""; _end = 0
+	if reference1 == 2; _pauseSans = "\w8\![raise,OnTic,start,1]"
+
+	if reference0 != "start" && RND(50) && OnTic_Calc == 0; OnTic_Sans 
+	elseif reference1 == 1 && OnTic_Calc == 0; OnTic_Sans
+
+	_end = OnTic_Calc
+	
+	if _end == 1
+	{
+		_result = "Sans won, you lost 1g."
+		money -= 2
+	}
+	elseif _end == 2
+	{
+		_result = "You won, Sans paid you 1g."
+		money += 2
+	}
+	elseif _end == 3; _result = "It's a tie."
+	
+	if _end != 0 
+	{
+		_new = "\_l[170,130]\![*]\q[Repeat,OnTic,delete]"
+	}
+	
+	"\0\b2\_l[-10]\_q/
+	%(b)-----------Tic-Tac-Toe-----------%(def)\n\n[half]/
+	\f[anchor.notselect.color,250,250,0]/
+	\f[anchor.brush.style,square]/
+	\f[anchor.blendmethod,square]/
+	\![embed,OnTic_Print,%(_end),%(reference1)]/
+	%(_pauseSans)/
+	%(buttons(2,'Games','OnGame'))/
+	%(lightup)%(_new)\_l[0,130]%(_result)%(def)\n"
+}
+//reference0; don't print anchors if game over
+//reference1; don't print anchors if sans' draw
+OnTic_Print
+{
+	_p = "\_l[90]"
+	
+	for _i = 0; _i < ARRAYSIZE(ticAr); _i++
+	{
+		if reference0 == 0 && reference1 != 2 && ticAr[_i] == "E";
+			_p += "\_a[OnTic_Anchor,%(_i)]"
+		
+		if ticAr[_i] == "O"; _p += "\_b[sprites/ttto.png,inline]"
+		elseif ticAr[_i] == "X"; _p += "\_b[sprites/tttx.png,inline]"
+		else; _p += "\_b[sprites/tttempty.png,inline]"
+		
+		if reference0 == 0 && reference1 != 2 && ticAr[_i] == "E";
+			_p += "\_a"
+		
+		if ((_i+1) % 3) == 0; _p += "\n\_l[90]"
+	}
+	
+	_p
+}
+OnTic_Anchor
+{
+	ticAr[TOINT(reference0)] = "X"
+	"\![raise,OnTic,start,2]"
+}
+OnTic_Sans
+{
+	_nb = RAND(9)
+	
+	if ticAr[_nb] == "E"; ticAr[_nb] = "O"
+	else; OnTic_Sans
+
+	"\![raise,OnTic,start,0]"
+}
+
+OnTic_Calc
+{
+	_mov = OnTic_Moves
+	_game = ARRINFO("tic","E")
+	_o = TOSTR( ASEARCHEX("O",ticAr) )
+	_x = TOSTR( ASEARCHEX("X",ticAr) )
+	_return = 0;
+	foreach _mov; _c
+	{
+		_c = SPLIT(_c,',')
+		if _c[0] _in_ _o && _c[1] _in_ _o && _c[2] _in_ _o;
+			_return = 1
+		elseif _c[0] _in_ _x && _c[1] _in_ _x && _c[2] _in_ _x;
+			_return = 2
+		else; continue
+	}
+	
+	if _game == 0 && _return == 0; _return = 3 //tie
+	
+	_return
+}
+OnTic_Moves
+{
+	_arr = <<'
+	0,1,2
+	3,4,5
+	6,7,8
+	0,3,6
+	1,4,7
+	2,5,8
+	0,4,8
+	2,4,6
+	'>>
+	_arr = SPLIT(_arr,C_CRLF)
+	_arr
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnGDig_*
+//
+//				:Gold Digger, creates a random lottery field
+//				 with gold + and gold -, or nothing. Uses sprites.
+//
+// Var			:_argv = (/result from anchor,/start)
+//				 reference0 = (/delete)
+//				 gdigGold
+//				 gdigAr
+//------------------------------------------------------------------------------
+
+OnGDig_Init
+{
+	gdigGold = 0
+	
+	gdigAr = IARRAY
+	
+	for _x = 0; _x < 13*9; _x++;
+	{
+		_i = RAND(6)
+		if (_i == 0 || _i == 1 || _i == 2);
+			gdigAr ,= "Empty,U"
+		elseif (_i == 3 || _i == 4);
+			gdigAr ,= "Gold,U"
+		else;
+			gdigAr ,= "Minus,U"
+	}
+}
+
+OnGDig
+{
+	_result = ""
+	if ISVAR("gdigAr") == 0 || reference0 == "delete" {
+		OnGDig_Init
+		_result = "%(m)(Click on the fields to search for G.)\n\n[half]"
+	}
+	else {
+		_result = "%(_argv[0])\n\n[half]"
+		_argv[1] = "start"
+	}
+	
+	if _argv[1] == "start";
+		_result += "\_l[0,240]%(lightup)/
+		Gold won: %(gdigGold)\nMoney: %(money)%(def)/
+		\_l[170,240]/
+		\![*]\q[Begin anew,OnGDig,delete]"
+
+	"\0\b4\_l[-10]\_q/
+	%(b)------------Gold Digger----------%(def)\n\n[half]/
+	\f[anchor.notselect.color,250,250,0]/
+	\f[anchor.brush.style,square]/
+	\f[anchor.blendmethod,square]/
+	%(OnGDig_Print)/
+	\n[half]%(_result)%(def)/
+	%(buttons(4,'Games','OnGame'))"
+}
+
+OnGDig_Print
+{
+	_p = ""
+	
+	for _i = 0; _i < ARRAYSIZE(gdigAr); _i++
+	{
+		if gdigAr[_i][1] == "U";
+			_p += "\_a[OnGDig_Anchor,%(_i),%(gdigAr[_i][0])]/
+				\_b[sprites/fieldunclicked.png,inline,--option = use_self_alpha]/
+				\_a"
+		elseif gdigAr[_i][0] == "Empty";
+			_p += "\_b[sprites/fieldclicked.png,inline,--option = use_self_alpha]"
+		elseif gdigAr[_i][0] == "Gold";
+			_p += "\_b[sprites/fieldgold.png,inline,--option = use_self_alpha]"
+		else;
+			_p += "\_b[sprites/fieldbomb.png,inline,--option = use_self_alpha]"
+	}
+	
+	_p
+}
+OnGDig_Anchor
+{
+	_i = TOINT(reference0)
+	
+	gdigAr[_i] =  "%(reference1),C"
+	
+	if gdigAr[_i][0] == "Minus"
+	{
+		_money = RAND(16) + 1
+		gdigGold -= _money
+		money -= _money
+		OnGDig("%(m)You lost %(_money)G.")
+	}
+	elseif gdigAr[_i][0] == "Gold"
+	{
+		_money = RAND(15) + 1
+		gdigGold += _money
+		money += _money
+		OnGDig("%(m)You found %(_money)G.")
+	}
+	else
+	{
+		OnGDig("%(m)Nothing happened.")
+	}
+}

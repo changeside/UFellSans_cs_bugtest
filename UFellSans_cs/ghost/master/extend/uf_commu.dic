@@ -1,0 +1,46 @@
+//------------------------------------------------------------------------------
+// File		:uf_commu.dic
+//
+//			:Inter-Ghost interactions. Not used. Only here for future ref.
+//------------------------------------------------------------------------------
+
+OnCommunicate
+{
+	if reference0 == "user" || reference0 == "User"
+ 	{
+		//---- 사용자로부터의 이야기에 대답
+ 		ReplyToUser
+	}
+ 	else
+	{
+ 		//---- 유령로부터의 이야기에 대답
+		ReplyToGhost
+ 	}
+}
+
+ReplyToUser
+{
+	TalkToUser
+}
+
+
+ReplyToGhost
+{
+ 	res_reference0 = reference0
+}
+
+OnOtherGhostTalk
+{
+	if sleeptrue != 1 {
+		 if reference0 == "Sparx"
+		{
+			if reference5 == "smooth"
+			{
+				//"%(s)\i[301]\i[204]\i[110]%(m)sure he is."
+			}
+		}
+	}
+	
+}
+
+

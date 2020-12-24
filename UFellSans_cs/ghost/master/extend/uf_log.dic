@@ -1,0 +1,212 @@
+//------------------------------------------------------------------------------
+// File		:uf_log.dic
+//
+//			:Holds all log like things (kofi)
+//
+// Var		:kofiC
+//			 backupPath
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Function		:OnKofi_*|kofisup|kofishoutout
+//
+//				:Kofi related functions.
+//------------------------------------------------------------------------------
+kofisup : nonoverlap //List of all Ko-Fi supporter names
+{
+	"bluebutt"
+	"carani"
+	"lemonadeparty"
+	"knight_of_kylo"
+	"queen lethargy"
+	"somebody"
+	"valmunify"
+	"plantcat"
+	"chalk"
+	"splyych"
+	"nitritre"
+	"djdusk"
+	"snugglyj"
+	"sinzskillington"
+	"miera"
+}
+kofishoutout : nonoverlap //Dialogue for Ko-Fi thanks
+{
+	"(s_0)\i[102]%(m)i ain't too fond o' people, but... (s_1)\i[204]\i[305]%(kofisup) sounds pretty nice."
+	"(s_0)\i[301]%(m)i'm supposed to say that %(kofisup) is a... (s_0)\i[107]\i[302] hella rad person.\n\n(s_1)\i[102]%(m)can't argue with that."
+	"(s_0)\i[102]%(m)there's been rumors %(kofisup) is (s_0)\i[301]made o' money.\n\n(s_0)\i[112]\i[203]%(m)glad they helped pay off my tab."
+	"(s_0)%(m)%(kofisup) really helped a pal out here.\n\n%(m)\i[105]\i[202]should meet 'em in grillby's sometime.\n\n(s_0)\i[301]%(m)they're payin' though.%(ARRADD('grillby','barname'))"
+	"(s_0)\i[105]\i[301]%(m)huh. my tab ain't even that large anymore.\n\n(s_0)\i[102]%(m)thanks %(kofisup)."
+	"(s_0)\i[112]\i[202]%(m)been able ta afford an extra meal recently thanks to %(kofisup)..."
+}
+OnKofi_Menu //@uf_inventory.dic
+{
+	_cur = IARRAY
+	if reference0 == "goals";
+		_cur = ("main","Met",OnKofi_Finished)
+	else;
+		_cur ,= ("goals","Next",OnKofi_Goals)
+	if kofiC > 0;
+		_cur ,= "\_l[0,125]Amount of Ko-Fi:\n    >%(lightup)%(kofiC)%(def)"
+	
+	"\_q\b2\_l[70]%(_cur[1]) Ko-Fi dev goals:/
+	\n\n[half]/
+	%(_cur[2])%(_cur[3])/
+	\_l[205,125]%(cmenubar)\![*]\q[Toggle,OnKofi_Menu,%(_cur[0])]/
+	%(buttons(2,'Go back','OnBag'))"
+}
+OnKofi_Goals
+{
+	"Currently none unless there is new interest!\n\n/
+	Big thanks from Sans and the dev for all your donations <3"
+}
+OnKofi_Finished
+{
+	"%(lightup)/
+		7 Ko-Fi's - Phone calls with sprites (Papyrus edition)\n\n[half]/
+		15 Ko-Fi's - More user based dialog\n\n[half]/
+		20 Ko-Fi's - Shop Extension/
+	%(def)"
+}
+OnKofi_Buy //@uf_inventory.dic
+{
+	if totalinfo[0] >= 10; _time = "fer a shit ton of time"
+	elseif totalinfo[0] >= 1; _time = "fer too long"
+	else; _time = "from time to time"
+	--
+	"\b4(s_0)\i[102]%(m)ok so. (s_0)\i[105]\i[302]since ya' decided to keep me 'ere %(_time) %(nickname), /
+	(s_0)\i[201]\i[302]i can't pay back a... %(it)pal%(itoff) of mine.\n\n[half]/
+	%(m)but... (s_0)\i[203]\i[301]ya' could help me pay off that tab. /
+	(s_0)\i[114]\i[203]howzit sound?\n\n/
+	(s_1)\i[102]\i[203]%(m)you could even leave yer name so i know who to thank. /
+	(s_0)\i[114]\i[203]tell yer friends wouldya?(s_0)\i[106]\i[201]\i[400]/
+	\_q\n\n/
+	%(m)(Ko-Fi/Patreon supporters' ideas or notes for Sans will hold priority.)/
+	\n\n[half]/
+	\_a[https://ko-fi.com/change]%(m)(Click here to open the Ko-Fi Page.)\_a\n/
+	   -----------------------------------------\n/
+	%(m)(Instead. If you have the resources, /
+	you can \_a[https://www.patreon.com/changeside]join my Patreon\_a /
+	to get access to earlier updates and more.)/
+	%(buttons(4,'Go back','OnShop'))"
+}
+OnKofi_Counter
+{
+	/*	//Command for getting the Ko-Fi Counter.
+		"\![execute,http-get,https://ko-fi.com/widget/counterwidget/B0B1EAGS,--async=OnKofi_Counter,--file=kofi.txt,--nodescript]"
+	*/
+	
+	kofiC = ""
+	
+	if FOPEN(reference3,'r')
+	{
+		while (_buff = FREAD(reference3)) != -1
+		{
+			if _buff != '' && 'koficounter-value' _in_ _buff
+			{
+				kofiC = _buff						//read buffered line in
+				kofiC = SPLIT(kofiC,">")			//Split line in span class 2 parts
+				kofiC = TOSTR(kofiC[1])				//take out "number</span" part & convert
+				kofiC = REPLACE(kofiC,"</span","")	//delete the "</span" part
+				kofiC = TOINT(kofiC)				//convert to int
+				break
+			}
+		}
+	}
+	FCLOSE(reference3)
+}
+
+//------------------------------------------------------------------------------
+// Feedback text
+//------------------------------------------------------------------------------
+OnBug_Feedback //@uf_inventory.dic
+{
+	"\b2\_q/
+	%(m)(If you have suggestions, want to shoot the creator a message, offer feedback or report bugs, click the link below and write your concerns.)\n/
+		\_l[70]\_a[https://goo.gl/forms/FGbUI4VUUizOwh303]goo.gl/forms\_a/
+	\n/
+	%(m)(This whole thing is entirely anonymous and the developer will not be able to reply except an email is left behind!)\n/
+	%(m)(Otherwise please go to \_a[http://changeside.tumblr.com]the devs tumblr\_a and leave an ask.)/
+	%(buttons(2,'Go back','OnBag'))"
+}
+
+//------------------------------------------------------------------------------
+// Back up functions
+//------------------------------------------------------------------------------
+OnBackup_Menu //@uf_menu.dic
+{
+	"\b4\_q\_l[80]Save File Backup\n\n\n/
+	%(cmenu6)	- Current path - \n/
+	%(lightup)	%(backupPath)%(cdef)\n\n\n%(def)/
+	\![*]\q[Change Path,OnBackup_Define]\n/
+    \![*]\q[Save file,OnBackup_Save]\n/
+	\![*]\q[Load file,OnBackup_Load]\n/
+	%(buttons(4,'Cancel','script\e','Go back','OnConfig'))"
+}
+OnBackup_Define
+{
+	if _argv[0] == "boot"; "\C\![open,dialog,save,--id=OnBackup_PathBOOT,--title=Save your progress,--filter=Config file(cfg)|*.cfg,--ext=cfg]"
+	else; "\C\![open,dialog,save,--id=OnBackup_Path,--title=Save your progress,--filter=Config file(cfg)|*.cfg,--ext=cfg]"
+}
+OnBackup_PathBOOT { backupPath = reference2 }
+OnBackup_Path
+{
+	backupPath = reference2
+	OnBackup_Menu
+}
+OnBackup_Save
+{
+	SAVEVAR()
+	_text = ""
+	_path = "/yaya_variable.cfg"
+	_copy = IARRAY
+	_open = FOPEN(_path , "r")
+	_fline = FREAD(_path)
+	
+	//while not at end of file
+	while _fline != -1
+	{
+		//copy the file
+		_copy ,= _fline
+		_fline = FREAD(_path)
+	}
+
+	FCLOSE(_path)
+
+	_open = FOPEN(backupPath , "w")
+	foreach _copy ; _line
+	{
+		FWRITE(backupPath , _line)
+	}
+	
+	FCLOSE(backupPath)
+	
+	if _argv[0] == "load";
+		"\c\0(s_0)\i[102]%(m)(Loaded the backup.)/
+		%(pause)%(OnBackup_Menu)"
+	elseif _argv[0] == "close"; ""
+	else;
+		"\0(s_0)\i[102]%(m)(Saved the backup.)/
+		%(pause)%(OnBackup_Menu)"
+}
+OnBackup_Load
+{
+	_path = "/yaya_variable.cfg"
+	FDEL(_path)
+	FCLOSE(_path)
+	
+	FMOVE(backupPath , "/")
+	RESTOREVAR()
+	
+	OnBackup_Save("load")
+}
+
+
+//------------------------------------------------------------------------------
+// Variable conversion (from old ver.)
+//------------------------------------------------------------------------------
+
+OnVariable_Conversion
+{
+	
+}

@@ -1,0 +1,622 @@
+//------------------------------------------------------------------------------
+// File		:uf_consistency.dic
+//
+//			:All special functions and formatting options.
+//
+// Var		:userbirthday
+//			 minute; hour; day; month
+//			 24htrue
+//			 upperworld
+//			 aitalkinterval
+//			 pausetrue
+//			 colortrue
+//			 pronoun
+//			 datetrue
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Print functions
+//------------------------------------------------------------------------------
+PrintBirthday //print user birthday
+{
+	if ARRAYSIZE(userbirthday) == 0; ""
+	else; Date(userbirthday[0],userbirthday[1])
+}
+CurDate		{ Date("%day","%month") }
+FullDate	{ "%(Date(day,month)) %year" }
+Date //print date in written out day month format 
+{
+	_p = ""; _date = _argv
+		
+	if ISVAR(_date); _date = EVAL("%(_date)") //check if given date is a variable
+		
+	case TOINT(_date[0]) {
+		when 1,21,31; _p += "%(_date[0])st"
+		when 2,22; _p += "%(_date[0])nd"
+		when 3,23; _p += "%(_date[0])rd"
+		others; _p += "%(_date[0])th"
+	}
+	_p += " "
+	case TOINT(_date[1]) {
+		when 1; _p += "January"
+		when 2; _p += "February"
+		when 3; _p += "March"
+		when 4; _p += "April"
+		when 5; _p += "May"
+		when 6; _p += "June"
+		when 7; _p += "July"
+		when 8; _p += "August"
+		when 9; _p += "September"
+		when 10; _p += "October"
+		when 11; _p += "November"
+		others; _p += "December"
+	}
+	_p
+}
+DayName
+{
+	case weekday {
+		when 0; "Sunday"
+		when 1; "Monday"
+		when 2; "Tuesday"
+		when 3; "Wednesday"
+		when 4; "Thursday"
+		when 5; "Friday"
+		when 6; "Saturday"
+	}
+}
+time //print time in hour:minute:second format
+{
+	_time = ""
+	if hour < 10;	_time = "0" + hour
+	else;			_time = hour
+	if minute < 10; _time += ",0" + minute
+	else; 			_time += "," + minute
+	if second < 10; _time += ",0" + second
+	else; 			_time += "," + second
+	_time
+}
+date //print date in day/month format
+{
+	_date = ""
+	if day < 10; _date = "0" + day
+	else; _date = day
+	if month < 10; _date += "/0" + month
+	else; _date += "/" + month
+	_date
+}
+Time //print time in hour:minute (AM/PM) format
+{
+	_ap = GetAP
+	if _ap != ""; _ap = " "+_ap
+	"%(GetHour):%(GetMin)%(_ap)"
+}
+GetHour
+{
+	if 24htrue {
+		if hour < 10; "0%(hour)"
+		else; "%(hour)"
+	}
+	else {
+		if hour12 < 10; "0%(hour12)"
+		else; "%(hour12)"
+	}
+}
+GetMin
+{
+	if (minute >= 0 && minute < 10); "0%(minute)"
+	else; "%(minute)"
+}
+GetAP
+{
+	if !24htrue {
+		if (hour >= 0 && hour <= 11); "am"
+		else; "pm"
+	}
+}
+Season
+{
+	case month {
+		when 1,2,12 {
+			if upperworld; "winter"
+			else; "summer"
+		}
+		when 3,4,5 {
+			if upperworld; "spring"
+			else; "autumn"
+		}
+		when 6,7,8 {
+			if upperworld; "summer"
+			else; "winter"
+		}
+		others { //9,10,11
+			if upperworld; "autumn"
+			else; "spring"
+		}
+	}
+}
+talkintervalprint
+{
+	case aitalkinterval {
+		when 90; "Every minute";
+		when 270; "Every 3 minutes"
+		when 400; "Every 5 minutes"
+		when 0; "Silent"
+		when 45; "Every 30 seconds"
+		others; "Every 3 minutes" //270
+	}	
+}
+
+
+//------------------------------------------------------------------------------
+// Formatting shortcuts
+//------------------------------------------------------------------------------
+
+	//pauses
+pause {
+	if pausetrue; "\x"
+	else; "\w8\w8\w8\w8\w8\c"
+}
+	//balloon
+m { "\_l[-15]*\_l[0]" }
+
+	//font
+def 		{ "\f[default]" } //default
+it 			{ "\f[italic,1]" } //italics
+itoff 		{ "\f[italic,0]" }
+b 			{ "\f[bold,1]" } //bold
+boff		{ "\f[bold,0]" }
+st			{ "\f[strike,1]" } //strike through
+stoff		{ "\f[strike,0]" }
+whisper 	{ "\f[height,9]" }
+	//colors
+greyedout	{ "\f[color,180,180,180]" }
+lightup 	{ "\f[color,229,134,82]" }
+cmenu1 //pink-red
+{	if colortrue == 1;"\f[color,167,69,99]"	}
+cmenu2 //brown
+{	if colortrue == 1; "\f[color,133,112,91]"	}
+cmenu3 //white greyish
+{	if colortrue == 1; "\f[color,168,148,153]"	}
+cmenu4 //purple/lilac
+{	if colortrue == 1; "\f[color,133,109,148]"	}
+cmenu5 //aqua blue
+{	if colortrue == 1; "\f[color,20,100,120]"	}
+cmenu6 //yellow 
+{	if colortrue == 1; "\f[color,193,168,120]"	}
+canchor //anchor color
+{ "\f[color,180,40,40]" }
+
+	//dialogue
+PRONOUN 	{ TOUPPER(pronoun) }
+term		{ TOLOWER(_argv[0]) }	 //lowercase
+Term		{ Capitalize(_argv[0]) } //normal
+TERM 		{ TOUPPER(_argv[0]) }	 //uppercase
+Capitalize
+{
+  _buffer = SUBSTR(_argv[0],0,1)
+  _argv[0] = ERASE(_argv[0],0,1)
+  _argv[0] = INSERT(_word,0,TOUPPER(_buffer))
+  _argv[0]
+}
+
+//------------------------------------------------------------------------------
+// Grammar functions
+//------------------------------------------------------------------------------
+isare
+{
+	if pronoun[5] == "s"; "is"
+	else; "are"
+}
+dodoes
+{
+	if pronoun[5] == "s"; "does"
+	else; "do"
+}
+
+//------------------------------------------------------------------------------
+// Character names (char sprite short=speaking char)(0=sans;1=user)
+//------------------------------------------------------------------------------
+
+papyrus : nonoverlap
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+		//general
+	if ARRINFO("papyrus","name")||_c!="s" {
+		if _c=="s"; "papyrus"
+		else; "Papyrus"
+		if !ARRINFO("papyrus","name"); ARRADD("papyrus","name")
+	}
+	if AFF(0,15,30)&&_c=="s"; "someone i know"
+	if AFF(0,15,30)&&_c=="s"; "someone"
+	if AFF(0,15,30)&&_c=="s"; "somebody"
+	if _c!="s"&&_c!="g"; "somebody"
+	if _c!="g"; "a certain someone"
+		//job
+	if ARRINFO("papyrus","job")&&_c=="s"; "boss"
+	if ARRINFO("papyrus","job")||_c!="s" {
+		"the royal guard's captain"
+		if !ARRINFO("papyrus","job"); ARRADD("papyrus","job")
+	} 
+	if _c=="a" {
+		"the guard's captain"
+		if !ARRINFO("papyrus","job"); ARRADD("papyrus","job")
+	}
+	if ARRINFO("papyrus","job")||_c!="s" {
+		"the captain of the royal guard"
+		if !ARRINFO("papyrus","job"); ARRADD("papyrus","job")
+	}
+	if ARRINFO("papyrus","job")||_c!="s" {
+		if _c=="u";	"the %(it)captain%(itoff)"
+		else;		"the captain"
+		if !ARRINFO("papyrus","job"); ARRADD("papyrus","job")
+	}
+	if _c!="g"; "the boss"
+		//familial
+	if ARRINFO("papyrus","family")&&_c=="s";
+		"my brother"
+	if _c!="s"&&_t==0 {
+		"your brother"
+		if !ARRINFO("papyrus","family"); ARRADD("papyrus","family")
+	}
+	elseif _c!="s"&&_t==1 {
+		"sans' brother"
+		if !ARRINFO("papyrus","family"); ARRADD("papyrus","family")
+	}
+		//special undyne swears
+	if _c=="u"; "the asshole"
+	if _c=="u"; "the bastard"
+}
+papyrus_0
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+	{ 
+		if _c=="s"; "papyrus"
+		else; "Papyrus"
+		if !ARRINFO("papyrus","name"); ARRADD("papyrus","name") }
+	{ 
+		"boss"
+		if !ARRINFO("papyrus","job"); ARRADD("papyrus","job") }
+	if _c!="g"; "sir"
+}
+undyne : nonoverlap
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+		//general
+	if ARRINFO("undyne","name")||_c!="s" {
+		if _c=="s"; "undyne"
+		elseif _c=="p"; "UNDYNE"
+		else; "Undyne"
+		if !ARRINFO("undyne","name"); ARRADD("undyne","name")
+	}
+	if AFF(0,15,30)&&_c=="s"; "someone i know"
+	if AFF(0,15,30)&&_c=="s"; "someone"
+	if AFF(0,15,30)&&_c=="s"; "somebody"
+	if _c!="s"&&_c!="g" {
+		if _c=="p"; "SOMEBODY"
+		else; "somebody"
+	}
+	if _c!="g" {
+		if _c=="p"; "A CERTAIN SOMEONE"
+		else; "a certain someone"
+	} 
+	if _c=="s"&&MD("angry"); "fish cunt" 
+		//job
+	if ARRINFO("undyne","job")&&_c=="s"; "someone from the royal guard"
+	if ARRINFO("undyne","job")&&_c=="s"; "a royal guard member"
+	if _c=="p" {
+		"A CERTAIN GUARD MEMBER"
+		if !ARRINFO("undyne","job"); ARRADD("undyne","job")
+	}
+		//alphys
+	if _c=="a"; "my girlfriend"
+	if _c=="a"; "babe"
+	if _c=="a"; "my babe"
+}
+undyne_0
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+}
+alphys : nonoverlap
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+		//general
+	if ARRINFO("alphys","name")||_c!="s" {
+		if _c=="s"; "alphys"
+		elseif _c=="p"; "ALPHYS"
+		else; "Alphys"
+		if !ARRINFO("alphys","name"); ARRADD("alphys","name")
+	}
+	if AFF(0,15,30)&&_c=="s"; "someone i know"
+	if AFF(0,15,30)&&_c=="s"; "someone"
+	if AFF(0,15,30)&&_c=="s"; "somebody"
+	if _c!="s"&&_c!="g" {
+		if _c=="p"; "SOMEBODY"
+		else; "somebody"
+	}
+	if ARRINFO("alphys","hobby")||_c=="s"; "anime freak"
+	if _c=="s"; "hotlands freak"
+	if ARRINFO("alphys","job")||_c!="s" {
+		if _c=="p"; "THE ROYAL SCIENTIST"
+		else; "the royal scientist"
+		if !ARRINFO("alphys","job"); ARRADD("alphys","job")
+	}
+	
+		//undyne
+	if _c=="u"; "my Boo"
+	if _c=="u"; "my Dear"
+}
+alphys_0
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+	{
+		if _c=="s"; "alphys"
+		elseif _c=="p"; "ALPHYS"
+		else; "Alphys"
+		if !ARRINFO("alphys","name"); ARRADD("alphys","name")
+	}
+	
+	if _c=="s"; "royal scientist"
+}
+rockname : nonoverlap //togglerock=1=before naming it
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+
+	if _c=="p"; "OUR PET ROCK"
+	if _c=="p"; "OUR PET"
+	if togglerock&&_c=="p"; "THE ROCK"
+	if togglerock&&_c=="p"; "THE PET ROCK"
+	if !togglerock&&_c=="p"; "STEVE"
+
+	if !togglerock&&_c=="s"; "steve"
+	if togglerock&&_c=="s"; "our pet rock"
+
+	if _c!="s"&&_c!="p"&&_t!=1; "your pet rock"
+	if _c!="s"&&_c!="p"&&_t==1; "sans' pet rock"
+}
+gbar
+{
+	_t=0; _c="s"; _c = TOSTR(_argv[0]); _t = TOINT(_argv[1])
+
+	if ARRINFO("grillby","barname")||_c!="s" {
+		if _c=="s"; "grillby's"
+		elseif _c=="p"; "GRILLBY'S"
+		else; "Grillby's"
+		if !ARRINFO("grillby","barname"); ARRADD("grillby","barname")
+	}
+	if ARRINFO("grillby","barfave")&&_c=="s"; "my favorite bar"
+	if _c!="s" {
+		if _t==1 &&_c=="p"; "SANS' favorite bar"
+		elseif _t==1; "sans' favorite bar"
+		elseif _c=="p"; "YOUR FAVORITE BAR"
+		else; "your favorite bar"
+		if !ARRINFO("grillby","barfave"); ARRADD("grillby","barfave")
+	}
+	if _c=="p" && _t==1 {
+		"MY BROTHER'S FAVORITE BAR"
+	}
+	if _c=="p" && RND(30); "THE ABOMINATION OF A BAR"
+}
+
+
+//------------------------------------------------------------------------------
+// Randomized names/words/sentences.
+//------------------------------------------------------------------------------
+swear
+{
+	"holy shit."
+	"fuck."
+	"yeesh."
+	"crap."
+	"heck"
+	"damn"
+	"shit"
+	"god"
+}
+swearing
+{
+	"goddamn"
+	"fucking"
+	"fuckin"
+	"hecking"
+	"damned"
+	"motherfucking"
+	"rotten"
+	"bloody"
+}
+eh
+{
+	"ehr"
+	"eh"
+	"uh"
+	"ehrm"
+	"ehh"
+	"'k"
+	"ehm"
+}
+nickname //_argv[0] = ""/"special"; if special; only pulls special nicknames
+{
+	if ARRINFO("user","small") && (MD("happy")||MD("pleased")) && RND(40); "tiny "
+	--
+	if AFF(70) && datetrue && !ARRINFO("user","rude") && _argv[0]!='special'; "sweetheart"
+	if AFF(70) && datetrue && !ARRINFO("user","rude") && _argv[0]!='special'; "sweety"
+	if AFF(70) && datetrue && !ARRINFO("user","rude") && _argv[0]!='special'; "sugar"
+	if AFF(70) && datetrue && !ARRINFO("user","rude") && _argv[0]!='special'; "angel"
+	if AFF(70) && datetrue && !ARRINFO("user","rude") && _argv[0]!='special'; "cutie"
+	if AFF(70) && datetrue && _argv[0]!='special'; "dove"
+	if AFF(70) && datetrue && _argv[0]!='special'; "sunshine"
+	if AFF(70) && datetrue && _argv[0]!='special';	"kitten"
+
+	if AFF(30,50,70) && ARRINFO("user","rude"); "t-bone"
+	if AFF(30,50,70) && ARRINFO("user","rude"); "spite"
+	if AFF(30,50,70) && ARRINFO("user","rude"); "ankle biter"
+	if AFF(30,50,70) && ARRINFO("user","rude"); "knucklehead"
+	if AFF(30,50,70) && ARRINFO("user","rude"); "spine"
+	if AFF(30,50,70) && ARRINFO("user","rude"); "punk"
+	if AFF(30,50,70) && ARRINFO("user","artist"); "painter"
+	if AFF(30,50,70) && ARRINFO("user","artist"); "pencil swinger"
+	if AFF(30,50,70) && ARRINFO("user","tall"); "giant"
+	if AFF(30,50,70) && _argv[0]!='special'; "kid"
+	if AFF(30,50,70) && _argv[0]!='special'; "kiddo"
+	if AFF(30,50,70) && _argv[0]!='special'; "%(username)"
+	if AFF(30,50,70) && _argv[0]!='special'; "pal"
+	if AFF(30,50,70) && _argv[0]!='special'; "buddy"
+	
+	if AFF(30) && ARRINFO("user","rude"); "jerk"
+	if AFF(30) && _argv[0]!='special'; "human"
+	
+	if AFF(0,15) && ARRINFO("user","artist"); "paint disaster"
+	if AFF(0,15) && _argv[0]!='special'; "retard"
+	if AFF(0,15) && _argv[0]!='special'; "idiot"
+	if AFF(0,15) && _argv[0]!='special'; "dumbass"
+	if AFF(0,15) && _argv[0]!='special'; "asshole"
+	if AFF(0,15) && _argv[0]!='special'; "waste of space"
+	if AFF(0,15) && _argv[0]!='special'; "human"
+	if AFF(0,15) && _argv[0]!='special'; "jerk"
+	if AFF(0,15) && _argv[0]!='special'; "bastard"
+	if AFF(0,15) && _argv[0]!='special'; "bitch"
+	if AFF(0,15) && _argv[0]!='special'; "brat"
+	if AFF(0,15) && _argv[0]!='special'; "little shit"
+	if AFF(0,15) && _argv[0]!='special'; "fucktard"
+	
+}
+myfriend : nonoverlap
+{
+	"my pal"
+	"my buddy"
+	if AFF(50,70); "%(username)"
+}
+stuff
+{
+	"grub"
+	"stuff"
+	"shit"
+	"something"
+	"thing"
+	"things"
+}
+beginning
+{
+	"well"
+	"mh"
+	"ah"
+	"ehm"
+	"okay"
+	"ok"
+	"mhh"
+	"'k"
+	"oi"
+	"yo"
+	"ay"
+}
+greeting
+{
+	if MD("amused"); "aloha"
+	"oi"
+	"hey"
+	"yo"
+	"heya"
+	"'sup"
+	"ey"
+	--
+	if RND(50) && AFF(50,70); ", %(nickname)"
+}
+bye
+{
+	"ciao"
+	"adios"
+	"bye"
+	"see ya'"
+	"see ya' around"
+	"'later"
+	"'till later"
+	--
+	if RND(50); ", %(nickname)"
+}
+confused
+{
+	"fuck"
+	"heck"
+	"damn"
+	"ffff-"
+	"what even"
+	"huh"
+}
+sleepy //sleepy noises
+{
+	"hh-"
+	"zz"
+	"z-"
+	"z..."
+	"h..."
+	"ngh.."
+	"gh-"
+	"n-"
+	"n..."
+	"ah.."
+	"ngh-"
+}
+enraged : nonoverlap
+{
+	"ffffff-"
+	"hhhhhhh-"
+	"ghrrr-"
+	"heck"
+	"motherfucking son of a bitch"
+	"bloody son of a bitch"
+	"fuck"
+	"goddamn"
+	"shit"
+	"to asgore with this"
+	"god"
+	"stars"
+}
+timegreet : nonoverlap
+{
+	if (hour >= 5 && hour < 12); "mornin'"
+	if (hour >= 5 && hour < 12); "good mornin'"
+	if (hour >= 12 && hour < 16); "afternoon"
+	if (hour >= 12 && hour < 16); "good afternoon"
+	if (hour >= 16 && hour < 23); "evenin'"
+	if (hour >= 16 && hour < 23); "good evenin'"
+	if (hour >= 23 && hour < 5); "night"
+	if (hour >= 23 && hour < 5); "g' night"
+}
+anime : nonoverlap
+{
+		//genre psychological
+	"Death note"
+	"Tokyo Ghoul"
+	"Mirai Nikki"
+	"Elfen Lied"
+	"Psycho Pass"
+	"Death Parade"
+	"Neon Genesis Evangelion"
+	"Zankyou no Terror"
+	"Promised Neverland"
+	"Ghost in the Shell"
+	"Paprika"
+	"Perfect Blue"
+	"Beastars"
+	"Angel of Death"
+	"Gantz"
+	"Shinsekai yori"
+}
+suggestion
+{
+	"play some games."
+	"do somethin a tad more interestin."
+	"buy me a 'dog or whatever."
+}
+userscomputer : nonoverlap
+{
+	"your recycle bin"
+	"your document folder"
+	"your secret folder"
+	"your pictures"
+	"your documents"
+	if ARRINFO("user","artist"); "your art folder"
+	if ARRINFO("user","artist"); "your secret art folder"
+}
+

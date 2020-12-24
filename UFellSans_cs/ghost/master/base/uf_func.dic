@@ -1,0 +1,871 @@
+//------------------------------------------------------------------------------
+// File		:uf_func.dic
+//
+//			:Special If checks and functionality functions.
+//
+// Var		:affection
+//			 hour
+//			 dresslogAr
+//			 invAr
+//			 passmintotal
+//			 ghostupmin
+//			 pnumb
+//			 tempnb
+//			 phonetrue; sittrue; sleeptrue
+//			 timeAr
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// If check functions
+//------------------------------------------------------------------------------
+AFF //check for affection stages
+{
+	_lv = 0; _n = IARRAY
+		
+	case affection { //affection stages
+		when 70-100; _lv = 4
+		when 50-69; _lv = 3
+		when 30-49; _lv = 2
+		when 15-29; _lv = 1
+		when 0-14; _lv = 0
+	}
+		
+	foreach _argv; _v { //check if affection falls in range
+		case _v {
+			when 70-100; _n ,= 4
+			when 50-69; _n ,= 3
+			when 30-49; _n ,= 2
+			when 15-29; _n ,= 1
+			when 0-14; _n ,= 0
+		}
+	}
+	
+	if ASEARCH(_lv,_n) == -1; 0
+	else; 1
+}
+MD //check for 1 given mood
+{
+	_moods = OnMood_Check
+	if ASEARCH(_argv[0],_moods) == -1; 0
+	else; 1
+}
+MDPER //return percentage of mood
+{
+	_moods = OnMood_Names; _percent = OnMood_Percent; _nb = ASEARCH(_argv[0],_moods)
+	_percent[_nb]
+}
+RND //check for random percent chance
+{
+	_nb = TOINT(_argv[0]) //% chance of happening
+	
+	if RAND(100) <= _nb; 1
+	else; 0
+}
+ARRINFO //check for value in array
+{
+	//_argv[0] = array name to check in
+	//_argv[1] = value to check
+	if GETTYPEEX(_argv[0]) == 4; _argv[0] = _argv[0]
+	elseif GETTYPEEX("%(_argv[0])Ar") == 4; _argv[0] = _argv[0] + "Ar"
+	else; return
+	_arr = EVAL("%(_argv[0])")
+	if ASEARCH(_argv[1],_arr) != -1; 1
+	else; 0
+}
+DAY //check if current date/day is given date/day
+{
+	_date = _argv[0]
+		//check if given date is a variable
+	if ISVAR(_date); _date = EVAL("%(_date)")
+
+	if ',' _in_ _date {
+		if _date == "%day,%month"; 1
+		else; 0
+	}
+	else {
+		if _date == "%day"; 1
+		else; 0
+	}
+}
+TimeSlot //check for day stages
+{
+	case hour
+	{
+		when 5-8; "earlymorning"
+		when 9-11; "morning"
+		when 12-14; "lunch"
+		when 15-17; "afternoon"
+		when 18-20; "evening"
+		when 21-24; "latenight"
+		others; "midnight"
+	}
+}
+DRESS //check state of dress
+{
+	if ISVAR("dresslogAr") == 0; dresslogAr = IARRAY
+	_line = ""; _nb = -1; _state = 0
+	foreach dresslogAr; _item
+	{
+		if _item[1] == _argv[0] && _item[2] == _argv[1] {
+			_line = _item
+			_nb = TOINT(ARRAYSIZE(_line)-2)
+			_state = _line[_nb]
+			break
+		}
+	}
+	_state = TOINT(_state)
+	_state
+}
+
+
+//------------------------------------------------------------------------------
+// Special inventory handling functions
+//------------------------------------------------------------------------------
+INV
+{
+	//returns array
+	// 1/0 if item exists
+	// -1/amount
+	// -1 (can't be given)/amount given
+	
+	_arr = (0,-1,-1)
+	foreach invAr; _item
+	{
+		if _item[0] == _argv[0] {
+			_arr = (1,TOINT(_item[1]),TOINT(_item[2]))
+			break
+		}
+	}
+	_arr
+}
+INV_GETPOS //returns position of item
+{
+	_pos = -1
+	for _i = 0; _i < ARRAYSIZE(invAr); _i++
+	{
+		if invAr[_i][0] == _argv[0] {
+			_pos = _i
+			break
+		}
+	}
+	_pos
+}
+INV_0 //change name
+{
+	_i = INV_GETPOS(_argv[0])
+	_item = invAr[_i]
+	_item[0] = _argv[1]
+	invAr[_i] = _item
+}
+INV_1 //change amount available
+{
+	_i = INV_GETPOS(_argv[0])
+	_item = invAr[_i]
+	_item[1] = INV_CALC(_item[1],_argv[1])
+	invAr[_i] = _item
+}
+INV_2 //change amount given
+{
+	_i = INV_GETPOS(_argv[0])
+	_item = invAr[_i]
+	_item[2] = INV_CALC(_item[2],_argv[1])
+	invAr[_i] = _item
+}
+INV_CALC
+{
+	//amount = _argv[0]
+	//change = _argv[1]
+	_sign = SUBSTR(_argv[1],0,1)
+	_result = -1
+	
+	if _argv[1] == "--";
+		_result = TOINT(_argv[0]) - 1
+	elseif _argv[1] == "++";
+		_result = TOINT(_argv[0]) + 1
+	elseif _sign == "-" || _sign == "+" {
+		_value = ERASE(_argv[1],0,1)
+		_result = EVAL(_argv[0]+_sign+_value)
+	}
+	elseif ISINTSTR(_argv[1]) || GETTYPE(_argv[1]) == 1;
+		_result = TOINT(_argv[1])
+	else;
+		_result = _argv[0]
+	_result
+}
+
+
+//------------------------------------------------------------------------------
+// Info return & time functions
+//------------------------------------------------------------------------------
+
+totalinfo //return total time info
+{
+	_result = IARRAY
+	_result ,= passmintotal/60
+	_result ,= passmintotal%60
+	_result
+}
+ghostupinfo //return current boot time info  
+{
+	_result	 = IARRAY
+	_result	,= ghostupmin/60
+	_result	,= ghostupmin%60
+	_result
+}
+OffTimeCalc //returns amount of time closed (_months rough)
+{
+	//taken and modified from aya/yaya wiki tips
+	//gets second difference between now/last closed
+	_SecCount = GETSECCOUNT() - LastCloseSecCount
+
+	//calculates time difference, divides by seconds, minutes, hours
+	_years	= _SecCount/60/60/24/365
+	_months	= _SecCount/60/60/24/30
+	_days	= _SecCount/60/60/24
+	_hours	= _SecCount/60/60
+	_mins	= _SecCount/60
+
+	(_years,_months,_days,_hours,_mins)
+}
+
+
+//------------------------------------------------------------------------------
+// Value changing functions
+//------------------------------------------------------------------------------
+VARC //only for int/real that already exist (number; =number; +number; -number; ++; --)
+{
+	if _argc < 2; return
+	
+	_sign = ""; _value = 0; _result = 0; _return = "\![raise,OnVARCHANGE,"
+	
+	for _i = 0; _i < _argc; _i++
+	{
+			if (_i%2) != 0; continue
+			
+		_sign = SUBSTR(_argv[_i+1],0,1)
+			//foolproof it. make sure variable doesn't accidentally get deleted
+			if ( _sign != "=" && _sign != "+" && _sign != "-" )
+			{
+				if ( ISINTSTR(_argv[_i+1]) || ISREALSTR(_argv[_i+1]) ) {
+					_sign = "="
+					_argv[_i+1] = "=" + _argv[_i+1]
+				}
+				else; return
+			}
+		_value = ERASE(_argv[_i+1],0,1)
+		
+		case GETTYPE(EVAL(_argv[_i])) {
+			when 1; _value = TOINT(_value) 	//Integer
+			when 2; _value = TOREAL(_value) //Real number
+			others; return
+		}
+		if ( _argv[_i+1] == "++"|| _argv[_i+1] == "--" );
+			_value = 1
+		
+		if _sign == "="; _result = _value
+		else; _result = EVAL(_argv[_i]+_sign+_value)
+
+		_return += _argv[_i] + "," + _result + ","
+	}
+	_return += "]"
+	_return
+}
+VARV //for strings as well
+{
+	if _argv < 2; return
+
+	_return = "\![raise,OnVARCHANGE,"
+	
+	for _i = 0; _i < _argc; _i++
+	{
+			if (_i%2) != 0; continue
+		_value = _argv[_i+1]
+		case GETTYPE(EVAL(_argv[_i])) {
+			when 1; _value = TOINT(_value)	//Integer
+			when 2; _value = TOREAL(_value)	//Real number
+			when 3; _value = TOSTR(_value)	//String
+			//when 4; Array
+			others; return
+		}
+		_return += _argv[_i] + "," + _result + ","
+	}
+}
+OnVARCHANGE {
+	_var = ""; _res = 0;
+	for _i = 0; _i < ARRAYSIZE(reference); _i++
+	{
+			if (_i%2) != 0; continue
+		_var = reference[_i]
+		_res = reference[_i+1]
+		LETTONAME(_var,_res)
+	}
+}
+
+//------------------------------------------------------------------------------
+// Array handler functions
+//------------------------------------------------------------------------------
+ARRADD //Add something to the end of an array (in sakuraskript)
+{
+	//_argv[0] = array name to add to
+	//_argv[1-n] = values to add
+	if GETTYPEEX(_argv[0]) == 4; _argv[0] = _argv[0]
+	elseif GETTYPEEX("%(_argv[0])Ar") == 4; _argv[0] = _argv[0] + "Ar"
+	else; return
+	_return = "\![raise,OnArrayAdd,%(_argv[0])"
+	for _i = 1; _i < _argc; _i++
+	{
+		if !ARRINFO(_argv[0],_argv[_i]);
+			_return += "," + _argv[_i]
+	}
+	_return += "]"
+	_return
+}
+ARRADD_0 //(outside sakuraskript)
+{
+	if GETTYPEEX(_argv[0]) == 4; _argv[0] = _argv[0]
+	elseif GETTYPEEX("%(_argv[0])Ar") == 4; _argv[0] = _argv[0] + "Ar"
+	else; return
+	for _i = 1; _i < _argc; _i++
+	{
+		if !ARRINFO(_argv[0],_argv[_i]);
+			EVAL(_argv[0]+",= '"+_argv[_i]+"'")
+	}
+}
+OnArrayAdd { //helper function to avoid values being evaluated too early
+	if ARRAYSIZE(reference) < 2; return
+	for _i = 1; _i < ARRAYSIZE(reference); _i++
+	{
+		EVAL(reference[0]+",= '"+reference[_i] + "'")
+	}
+}
+ARRDEL //Delete something from an array (in sakuraskript)
+{
+	//_argv[0] = array name to delete from
+	//_argv[1-n] = values to delete
+	if GETTYPEEX(_argv[0]) == 4; _argv[0] = _argv[0]
+	elseif GETTYPEEX("%(_argv[0])Ar") == 4; _argv[0] = _argv[0] + "Ar"
+	else; return
+	_nb = 0; _return = "\![raise,OnArrayDelete,%(_argv[0])"
+	_arr = EVAL("%(_argv[0])")
+	for _i = 1; _i < _argc; _i++
+	{
+		if ARRINFO(_argv[0],_argv[_i]) {
+			_nb = ASEARCH(_argv[_i],_arr)
+			_return += "," + _nb
+		}
+	}
+	_return += "]"
+	_return
+}
+ARRDEL_0 //(outside sakuraskript)
+{
+	if GETTYPEEX(_argv[0]) == 4; _argv[0] = _argv[0]
+	elseif GETTYPEEX("%(_argv[0])Ar") == 4; _argv[0] = _argv[0] + "Ar"
+	else; return
+	_nb = 0; _arr = EVAL("%(_argv[0])")
+	for _i = 1; _i < _argc; _i++
+	{
+		if ARRINFO(_argv[0],_argv[_i]) {
+			_nb = ASEARCH(_argv[_i],_arr)
+			EVAL(_argv[0]+"["+_nb+"]=IARRAY")
+		}
+	}
+}
+OnArrayDelete { //helper function to avid values being deleted if script isn't even called
+	if ARRAYSIZE(reference) < 2; return
+	_nb = -1
+	for _i = 1; _i < ARRAYSIZE(reference); _i++
+	{
+		_arr = reference[0]
+		_nb = TOINT(reference[_i])
+		EVAL("%(reference[0])[%(_nb)] = IARRAY")
+	}
+}
+ARRSHUFFLE //shuffle an array
+{
+	_arr = _argv
+	for _i = _argc-1; _i > 0; _i--
+    {
+        _rand = RAND(_argc)
+  
+        // Swap _arr[i] with the element at random index 
+        _temp = _arr[_i]
+        _arr[_i] = _arr[_rand]
+        _arr[_rand] = _temp 
+    }
+	_arr
+}
+
+
+
+//------------------------------------------------------------------------------
+// Special print functions
+//------------------------------------------------------------------------------
+buttons
+{
+	//_argv[0] = 0/2/4 (small/middle/large balloon)
+	//_argv[1-n] = Button name, Function name
+
+		//coordinates depending on balloon
+	_y = 0;
+	case TOINT(_argv[0])
+	{
+		when 0; _y = 90 //small: f.e jokes
+		when 2; _y = 170 //middle: f.e. menu
+		when 4; _y = 275 //large: f.e. config
+	}
+		//button rendering
+	_p = "\f[color,default]%(cmenu1)"
+	_space = IARRAY
+	case _argc-1
+	{
+		when 2; _space = (200)
+		when 4; _space = (0,200)
+		when 6; _space = (0,100,200)
+	}
+	for _i = 1; _i < _argc; _i++
+	{
+		if _i%2 == 0; continue
+		
+		if _argv[_i] != ""; _p += "\_l[%(_space[_i/2]),%(_y)]\![*]\q[%(_argv[_i]),%(_argv[_i+1])]"
+	}
+	_p += "\f[color,default]" //ensure that nothing else gets printed in bar color!
+	_p
+}
+
+
+//_argv[0] = array OR arrayfunction
+//_argv[1] = Originating function name
+//_argv[2] = printamount (def 5)
+//_argv[3] = delimiter
+//_argv[4] = X button
+//_argv[5] = 0/1/2 Check button (2=plus In PROGRESS)
+//_argv[6] = Move buttons
+//_argv[7] = Edit button
+//_argv[8] = multi array print format (f.e. "_arr[0] - _arr[2]")
+//_argv[9] = Originating function name
+//Check button|Main array part
+OnList 
+{
+	_print = ""; _itemC = 0; _nb = 0; _tempAr = IARRAY; _format = _argv[8]; _pamount = 5; _lb = 0; _ileft = 0
+	_eb = ""; _xb = ""; _mb0 = ""; _mb1 = "" //buttons
+		//Get print amount if specified
+	if _argv[2] != "" && TOINT(_argv[2]) != 0; _pamount = TOINT(_argv[2])
+		//Choose array pool
+    if ISVAR(_argv[0]) == 1; _tempAr = EVAL(_argv[0])
+    else; _tempAr = EVAL("On" + _argv[0] + "_Array")
+	    //Amount of items	
+	_itemC = ARRAYSIZE(_tempAr) 
+        //NB of item to render from (page handling)
+	if (pnumb * _pamount) > (_itemC-1);	//if printing is too far (leads to empty page)
+		pnumb = (_itemC-1)/_pamount
+    _nb = pnumb * _pamount  //nb = actual item index
+		//count line breaks to fix printing beneath (IN FORMAT)
+	if "\n" _in_ _format; _lb = RE_GREP(_format,'\\n') * _pamount
+
+	for _i = 0; _i < _pamount; _i++ //loop prints always the same amount of items
+	{
+		
+		_arr = _tempAr[_nb]
+		SETDELIM(_arr, _argv[3])
+	
+		if _i != 0;	_print += "\n\n[half]"
+        
+		//Sakuraskript print
+		if _argv[4] == 1 { //X button
+				//ref: 0=func; 1=all/one; 2=array name; 3=array index
+				_index = _nb
+			_xb = "\_a[OnList_Delete,%(_argv[1]),1,%(_argv[0]),%(_index)][X]\_a"
+		}
+		if _argv[5] != 0 { //Check button
+			_state = ""
+			if TOINT(_arr[0]) == 2; _state = "\_b[sprites/fieldgold.png,inline,--option = use_self_alpha]"
+			if TOINT(_arr[0]) == 1; _state = "\_b[sprites/fieldclicked.png,inline,--option = use_self_alpha]"
+			else; 					_state = "\_b[sprites/fieldunclicked.png,inline,--option = use_self_alpha]"
+				//ref: 0=func; 1=button type; 2=array name;3=array index; 4=delimiter
+			_print += "\_a[OnList_Check,%(_argv[1]),%(_argv[5]),%(_argv[0]),%(_nb),%(_argv[3])]%(_state)\_a"
+		}
+		if _argv[6] == 1 { //Move buttons
+
+		}
+		if _argv[7] == 1 { //Edit button
+				//ref: 0=func; 1=array index
+			_eb = "\_a[OnList_Edit,%(_argv[1]),%(_nb)][E]\_a"
+		}
+        if _argv[8] != "" { //Format print
+			_print += EVAL(_format)
+			_print = REPLACE(_print,'XBUTTON',_xb)
+			_print = REPLACE(_print,'EBUTTON',_eb)
+		}
+        else { //Normal print
+			_print += SHIORI3FW.MakeShortText(_arr,30)
+			_print += _xb + _eb
+		}
+		
+		_nb++
+		if _nb == _itemC {
+			_i++
+			break
+		} 
+	}
+
+    //Page number bar
+	_print += "\f[color,default]"
+	_ileft = _pamount - _i
+	_print += "\n[" + (150*(_ileft + 1) + 15 + (100*(_ileft%_lb))) + "]" //empty lines for correct spacing
+	if pnumb >= 1; 
+        _print += "%(cmenu1)\_l[0]\q[< Prior page,OnPageFlip,dec,%(_argv[1])]"
+	if (_itemC > 5 && _itemC > _nb);
+        _print += "%(cmenu1)\_l[100]\q[Next page >,OnPageFlip,inc,%(_argv[1])]"
+	_print += "\f[color,default]"
+
+	//if the array is empty; ERROR
+	if _itemC == 0; _print = "(Looks like there's nothing here.)"
+	
+	_print
+}
+OnList_Delete //ref: 0=func; 1=all/one; 2=array name; 3=array index
+{
+	if TOINT(reference1) == 0; EVAL(reference2+"= IARRAY")
+	else; EVAL(reference2+"["+reference3+"] = IARRAY")
+
+	EVAL(reference0) //open function again
+}
+OnList_Check //ref: 0=func; 1=button type; 2=array name;3=array index; 4=delimiter
+{
+	_item = EVAL(reference2+"["+reference3+"]") //fetch array line
+	SETDELIM(_item,"%(reference4)")
+
+	_value = TOINT(_item[0])
+	_item[0] = (_value+1)%(reference1+1) //toggle states based on button click number
+
+	EVAL(reference2+"["+reference3+"] = _item") //reassign array line
+	EVAL(reference0) //open function again
+}
+OnList_Edit //ref: 0=func; 1=array index
+{
+	tempnb = TOINT(reference1)
+	EVAL(reference0+"_Edit")
+}
+OnList_Move //TODO: add move buttons
+{
+
+}
+
+//------------------------------------------------------------------------------
+// Function		:Item interface printing (supports 1/2/3 columns)
+//
+// Array		:Price|Print Name|Item name|Function|Description|refs
+// Choice		:Name,Func,Item Name,Item Price,Hover ref,Description,Ref
+// Prints		:"Print name" + if shop; "G - Price" + if hovered; "Description"
+//
+// Var:			:_argv[0] = ShopUndernet/ShopSans/Bag/Ask
+//				 _argv[1] = (Description of Item hovered above)
+//				 _argv[2] = (Modified list size; useful for larger balloons)
+//				 pnumb = (page number temp var)
+//------------------------------------------------------------------------------
+
+OnChoiceHover
+{
+	case reference4
+	{
+		when "ShopUndernet","ShopSans"; OnShop(reference4,reference5)
+		when "Bag"; OnBag(reference4,reference5)
+	}
+}
+
+OnRenderInterface //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/color
+{
+	_itemCount = 0; _print = ""; _printamount = 5; _array = IARRAY
+		if _argv[2] != "" && TOINT(_argv[2]) != 0; _printamount = TOINT(_argv[2])
+		//Choose array pool
+	_array = EVAL("On" + _argv[0] + "_Array")
+		//modify printamount of TWO/THREE/THREE2 in array
+	_printamount += ARRAYSIZE(RE_ASEARCHEX('^.*\|(TWO|THREE|THREE2)',_array))
+	_itemCount = ARRAYSIZE(_array)
+	
+		//displays pages
+	_nb = pnumb * _printamount
+
+	if _nb > (_itemCount-1) {	//if printing is too far (leads to empty page)
+		pnumb = (_itemCount-1)/_printamount
+		_nb = pnumb * _printamount
+	}
+
+	for _p = 0; _p < _printamount; _p++
+	{
+		_item = _array[_nb]
+		SETDELIM(_item, "|")
+		
+		//_item = SPLIT(_item,'|')
+	
+			//space it out to the right
+		if _item[2] == "TWO";		 _print += "\_l[155]"
+		elseif _item[2] == "THREE";	 _print += "\_l[85]"
+		elseif _item[2] == "THREE2"; _print += "\_l[180]"
+		elseif _p != 0;				 _print += "\n\n[half]"
+
+			//add base print color if specified by ref0/_item[5]
+			//or add anchor hover color if hovered over
+		if _argv[1] != "" && _argv[1] == _item[4];
+			_print += canchor 
+		elseif "\f[" _in_ _item[5] {
+			_print += _item[5]
+			_item[5] = ""
+		}
+		else; _print += "\f[default]"
+	
+		if _item[0] == "!" {	//Simple sakuraskript text print
+			_print += _item[1]
+		}
+		else {					//Choice printing/Default
+			if _item[0] == "P"; //plain, no choice marker
+					_print += "\q["
+			else;	_print += "\![*]\q["
+				//Print Name and price
+			if (_item[0] != "" && _item[0] != "P");
+				_print += _item[0] + "G - "
+			_print += _item[1]
+				//Choice ID
+			_print += "," + _item[3]
+			
+				//Item Name
+			_print += "," + _item[2]
+				//Item Price
+			_print += "," + _item[0]
+				//Hover reference
+			_print += "," + _argv[0]
+				//Description
+			_print += "," + _item[4]
+				//Additional Ref
+			_print += "," + _item[5]
+			
+			_print += "]"
+			
+			_print += "\f[color,default]"
+		}
+		
+		_nb++
+		if _nb == _itemCount; break
+	}
+	if _nb == _itemCount; _p++
+	_print += "\f[color,default]"
+	_print += "\n[" + (150*((_printamount - _p) + 1)+15) + "]"
+		//Page number bar
+	if pnumb >= 1;
+		_print += "%(cmenu1)\_l[0]\q[< Prior page,OnPageFlip,dec,%(_argv[0])]"
+	if (_itemCount > 5 && _itemCount > _nb);
+		_print += "%(cmenu1)\_l[100]\q[Next page >,OnPageFlip,inc,%(_argv[0])]"
+
+	_print += "\f[color,default]"
+		//Description printing if mouse hovers
+	if _argv[1] != ""
+	{
+			//Description printing position
+		_print += "\n\_l[0,210]"
+		_print += "%(m)" + _argv[1]
+	}
+
+		//if the array is empty
+	if _itemCount == 0;
+		_print = "(Looks like there's nothing here. You should come back later.)"
+	
+	_print
+}
+//line break = y = font height + 2
+
+OnPageFlip
+{
+	if reference0 == "inc"; pnumb++
+	elseif reference0 == "dec"; pnumb--
+
+	case reference1
+	{
+		when "ShopSans","ShopUndernet"; OnShop(reference1,"")
+		others {
+			if ISFUNC(reference1); EVAL(reference1)
+			else; EVAL("On" + reference1)
+		}
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+// Surface calls (s=surface; t=transitions)
+//------------------------------------------------------------------------------
+//SHIORI3FW.LastSurface[0]
+Ons_0 //default
+{
+	if (sleeptrue && sittrue); "\s[14]"
+	elseif sleeptrue; "\s[13]"
+	elseif (phonetrue && sittrue); "\s[3]"
+	elseif phonetrue; "\s[2]"
+	elseif sittrue; "\s[1]"
+	else; "\s[0]"
+}
+Ons_1 //shrug
+{
+	if (phonetrue && sittrue); "\s[7]"
+	elseif phonetrue; "\s[6]"
+	elseif sittrue;	"\s[5]"
+	else; "\s[4]"
+}
+Ons_2 //head turned
+{
+	if (phonetrue && sittrue); "\s[12]"
+	elseif phonetrue; "\s[11]"
+	elseif sittrue; "\s[9]"
+	else; "\s[8]"
+}
+OnSleeptrue {sleeptrue = 1}
+OnSleepfalse {sleeptrue = 0}
+OnPhonetrue {phonetrue = 1}
+OnPhonefalse {phonetrue = 0}
+OnSittrue {sittrue = 1}
+OnSitfalse {sittrue = 0}
+
+idle //@uf_string.dic
+{
+		//default/idle surfaces
+	"(s_0)"
+	if (phonetrue && sittrue); "\s[198]"
+	if (phonetrue && !sittrue); "\s[199]"
+		//toggle phone
+	if !phonetrue && INV('phone')[0] == 1 {
+		if (MD("bored") && RND(20)); "(s_pout)"
+		elseif RND(5); "(s_pout)"
+	}
+	if (RND(25) && phonetrue); "(s_pback)"
+		//toggle sitting
+	if (RND(2) && !sittrue && !phonetrue) || (RND(80) && timeAr[1]>15);	"(s_sit)"
+	if (RND(2) && sittrue && !phonetrue) || (RND(80) && timeAr[1]>25); 	"(s_stand)"
+}
+
+
+gaze_0 {
+	"\i[105]"; "\i[106]"; "\i[107]"
+}
+
+
+OnSurface_Transition
+{
+	_next = TOSTR(_argv[0])
+	_last = TOSTR(_argv[1])
+	_ret = ""
+	if _next == '(s_0)' { //from sth to default
+		case _last {
+			when '(s_2)','8','9','11','12' { //head turned
+				if (phonetrue && sittrue); _ret = "\s[307]"
+				elseif phonetrue; _ret = "\s[305]"
+				elseif sittrue; _ret = "\s[303]"
+				else;  _ret = "\s[301]"
+				_ret += ",301"
+			} 
+		}
+	}
+	elseif _next == '(s_1)' { //from sth to shrug
+		case _last {
+			when '(s_2)','8','9','11','12' { //head turned
+				if (phonetrue && sittrue);  _ret = "\s[307]"
+				elseif phonetrue; _ret = "\s[305]"
+				elseif sittrue; _ret = "\s[303]"
+				else; _ret = "\s[301]"
+				_ret += ",301"
+			} 
+		}
+	}
+	elseif _next == '(s_2)' { //from default to head turn
+		case _last {
+			when '(s_0)','0','1','2','3' {
+				if sleeptrue; ""
+				elseif (phonetrue && sittrue); _ret = "\s[306]"
+				elseif phonetrue; _ret = "\s[304]"
+				elseif sittrue; _ret = "\s[302]"
+				else; _ret = "\s[300]"
+				_ret += ",301"
+			}
+		}
+	}
+	elseif _next == '(s_sleep)' { //fall asleep
+		if !sleeptrue {
+			if isheadturned(_last) {
+				_temp = OnSurface_Transition('(s_0)','(s_2)')
+				_ret = _temp[0] + "\w["+_temp[1]+"]"
+			}
+			if (phonetrue && sittrue); _ret += "\s[311]\_w[1000]\s[314]" //put back phone
+			elseif phonetrue; _ret += "\s[309]\_w[1000]\s[312]"
+			elseif sittrue; _ret += "\s[314]"
+			else; _ret += "\s[312]"
+			_ret += ",2302"
+
+			sleeptrue = 1; phonetrue=0
+		}
+	}
+	elseif _next == '(s_wake)' {
+		if sleeptrue {
+			if (phonetrue && sittrue); _ret += "\s[311]\_w[1000]\s[315]" //put back phone
+			elseif phonetrue; _ret += "\s[309]\_w[1000]\s[313]"
+			elseif sittrue; _ret += "\s[315]" 
+			else; _ret += "\s[313]"
+			_ret += ",2302"
+			sleeptrue = 0; phonetrue=0
+		}
+	}
+	elseif _next == '(s_pout)' { //phone out
+		if !phonetrue && !sleeptrue {
+			if isheadturned(_last) {
+				_temp = OnSurface_Transition('(s_0)','(s_2)')
+				_ret = _temp[0] + "\w["+_temp[1]+"]"
+			}
+			if sittrue; _ret += "\s[310]"
+			else; _ret += "\s[308]"
+			_ret += ",1000"
+			phonetrue = 1
+		}
+	}
+	elseif _next == '(s_pback)' { //phone back
+		if phonetrue && !sleeptrue {
+			if isheadturned(_last) {
+				_temp = OnSurface_Transition('(s_0)','(s_2)')
+				_ret = _temp[0] + "\w["+_temp[1]+"]"
+			}
+			if sittrue; _ret += "\s[311]"
+			else; _ret += "\s[309]"
+			_ret += ",1000"
+			phonetrue = 0
+		}
+	}
+	elseif _next == '(s_sit)' { //sitting
+		if !sittrue && !sleeptrue {
+			if isheadturned(_last) {
+				_temp = OnSurface_Transition('(s_0)','(s_2)')
+				_ret = _temp[0] + "\w["+_temp[1]+"]"
+			}
+			if phonetrue; _ret += "\s[309]\_w[1000]"
+			_ret += "\s[316],1453"
+			phonetrue = 0; sittrue = 1
+		}
+	}
+	elseif _next == '(s_stand)' {
+		if sittrue && !sleeptrue {
+			if isheadturned(_last) {
+				_temp = OnSurface_Transition('(s_0)','(s_2)')
+				_ret = _temp[0] + "\w["+_temp[1]+"]"
+			}
+			if phonetrue; _ret += "\s[311]\_w[1000]"
+			_ret += "\s[317],1453"
+			phonetrue=0; sittrue = 0
+		}
+	}
+	else; ""
+	
+	_ret
+}
+isheadturned
+{
+	case _argv[0] {
+		when '(s_2)','8','9','11','12'; 1
+		others; 0
+	}
+}

@@ -1,0 +1,412 @@
+//------------------------------------------------------------------------------
+// File		:uf_musicplayer.dic
+//
+//			:Full functionality for a music player.
+//			 Plays MID/WAV/MP3/WMA/AU
+//
+// Var		:songAr
+//			 songNb
+//			 musicstateAr
+//			 temporderAr
+//------------------------------------------------------------------------------
+
+//musicstateAr = (""/play/pause,
+//				normal/single loop/list loop/shuffle/randomized,
+//				WINDOW off/on,
+//				VOLUME,
+//				SPEED,
+//				SHUFFLE LOOP 0/1)
+
+musicstateAr_Init
+{
+	musicstateAr = ("","normal","off",100,100,0)
+}
+
+OnMusic_Player
+{
+		//check that array is initialized
+	if ISVAR("musicstateAr") == 0; musicstateAr_Init
+		//print var
+	_choose = "";	_skip = IARRAY; _buttonsAr = IARRAY; _shuffle = IARRAY; _cursong = ""
+		if songNb != -1; _cursong = (SPLITPATH(songAr[songNb]))[2]
+	
+	if _cursong != "" {
+		if musicstateAr[0] == "";			_buttonsAr = ("Play","")
+		elseif musicstateAr[0] == "play";	_buttonsAr = ("Stop","Pause")
+		elseif musicstateAr[0] == "pause";	_buttonsAr = ("Stop","Resume")
+		if musicstateAr[1] == "shuffle" {
+			_img = ("\_b[sprites/music_loop.png,inline]","\_b[sprites/music_loopNOT.png,inline]","\_b[sprites/music_shuffle.png,inline]")
+			if musicstateAr[5] == 0;		_shuffle ,= " \_a[OnMusic_Status,shuffleloop,menu]%(_img[1])\_a"
+			else; 							_shuffle ,= " \_a[OnMusic_Status,shuffleloop,menu]%(_img[0])\_a"
+											_shuffle ,= " \_a[OnMusic_Mode,menu]%(_img[2])\_a"
+		}
+		
+		_choose += "\q[%(_buttonsAr[0]),OnMusic_Status,play,menu]\_l[205]/
+			\q[%(_buttonsAr[1]),OnMusic_Status,pause,menu]\n\_l[0,125]/
+			\q[Mode: %(musicstateAr[1]),OnMusic_Status,mode,menu]%(_shuffle[0])%(_shuffle[1])\_l[205]/
+			\q[Playlists,OnMusic_List]"
+		
+		if OnMusic_BACK == 1; 		_skip[0] = "\q[Prior song,OnMusic_Skip,back,menu]"
+		if OnMusic_FORWARD == 1; 	_skip[1] = "\q[Next song,OnMusic_Skip,for,menu]"
+	}
+	else;
+		_choose = "\q[Select a song,OnMusic_List]"
+	
+	
+	//_settings = "\q[Bar: %(musicstateAr[2]),OnMusic_Option,bar]\_l[100]/
+	//	\q[Volume: %(musicstateAr[3]),OnMusic_Option,volume]\_l[205]/
+	//	\q[Speed: %(musicstateAr[4]),OnMusic_Option,speed]\n%(cmenu5)"
+	
+		//print
+	"\0\b2\_q\![set,choicetimeout,-1]/
+	%(cmenu6)%(b)MusicPlayer V3%(def)/
+	%(cmenu6)\_l[200]|\q[Close,script:\e]|/
+	\n\n[half]%(cmenu2)/
+		Current song:\n/
+		\f[color,229,134,82]%(_cursong)%(def)/
+	\n\n\n[half]/
+	%(cmenu1)\_l[0,100]/
+		%(_choose)%(cmenu4)\n/
+	\_l[0,145]/
+		%(_settings)/
+	\_l[0,165]/
+		%(_skip[0])\_l[205]/
+		%(_skip[1])"
+}
+
+/*	Sakuraskript
+OnMusic_Play
+{
+	//_song = REPLACE(songAr[songNb],"\","/")
+	"\![sound,%(reference0),%(songAr[songNb]),--window=%(musicstateAr[2]),--volume=%(musicstateAr[3]),--rate=%(musicstateAr[4])]"
+}
+OnSoundStop
+{
+	"\![raise,OnMusic_Skip]"
+}
+*/
+//	Mciaudior
+OnMusic_Play
+{
+	if reference0 != "stop" && reference0 != "loop"; reference0 = "play"
+	if reference1 == "new" {
+		_i = SAORI("plugin/mciaudior.dll","stop")
+		_x = SAORI("plugin/mciaudior.dll","load",songAr[songNb])
+		if musicstateAr[1] == "single loop"; _y = SAORI("plugin/mciaudior.dll","loop")
+	}
+	_i = SAORI("plugin/mciaudior.dll",reference0)
+}
+OnMAAPlayFinish
+{
+	"\![raise,OnMusic_Skip]"
+}
+
+OnMusic_Skip
+{
+	case musicstateAr[1] {
+		when "normal" {
+			if ( reference0 == "back" && songNb != 0 );	songNb--
+			elseif songNb != ARRAYSIZE(songAr)-1; 		songNb++
+		}
+		//when "single loop"; songNb = songNb
+		when "list loop" {
+			if ( reference0 == "back" && songNb == 0 );	songNb = ARRAYSIZE(songAr)-1
+			elseif songNb == ARRAYSIZE(songAr)-1; 		songNb = 0
+		}
+		when "shuffle" {
+			if reference0 == "back" {
+				if songNb != temporderAr[0];
+					songNb = ASEARCH(songNb,temporderAr) - 1
+				elseif musicstateAr[5] == 1;
+					songNb = ARRAYSIZE(songAr)-1
+			} 
+			else {
+				if songNb != temporderAr[ARRAYSIZE(temporderAr)-1];
+					songNb = ASEARCH(songNb,temporderAr) + 1
+				elseif musicstateAr[5] == 1;
+					songNb = temporderAr[0]
+			}
+		}
+		when "randomized" {
+			_rnd = RAND(ARRAYSIZE(songAr))
+			if _rnd == songNb; "\![raise,OnMusic_Skip]" //reroll if it's the same song
+			else; songNb = _rnd
+		}
+	}
+
+	if musicstateAr[1] != "single loop"; "\![raise,OnMusic_Play,option,new]"
+	--
+	if reference1 == "menu"; OnMusic_Player
+}
+
+//check whether to show or hide the backwards/forwards skip button
+OnMusic_BACK
+{
+	_return = 1
+	case musicstateAr[1] {
+		when "normal", "single loop" {
+			if songNb == 0; _return = 0
+		} 
+		when "randomized"; _return = 0
+		when "shuffle" {
+			if ( musicstateAr[5] == 0 && songNb == temporderAr[0] ); _return = 0
+		}
+	}
+	if ARRAYSIZE(songAr) == 1; _return = 0
+	_return
+}
+OnMusic_FORWARD
+{
+	_return = 1
+	case musicstateAr[1] {
+		when "normal", "single loop" {
+			if songNb == ARRAYSIZE(songAr)-1; _return = 0
+		}
+		when "shuffle" {
+			if ( musicstateAr[5] == 0 && songNb == temporderAr[ARRAYSIZE(temporderAr)-1] ); _return = 0
+		}
+	}
+	if ARRAYSIZE(songAr) == 1; _return = 0
+	_return
+}
+
+OnMusic_Status
+{
+	if reference0 == "play" {		//play/stop
+		if musicstateAr[0] == ""; musicstateAr[0] = "play"
+		else; musicstateAr[0] = ""
+		"\![raise,OnMusic_Play,option]"
+	}
+	elseif reference0 == "pause" {	//pause/resume
+		if musicstateAr[0] == "play" {
+			musicstateAr[0] = "pause"
+			"\![raise,OnMusic_Play,pause]"
+		}
+		else {
+			musicstateAr[0] = "play"
+			"\![raise,OnMusic_Play,resume]"
+		}
+	}
+	elseif reference0 == "mode" {	//normal/single loop/list loop/shuffle/randomized
+		case musicstateAr[1] {
+			when "normal"; musicstateAr[1] = "single loop"
+			when "single loop"; musicstateAr[1] = "list loop"
+			when "list loop"; musicstateAr[1] = "shuffle"
+			when "shuffle"; musicstateAr[1] = "randomized"
+			when "randomized"; musicstateAr[1] = "normal"
+		}
+		OnMusic_Mode
+	}
+	elseif reference0 == "shuffleloop" {
+		if musicstateAr[5] == 0; musicstateAr[5] = 1
+		else; musicstateAr[5] = 0
+	}
+	--
+	if reference1 == "menu"; OnMusic_Player
+}
+
+OnMusic_Mode
+{
+	_m =  musicstateAr[1]
+	if _m == "single loop" && musicstateAr[0] != ""; "\![raise,OnMusic_Play,loop]"
+	elseif _m == "shuffle" {
+		temporderAr = IARRAY
+		for _i = 0; _i < ARRAYSIZE(songAr); _i++ {
+			temporderAr ,= _i
+		}
+		temporderAr = ARRSHUFFLE(temporderAr)
+	}
+	if reference0 == "menu"; OnMusic_Player
+}
+
+
+OnMusic_Option
+{
+	if reference0 == "bar" {
+		if musicstateAr[2] == "OFF"; musicstateAr[2] = "ON"
+		else; musicstateAr[2] = "OFF"
+		
+		OnMusic_Player
+		
+		if musicstateAr[0] == "play"; "\![raise,OnMusic_Play,option]"
+	}
+	elseif reference0 == "volume";
+		"\![open,sliderinput,OnMusic_Volume,-1,%(musicstateAr[3]),0,100]"
+	elseif reference0 == "speed";
+		"\![open,sliderinput,OnMusic_Speed,-1,%(musicstateAr[4]),80,120]"
+}
+OnMusic_Volume
+{
+	musicstateAr[3] = reference0
+	OnMusic_Player
+	--
+	if musicstateAr[0] == "play"; "\![raise,OnMusic_Play,option]"
+}
+OnMusic_Speed
+{
+	musicstateAr[4] = reference0
+	--
+	if musicstateAr[0] == "play"; "\![raise,OnMusic_Play,option]%(OnMusic_Player)"
+}
+
+OnMusic_List
+{
+	_mode = ""
+	_list = ""
+	if reference0 == "delete";
+		_mode = "Delete songs\f[bold,0]\_l[190]|\q[Back,OnMusic_List]/
+			|   |\q[Player,OnMusic_Player]|\n[150]"
+	elseif reference0 == "move"; 
+		_mode = "Move songs\f[bold,0]\_l[190]|\q[Back,OnMusic_List]/
+			|   |\q[Player,OnMusic_Player]|\n[150]"
+	else {
+		_mode = "Music Playlist\f[bold,0]\_l[190]|\q[Exit,script:\e]/
+				|   |\q[Player,OnMusic_Player]|\n[150]/
+			%(cmenu2)\_l[-10]\q[Add a folder,OnMusic_Edit,folder]      /
+			%(cmenu3)\q[Search song,OnMusic_Edit,search]/
+			%(cmenu2)\_l[190]\q[Add a musicfile,OnMusic_Edit,file]\n/
+			%(cmenu1)\_l[-10]\q[Save playlist,OnMusic_Edit,savelist]     /
+			\q[Open playlist,OnMusic_Edit,openlist]/
+			\_l[190]\q[Clear playlist,OnMusic_Edit,clearlist]\n"
+		if ARRAYSIZE(songAr) >= 2;
+			_mode += "%(cmenu4)\_l[-10]\q[Move songs,OnMusic_List,move]/
+				\_l[190]\q[Delete songs,OnMusic_List,delete]"
+	}
+
+		//Renders song names
+	_songname = ""
+	for _i = 0; _i < ARRAYSIZE(songAr); _i++
+	{
+		_songname = (SPLITPATH(songAr[_i]))[2]
+			//color adjustment
+		if songNb == _i; _list += "\f[anchor.font.color,default.anchor]"
+		else; _list += "\f[anchor.font.color,default]"
+		
+		if reference0 == "move" {
+			if _i < (ARRAYSIZE(songAr)-1); _list += "\_l[-15]\_a[OnMusic_Choose,down,%(_i)]v\_a"
+			if _i > 0; _list += "\_l[280]\_a[OnMusic_Choose,up,%(_i)]^\_a"
+			if _i == (ARRAYSIZE(songAr)-1); _list += "\_l[-15]-"
+			if _i == 0; _list += "\_l[280]-"
+		}
+		elseif songNb == _i; _list += "\_l[-10]>"
+		else; _list += "\_l[-10]-"
+			
+		_list += "\_l[0]\_a[OnMusic_Choose,%(reference0),%(_i)]%(_songname)\_a"
+		
+		
+		_list += "\n\n[25]"
+	}
+	
+	"\![set,choicetimeout,-1]\![set,autoscoll,false]\_q/
+	\0\b4\_l[-10]/
+	%(cmenu6)%(b)%(_mode)\n\n/
+	%(cmenu5)%(_list)\n"
+}
+
+OnMusic_Edit
+{
+	case reference0
+	{
+		when "folder"; "\C\![open,dialog,folder,--id=OnMusic_Add,--title=Please select a music folder]"
+		when "search"; "\![open,inputbox,OnMusic_Search]"
+		when "file"; "\C\![open,dialog,open,--id=OnMusic_Add,--title=Please select a music file,--filter=Music file(mid;wav;mp3;au;ogg;wma)|*.mid;*.wav;*.mp3;*.au;*.ogg;*.wma]"
+		when "savelist"; "\C\![open,dialog,save,--id=OnMusic_Save,--title=Save the playlist,--filter=M3U file(m3u)|*.m3u|M3U8 文件(m3u8)|*.m3u8,--ext=m3u|m3u8]"
+		when "openlist"; "\C\![open,dialog,open,--id=OnMusic_Open,--title=Please select a playlist file,--filter=M3U file(m3u;m3u8)|*.m3u;*.m3u8]"
+		when "clearlist" {
+			songAr = IARRAY
+			songNb = -1
+			musicstateAr[0] = ""
+			"\![raise,OnMusic_List]"
+		}
+	}
+}
+
+
+OnMusic_AddFolder
+{
+	//songAr = ""
+	_folders = IARRAY
+	
+	foreach _argv ; file
+	{
+		//_filepath = _argv[0] + "\" + file
+		
+			//don't add if already in the playlist
+		if ARRINFO("song",file); continue
+		
+		if (FATTRIB(file))[2] == 1;
+			_folders ,= file
+		else
+			songAr ,= file
+	}
+	
+	if ARRAYSIZE(_folders) >= 1; OnMusic_AddFolder(_folders)
+	else; "\_q\_?%(_songAr)       |      %(_argv)"
+}
+
+OnMusic_Add
+{
+	_droppedfilepath = SPLITPATH(reference0);
+	_filepath = _droppedfilepath[1];
+	_filename = _droppedfilepath[2];
+	_fileext = TOLOWER(_droppedfilepath[3]);
+}
+
+
+
+
+
+OnMusic_Save
+{
+}
+OnMusic_Open
+{
+	"\_l[100,20]\q[New Playlist,OnLoadPlaylist,new,%(reference2)]\_l[80,60]\q[Add to current one,OnLoadPlaylist,add,%(reference2)]"
+}
+
+OnMusic_Choose
+{
+	_nb = TOINT(reference1)
+	if reference0 == "delete" {
+		songAr[_nb] = IARRAY
+		temporderAr[ASEARCH(_nb,temporderAr)] = IARRAY
+		if _nb == songNb; songNb = -1
+	}
+	elseif reference0 == "up" {	//< song minus 1
+		_temp = songAr[_nb-1]
+        songAr[_nb-1] = songAr[_nb]
+        songAr[_nb] = _temp 
+			//fix shuffle temp list
+			_one = ASEARCH(_nb,temporderAr)
+			_two = ASEARCH(_nb-1,temporderAr)
+			_temp = temporderAr[_two]
+       		temporderAr[_two] = temporderAr[_one]
+        	temporderAr[_one] = _temp 
+		
+		if _nb == songNb; songNb--
+		
+		reference0 = "move" 
+	}
+	elseif reference0 == "down" { //> song plus 1
+		_temp = songAr[_nb+1]
+        songAr[_nb+1] = songAr[_nb]
+        songAr[_nb] = _temp 
+			//fix shuffle temp list
+			_one = ASEARCH(_nb,temporderAr)
+			_two = ASEARCH(_nb+1,temporderAr)
+			_temp = temporderAr[_two]
+       		temporderAr[_two] = temporderAr[_one]
+        	temporderAr[_one] = _temp 
+		
+		if _nb == songNb; songNb++
+		
+		reference0 = "move" 
+	}
+	else {
+		songNb = _nb
+		musicstateAr[0] = "play"
+		"\![raise,OnMusic_Play,new]"
+	}
+	--
+	"\![raise,OnMusic_List,%(reference0),%(_nb)]"
+}

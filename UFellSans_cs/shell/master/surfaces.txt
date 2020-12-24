@@ -1,0 +1,1365 @@
+
+//------------------------------------------------------------------------------
+// Guide	:Character Sprites
+//
+//	Paps (p):0|def,1|look away,2|sigh,3|sweat,4|surprised,
+//			 5|provocative happy,6|happy,7|genuine happy
+//	Grill(g):0|def,1|laugh,2|frown,3|angry
+//	Alph (a):0|def,1|dead,2|angry,3|mocking laughter,
+//			 4|judging,5|judging unamused,6|mirth
+//------------------------------------------------------------------------------
+
+
+//			|Intervals|
+//
+//	[n: = napping]
+//		
+//	-Normal-
+//		Eyes - 1
+//			99,blinking				401|402
+//			00,default				400
+//			01,half closed			401
+//			02,closed				402
+//			03,no pupils			403
+//			04,one pupil			404
+//			05,left					405
+//			06,right				406
+//			07,up					407
+//			08,down					408
+//			09,open wide			409
+//			10,open wide no pupils	410
+//			11,open wide 1 pupil	411
+//			12,smile				412
+//			13,angry				413
+//			14,wink					414
+//			15,eye roll				406|407|405|408
+//			16,random glance 		i:105,106,107,108
+//				
+//		Mouth - 2
+//			99,talk				501|505|506	n:551|555|556
+//				98,stop talk
+//				97-95, talk frames
+//			00,default			500	n:550
+//			01,sneer			501	n:551
+//			02,smile closed		502	n:552
+//			03,smile broad		503	n:553
+//			04,smile content	504	n:554
+//			05,:/				505	n:555
+//			06,sigh				506	n:556
+//			07,:)				507	n:557
+//			
+//		Eyebrows - 3
+//			00,default		600	n:650
+//			01,up			601	n:651
+//			02,down			602	n:652
+//			03,frown up		603	n:653
+//			04,one up		604	n:654
+//			05,angry		605	n:655
+//			
+//		Extra - 4
+//			00,sweat drop	703	n:706
+//			01,small blush	704	n:707
+//			02,large blush	705
+//		
+//	-Side-
+//		Eyes - 1
+//			99,blinking		498|497
+//			00,default		499
+//			01,half closed 	498
+//			02,closed		497
+//			03,no pupils	496
+//			04,look away	495
+//				
+//		Mouth - 2
+//			99,talk			599|598|595
+//				98,stop talk
+//				97-95, talk frames
+//			00,default		599
+//			01,open talk	598
+//			02,smile		597
+//			03,disgust		596
+//			04,talk 2		595
+//			05,talk 3		594
+//			
+//		Eyebrows - 3
+//			00,default		699
+//			01,up			698
+//			02,angry		697
+//			03,frown		696
+//
+//		Extra - 4
+//			00,sweat drop	708
+//			01,small blush	709
+//	
+//------------------------------------------------------------------------------
+//		|Surfaces|
+//
+//	default
+//		stand 0;	sit 1; 	phone stand 2; 	phone sit 3
+//	shrug
+//		stand 4;	sit 5; 	phone stand 6; 	phone sit 7
+//	head turn
+//		stand 8;	sit 9; 	phone stand 11;	phone sit 12
+//	sleep
+//		stand 13;	sit 14;
+//
+//	transitions
+//		default 	stand 		300,301
+//			-		sit 		302,303
+//		head turn	phone stand	304,305
+//					phone sit	306,307
+//
+//		default		stand		308,309
+//			-		sit			310,311
+//		phone out	
+//
+//		default		stand		312,313
+//			-		sit 		314,315
+//		sleep		
+//		
+//		default		stand		316
+//			-		sit			317
+//		sit
+//
+//	idle
+//		phone idle stand 199;	phone idle sit 198
+//		(X)rock on feet stand 197;	(X)tap on leg sit 196
+//		(X)nod head stand 195;	(X)nod head sit 194
+//		(X)play with zipper stand 193
+//	extra parts
+//		note 299;	socks 298;	costume 297
+//		star1 297; star2 296; star3 295
+//------------------------------------------------------------------------------
+//element*,DRAWING_METHOD,file_name.png,X,Y
+//...
+//
+//animation*.interval,PLAY_METHOD
+//animation*.pattern*,DRAWING_METHOD,ID,time,X,Y
+//...
+//	[PLAY_METHOD]
+//	sometimes
+//	rarely
+//	random,*
+//	periodic,*
+//	always
+//	runonce
+//	never
+//	yen-e
+//	talk,*
+//	bind
+//
+//	[DRAWING_METHOD]
+//	base
+//	overlay
+//	overlayfast
+//	replace
+//	interpolate
+//	asis
+//	move
+//	bind
+//	add
+//	reduce
+//	insert,ID //nesting for dress up items
+//	start,ID
+//	stop,ID
+//	alternativestart,(ID1,ID2,...)
+//	alternativestop,(ID1,ID2,...)
+//
+//animation*.collision*,name(???)
+//------------------------------------------------------------------------------
+
+descript
+{
+	version,1
+}
+
+surface10
+{
+	element0,replace,surfaceKero.png,0,0
+}
+
+//------------------------------------------------------------------------------
+// Part		:surfaces0
+//
+//			:Main surface file.
+//
+// Surfaces	:surface0-surface** (base surfaces)
+//			 surface1** (idle surfaces)
+//			 surface2** (clothing/extra surfaces)
+//------------------------------------------------------------------------------
+
+	//default
+//stand
+surface0
+{
+	element0,replace,surface0.png,0,0
+}
+//sit
+surface1
+{
+	element0,replace,surface1.png,0,0
+}
+//phone stand
+surface2
+{
+	element0,replace,surface2.png,0,0
+}
+//phone sit
+surface3
+{
+	element0,replace,surface3.png,0,0
+}
+
+	//shrug
+//stand
+surface4
+{
+	element0,replace,surface4.png,0,0
+}
+//sit
+surface5
+{
+	element0,replace,surface5.png,0,0
+}
+//phone stand
+surface6
+{
+	element0,replace,surface6.png,0,0
+}
+//phone sit
+surface7
+{
+	element0,replace,surface7.png,0,0
+}
+
+	//head turn
+//stand
+surface8
+{
+	element0,replace,surface8.png,0,0
+}
+//sit
+surface9
+{
+	element0,replace,surface9.png,0,0
+}
+//phone stand
+surface11
+{
+	element0,replace,surface11.png,0,0
+}
+//phone sit
+surface12
+{
+	element0,replace,surface12.png,0,0
+}
+
+	//sleep
+//stand
+surface13
+{
+	element0,replace,surface13.png,0,0
+}
+//sit
+surface14
+{
+	element0,replace,surface14.png,0,0
+}
+
+
+
+
+//idle surface animations
+
+//phone idle stand
+surface199
+{
+	element0,replace,surface2.png,0,0
+	
+	animation0.interval,random,1
+	animation0.pattern0,alternativestart,(1,2,2,2,2,3,3,3,4,5)
+	animation0.pattern1,overlay,-1,50,0,0
+	
+		//nothing
+	animation1.interval,never
+	animation1.pattern0,replace,2,1,0,0
+	animation1.pattern1,replace,2,300,0,0
+	animation1.pattern2,overlay,-1,300,0,0
+	
+		//tapping
+	animation2.interval,never
+	animation2.pattern0,overlay,754,1,95,133
+	animation2.pattern1,overlay,755,200,95,133
+	animation2.pattern2,overlay,-1,150,95,133
+
+	animation3.interval,never
+	animation3.pattern0,overlay,754,1,95,133
+	animation3.pattern1,overlay,755,100,95,133
+	animation3.pattern2,overlay,-1,50,95,133
+		//scroll
+	animation4.interval,never
+	animation4.pattern0,overlay,758,1,95,133
+	animation4.pattern1,overlay,759,200,95,133
+	animation4.pattern2,overlay,-1,200,95,133
+	animation4.pattern3,overlay,758,200,95,133
+	animation4.pattern4,overlay,759,200,95,133
+	animation4.pattern5,overlay,-1,200,95,133
+	
+	animation5.interval,never
+	animation5.pattern0,overlay,758,1,95,133
+	animation5.pattern1,overlay,759,200,95,133
+	animation5.pattern2,overlay,-1,200,95,133
+}
+//phone idle sit
+surface198
+{
+	element0,replace,surface3.png,0,0
+	
+	animation0.interval,random,1
+	animation0.pattern0,alternativestart,(1,2,2,2,2,3,3,3,4,5)
+	animation0.pattern1,overlay,-1,50,0,0
+	
+		//nothing
+	animation1.interval,never
+	animation1.pattern0,replace,3,1,0,0
+	animation1.pattern1,replace,3,300,0,0
+	animation1.pattern2,overlay,-1,300,0,0
+	
+		//tapping
+	animation2.interval,never
+	animation2.pattern0,overlay,756,1,112,288
+	animation2.pattern1,overlay,757,200,112,288
+	animation2.pattern2,overlay,-1,150,112,288
+
+	animation3.interval,never
+	animation3.pattern0,overlay,756,1,112,288
+	animation3.pattern1,overlay,757,100,112,288
+	animation3.pattern2,overlay,-1,50,112,288
+	
+			//scroll
+	animation4.interval,never
+	animation4.pattern0,overlay,760,1,112,288
+	animation4.pattern1,overlay,761,200,112,288
+	animation4.pattern2,overlay,-1,200,112,288
+	animation4.pattern3,overlay,760,200,112,288
+	animation4.pattern4,overlay,761,200,112,288
+	animation4.pattern5,overlay,-1,200,112,288
+	
+	animation5.interval,never
+	animation5.pattern0,overlay,760,1,112,288
+	animation5.pattern1,overlay,761,200,112,288
+	animation5.pattern2,overlay,-1,200,112,288
+}
+//rock on feet (stand only)
+// surface197
+// {
+
+// }
+//tap on leg (sit only?)
+// surface196
+// {
+
+// }
+//nod head stand
+// surface195
+// {
+
+// }
+//nod head sit
+// surface194
+// {
+
+// }
+//play with zipper (stand only?)
+// surface193
+// {
+
+// }
+
+
+
+
+//Extra parts
+	//note
+surface299
+{
+	element0,replace,other/note.png,0,0
+	
+	collision0,0,328,202,362,note
+}
+	//socks
+surface298
+{
+	element0,replace,other/socks.png,0,0
+	
+	collision0,0,328,202,362,socks
+}
+	//costume
+surface297
+{
+	element0,replace,other/costume_floor.png,0,0
+	
+	collision0,0,328,202,362,costume_floor
+}
+	//stars
+surface296
+{
+	element0,overlay,other/star_0.png,0,0
+}
+surface295
+{
+	element0,overlay,other/star_1.png,0,0
+}
+surface294
+{
+	element0,overlay,other/star_2.png,0,0
+}
+
+
+//------------------------------------------------------------------------------
+// Part		:surfaces1
+//
+//			:Holds all surface transitions.
+//			 Implemented in ghost/master/base/consistency.dic
+//
+// Surfaces	:surface3**
+//------------------------------------------------------------------------------
+
+
+//default; head turn
+surface300
+{
+	element0,replace,surface0.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,0,1,0,0
+	animation0.pattern1,replace,800,150,0,0
+	animation0.pattern2,replace,8,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,0,0
+	animation599.pattern1,overlay,712,150,0,0
+	animation599.pattern2,overlay,711,150,0,0
+}
+surface301
+{
+	element0,replace,surface8.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,8,1,0,0
+	animation0.pattern1,replace,800,150,0,0
+	animation0.pattern2,replace,0,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,711,1,0,0
+	animation599.pattern1,overlay,712,150,0,0
+	animation599.pattern2,overlay,710,150,0,0
+}
+//sit; head turn
+surface302
+{
+	element0,replace,surface1.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,1,1,0,0
+	animation0.pattern1,replace,801,150,0,0
+	animation0.pattern2,replace,9,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,12,152
+	animation599.pattern1,overlay,712,150,12,152
+	animation599.pattern2,overlay,711,150,12,152
+}
+surface303
+{
+	element0,replace,surface9.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,9,1,0,0
+	animation0.pattern1,replace,801,150,0,0
+	animation0.pattern2,replace,1,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,711,1,12,152
+	animation599.pattern1,overlay,712,150,12,152
+	animation599.pattern2,overlay,710,150,12,152
+}
+//phone stand; head turn
+surface304
+{
+	element0,replace,surface2.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,2,1,0,0
+	animation0.pattern1,replace,802,150,0,0
+	animation0.pattern2,replace,11,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,0,0
+	animation599.pattern1,overlay,712,150,0,0
+	animation599.pattern2,overlay,711,150,0,0
+}
+surface305
+{
+	element0,replace,surface11.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,11,1,0,0
+	animation0.pattern1,replace,802,150,0,0
+	animation0.pattern2,replace,2,150,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,711,1,0,0
+	animation599.pattern1,overlay,712,150,0,0
+	animation599.pattern2,overlay,710,150,0,0
+}
+//phone sit; head turn
+surface306
+{
+	element0,replace,surface3.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,3,1,0,0
+	animation0.pattern1,replace,803,150,0,0
+	animation0.pattern2,replace,12,150,0,0	
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,12,152
+	animation599.pattern1,overlay,712,150,12,152
+	animation599.pattern2,overlay,711,150,12,152
+}
+surface307
+{
+	element0,replace,surface12.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,12,1,0,0
+	animation0.pattern1,replace,803,150,0,0
+	animation0.pattern2,replace,3,150,0,0	
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,711,1,12,152
+	animation599.pattern1,overlay,712,150,12,152
+	animation599.pattern2,overlay,710,150,12,152
+}
+
+
+//default; phone out
+surface308
+{
+	element0,replace,surface0.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,0,1,0,0
+	animation0.pattern1,replace,813,300,0,0
+	animation0.pattern2,replace,814,300,0,0
+	animation0.pattern3,replace,2,400,0,0
+}
+surface309
+{
+	element0,replace,surface2.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,2,1,0,0
+	animation0.pattern1,replace,814,300,0,0
+	animation0.pattern2,replace,813,300,0,0
+	animation0.pattern3,replace,0,400,0,0
+}
+//sit; phone out
+surface310
+{
+	element0,replace,surface1.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,1,1,0,0
+	animation0.pattern1,replace,815,300,0,0
+	animation0.pattern2,replace,816,300,0,0
+	animation0.pattern3,replace,3,400,0,0
+
+}
+surface311
+{
+	element0,replace,surface3.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,3,1,0,0
+	animation0.pattern1,replace,816,300,0,0
+	animation0.pattern2,replace,815,300,0,0
+	animation0.pattern3,replace,1,400,0,0
+}
+
+
+//default; sleep
+surface312
+{
+	element0,replace,surface0.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,0,1,0,0
+	animation0.pattern1,replace,804,401,0,0
+	animation0.pattern2,replace,805,350,0,0
+	animation0.pattern3,replace,804,350,0,0
+	animation0.pattern4,replace,806,500,0,0
+	animation0.pattern5,replace,13,700,0,0
+		
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,0,0
+	animation599.pattern1,overlay,714,401,0,0
+	animation599.pattern2,overlay,715,350,0,0
+	animation599.pattern3,overlay,714,350,0,0
+	animation599.pattern4,overlay,716,500,0,0
+	animation599.pattern5,overlay,713,700,0,0
+}
+surface313
+{
+	element0,replace,surface13.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,13,1,0,0
+	animation0.pattern1,replace,806,401,0,0
+	animation0.pattern2,replace,804,350,0,0
+	animation0.pattern3,replace,805,350,0,0
+	animation0.pattern4,replace,804,500,0,0
+	animation0.pattern5,replace,0,700,0,0
+		
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,713,1,0,0
+	animation599.pattern1,overlay,716,401,0,0
+	animation599.pattern2,overlay,714,350,0,0
+	animation599.pattern3,overlay,715,350,0,0
+	animation599.pattern4,overlay,714,500,0,0
+	animation599.pattern5,overlay,710,700,0,0
+}
+//sit; sleep
+surface314
+{
+	element0,replace,surface1.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,1,1,0,0
+	animation0.pattern1,replace,807,401,0,0
+	animation0.pattern2,replace,808,350,0,0
+	animation0.pattern3,replace,807,350,0,0
+	animation0.pattern4,replace,809,500,0,0
+	animation0.pattern5,replace,14,700,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,12,152
+	animation599.pattern1,overlay,714,401,12,152
+	animation599.pattern2,overlay,715,350,12,152
+	animation599.pattern3,overlay,714,350,12,152
+	animation599.pattern4,overlay,716,500,12,152
+	animation599.pattern5,overlay,713,700,12,152
+}
+surface315
+{
+	element0,replace,surface14.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,14,1,0,0
+	animation0.pattern1,replace,809,401,0,0
+	animation0.pattern2,replace,807,350,0,0
+	animation0.pattern3,replace,808,350,0,0
+	animation0.pattern4,replace,807,500,0,0
+	animation0.pattern5,replace,1,700,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,713,1,12,152
+	animation599.pattern1,overlay,716,401,12,152
+	animation599.pattern2,overlay,714,350,12,152
+	animation599.pattern3,overlay,715,350,12,152
+	animation599.pattern4,overlay,714,500,12,152
+	animation599.pattern5,overlay,710,700,12,152
+}
+
+//default; sit down
+surface316
+{
+	element0,replace,surface0.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,0,1,0,0
+	animation0.pattern1,replace,810,401,0,0
+	animation0.pattern2,replace,811,350,0,0
+	animation0.pattern3,replace,812,300,0,0
+	animation0.pattern4,replace,1,401,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,0,0
+	animation599.pattern1,overlay,717,401,0,0
+	animation599.pattern2,overlay,718,350,0,0
+	animation599.pattern3,overlay,719,300,0,0
+	animation599.pattern4,overlay,710,401,12,152
+}
+//sit; stand up
+surface317
+{
+	element0,replace,surface1.png,0,0
+	
+	animation0.interval,runonce
+	animation0.pattern0,replace,1,1,0,0
+	animation0.pattern1,replace,812,401,0,0
+	animation0.pattern2,replace,811,350,0,0
+	animation0.pattern3,replace,810,300,0,0
+	animation0.pattern4,replace,0,401,0,0
+	
+	animation599.interval,bind + runonce
+	animation599.pattern0,overlay,710,1,12,152
+	animation599.pattern1,overlay,719,401,0,0
+	animation599.pattern2,overlay,718,350,0,0
+	animation599.pattern3,overlay,717,300,0,0
+	animation599.pattern4,overlay,710,401,0,0
+}
+
+
+//------------------------------------------------------------------------------
+// Part		:surfaces2
+//
+//			:Expression surface part. Hold all expression/extra sprites that
+//			 are used in surfaces0 along with collisions.
+//
+// Surfaces	:surface4** (eyes)
+//			 surface5**	(mouth)
+//			 surface6** (eyebrows)
+//			 surface7** (pose & extra)
+//			 surface.append*
+//------------------------------------------------------------------------------
+
+	//Expressions
+//standing
+surface.append0,2,4,6,199
+{
+	animation199.interval,random,5
+	animation199.pattern0,overlay,401,200,0,0
+	animation199.pattern1,overlay,402,70,0,0
+	animation199.pattern2,overlay,401,150,0,0
+	animation199.pattern3,overlay,-1,40,0,0
+	
+	animation100.interval,never
+	animation100.pattern0,overlay,400,1,0,0
+	animation101.interval,never
+	animation101.pattern0,overlay,401,1,0,0
+	animation102.interval,never
+	animation102.pattern0,stop,199
+	animation102.pattern1,overlay,402,1,0,0
+	animation103.interval,never
+	animation103.pattern0,overlay,403,1,0,0
+	animation104.interval,never
+	animation104.pattern0,overlay,404,1,0,0
+	animation105.interval,never
+	animation105.pattern0,overlay,405,1,0,0
+	animation106.interval,never
+	animation106.pattern0,overlay,406,1,0,0
+	animation107.interval,never
+	animation107.pattern0,overlay,407,1,0,0
+	animation108.interval,never
+	animation108.pattern0,overlay,408,1,0,0
+	animation109.interval,never
+	animation109.pattern0,overlay,409,1,0,0
+	animation110.interval,never
+	animation110.pattern0,overlay,410,1,0,0
+	animation111.interval,never
+	animation111.pattern0,overlay,411,1,0,0
+	animation112.interval,never
+	animation112.pattern0,overlay,412,1,0,0
+	animation113.interval,never
+	animation113.pattern0,overlay,413,1,0,0
+	animation114.interval,never
+	animation114.pattern0,stop,199
+	animation114.pattern1,overlay,414,1,0,0
+	animation115.interval,never
+	animation115.pattern0,overlay,406,150,0,0
+	animation115.pattern1,overlay,407,170,0,0
+	animation115.pattern2,overlay,405,170,0,0
+	animation115.pattern3,overlay,408,150,0,0
+	animation115.pattern4,overlay,-1,101,0,0
+	animation116.interval,never
+	animation116.pattern0,alternativestart,(105,106,107,108)
+
+	animation299.interval,talk,1
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,0,0
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,501,200,0,0
+	animation297.pattern1,overlay,-1,200,0,0
+	animation296.interval,never
+	animation296.pattern0,overlay,505,200,0,0
+	animation296.pattern1,overlay,-1,200,0,0
+	animation295.interval,never
+	animation295.pattern0,overlay,506,200,0,0
+	animation295.pattern1,overlay,-1,200,0,0
+
+		//mouths
+		animation200.interval,never
+	animation200.pattern0,overlay,500,1,0,0
+		animation201.interval,never
+	animation201.pattern0,overlay,501,1,0,0
+	//animation201.pattern1,start,297
+		animation202.interval,never
+	animation202.pattern0,overlay,502,1,0,0
+	//animation202.pattern1,start,296
+		animation203.interval,never
+	animation203.pattern0,overlay,503,1,0,0
+	//animation203.pattern1,start,295
+		animation204.interval,never
+	animation204.pattern0,overlay,504,1,0,0
+	//animation204.pattern1,start,294
+		animation205.interval,never
+	animation205.pattern0,overlay,505,1,0,0
+	//animation205.pattern1,start,293
+		animation206.interval,never
+	animation206.pattern0,overlay,506,1,0,0
+	//animation206.pattern1,start,292
+		animation207.interval,never
+	animation207.pattern0,overlay,507,1,0,0
+	//animation207.pattern1,start,291
+
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,600,1,0,0
+	animation301.interval,never
+	animation301.pattern0,overlay,601,1,0,0
+	animation302.interval,never
+	animation302.pattern0,overlay,602,1,0,0
+	animation303.interval,never
+	animation303.pattern0,overlay,603,1,0,0
+	animation304.interval,never
+	animation304.pattern0,overlay,604,1,0,0
+	animation305.interval,never
+	animation305.pattern0,overlay,605,1,0,0
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,703,1,0,0
+	animation401.interval,never
+	animation401.pattern0,overlay,704,1,0,0
+	animation402.interval,never
+	animation402.pattern0,overlay,705,1,0,0
+}
+//sitting
+surface.append1,3,5,7,198
+{
+	animation199.interval,random,5
+	animation199.pattern0,overlay,401,200,12,152
+	animation199.pattern1,overlay,402,70,12,152
+	animation199.pattern2,overlay,401,150,12,152
+	animation199.pattern3,overlay,-1,40,12,152
+	
+	animation100.interval,never
+	animation100.pattern0,overlay,400,1,12,152
+	animation101.interval,never
+	animation101.pattern0,overlay,401,1,12,152
+	animation102.interval,never
+	animation102.pattern0,stop,199
+	animation102.pattern1,overlay,402,1,12,152
+	animation103.interval,never
+	animation103.pattern0,overlay,403,1,12,152
+	animation104.interval,never
+	animation104.pattern0,overlay,404,1,12,152
+	animation105.interval,never
+	animation105.pattern0,overlay,405,1,12,152
+	animation106.interval,never
+	animation106.pattern0,overlay,406,1,12,152
+	animation107.interval,never
+	animation107.pattern0,overlay,407,1,12,152
+	animation108.interval,never
+	animation108.pattern0,overlay,408,1,12,152
+	animation109.interval,never
+	animation109.pattern0,overlay,409,1,12,152
+	animation110.interval,never
+	animation110.pattern0,overlay,410,1,12,152
+	animation111.interval,never
+	animation111.pattern0,overlay,411,1,12,152
+	animation112.interval,never
+	animation112.pattern0,overlay,412,1,12,152
+	animation113.interval,never
+	animation113.pattern0,overlay,413,1,12,152
+	animation114.interval,never
+	animation114.pattern0,stop,199
+	animation114.pattern1,overlay,414,1,12,152
+	animation115.interval,never
+	animation115.pattern0,overlay,406,150,12,152
+	animation115.pattern1,overlay,407,170,12,152
+	animation115.pattern2,overlay,405,170,12,152
+	animation115.pattern3,overlay,408,150,12,152
+	animation115.pattern4,overlay,-1,101,12,152
+	animation116.interval,never
+	animation116.pattern0,alternativestart,(105,106,107,108)
+	
+	animation299.interval,talk,1
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,12,152
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,501,200,12,152
+	animation297.pattern1,overlay,-1,200,12,152
+	animation296.interval,never
+	animation296.pattern0,overlay,505,200,12,152
+	animation296.pattern1,overlay,-1,200,12,152
+	animation295.interval,never
+	animation295.pattern0,overlay,506,200,12,152
+	animation295.pattern1,overlay,-1,200,12,152
+	
+	animation200.interval,never
+	animation200.pattern0,overlay,500,1,12,152
+	animation201.interval,never
+	animation201.pattern0,overlay,501,1,12,152
+	animation202.interval,never
+	animation202.pattern0,overlay,502,1,12,152
+	animation203.interval,never
+	animation203.pattern0,overlay,503,1,12,152
+	animation204.interval,never
+	animation204.pattern0,overlay,504,1,12,152
+	animation205.interval,never
+	animation205.pattern0,overlay,505,1,12,152
+	animation206.interval,never
+	animation206.pattern0,overlay,506,1,12,152
+	animation207.interval,never
+	animation207.pattern0,overlay,507,1,12,152
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,600,1,12,152
+	animation301.interval,never
+	animation301.pattern0,overlay,601,1,12,152
+	animation302.interval,never
+	animation302.pattern0,overlay,602,1,12,152
+	animation303.interval,never
+	animation303.pattern0,overlay,603,1,12,152
+	animation304.interval,never
+	animation304.pattern0,overlay,604,1,12,152
+	animation305.interval,never
+	animation305.pattern0,overlay,605,1,12,152
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,703,1,12,152
+	animation401.interval,never
+	animation401.pattern0,overlay,704,1,12,152
+	animation402.interval,never
+	animation402.pattern0,overlay,705,1,12,152
+}
+//side standing
+surface.append8,11
+{
+	animation199.interval,random,5
+	animation199.pattern0,overlay,498,200,0,0
+	animation199.pattern1,overlay,497,70,0,0
+	animation199.pattern2,overlay,498,150,0,0
+	animation199.pattern3,overlay,-1,40,0,0
+	
+	animation100.interval,never
+	animation100.pattern0,overlay,499,1,0,0
+	animation101.interval,never
+	animation101.pattern0,overlay,498,1,0,0
+	animation102.interval,never
+	animation102.pattern0,stop,199
+	animation102.pattern1,overlay,497,1,0,0
+	animation103.interval,never
+	animation103.pattern0,overlay,496,1,0,0
+	animation104.interval,never
+	animation104.pattern0,overlay,495,1,0,0
+	
+	
+	animation299.interval,talk,1
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,0,0
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,594,200,0,0
+	animation297.pattern1,overlay,-1,200,0,0
+	animation296.interval,never
+	animation296.pattern0,overlay,598,200,0,0
+	animation296.pattern1,overlay,-1,200,0,0
+	animation295.interval,never
+	animation295.pattern0,overlay,595,200,0,0
+	animation295.pattern1,overlay,-1,200,0,0
+	
+	animation200.interval,never
+	animation200.pattern0,overlay,599,1,0,0
+	animation201.interval,never
+	animation201.pattern0,overlay,598,1,0,0
+	animation202.interval,never
+	animation202.pattern0,overlay,597,1,0,0
+	animation203.interval,never
+	animation203.pattern0,overlay,596,1,0,0
+	animation204.interval,never
+	animation204.pattern0,overlay,595,1,0,0
+	animation205.interval,never
+	animation205.pattern0,overlay,594,1,0,0
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,699,1,0,0
+	animation301.interval,never
+	animation301.pattern0,overlay,698,1,0,0
+	animation302.interval,never
+	animation302.pattern0,overlay,697,1,0,0
+	animation303.interval,never
+	animation303.pattern0,overlay,696,1,0,0
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,708,1,0,0
+	animation401.interval,never
+	animation401.pattern0,overlay,709,1,0,0
+}
+//side sitting
+surface.append9,12
+{
+	animation199.interval,random,5
+	animation199.pattern0,overlay,498,200,12,152
+	animation199.pattern1,overlay,497,70,12,152
+	animation199.pattern2,overlay,498,150,12,152
+	animation199.pattern3,overlay,-1,40,12,152
+	
+	animation100.interval,never
+	animation100.pattern0,overlay,499,1,12,152
+	animation101.interval,never
+	animation101.pattern0,overlay,498,1,12,152
+	animation102.interval,never
+	animation102.pattern0,stop,199
+	animation102.pattern1,overlay,497,1,12,152
+	animation103.interval,never
+	animation103.pattern0,overlay,496,1,12,152
+	animation104.interval,never
+	animation104.pattern0,overlay,495,1,12,152
+	
+	
+	animation299.interval,talk,1
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,12,152
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,594,200,12,152
+	animation297.pattern1,overlay,-1,200,12,152
+	animation296.interval,never
+	animation296.pattern0,overlay,598,200,12,152
+	animation296.pattern1,overlay,-1,200,12,152
+	animation295.interval,never
+	animation295.pattern0,overlay,595,200,12,152
+	animation295.pattern1,overlay,-1,200,12,152
+	
+	animation200.interval,never
+	animation200.pattern0,overlay,599,1,12,152
+	animation201.interval,never
+	animation201.pattern0,overlay,598,1,12,152
+	animation202.interval,never
+	animation202.pattern0,overlay,597,1,12,152
+	animation203.interval,never
+	animation203.pattern0,overlay,596,1,12,152
+	animation204.interval,never
+	animation204.pattern0,overlay,595,1,12,152
+	animation205.interval,never
+	animation205.pattern0,overlay,594,1,12,152
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,699,1,12,152
+	animation301.interval,never
+	animation301.pattern0,overlay,698,1,12,152
+	animation302.interval,never
+	animation302.pattern0,overlay,697,1,12,152
+	animation303.interval,never
+	animation303.pattern0,overlay,696,1,12,152
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,708,1,12,152
+	animation401.interval,never
+	animation401.pattern0,overlay,709,1,12,152
+}
+
+//sleep stand
+surface.append13
+{	
+	animation299.interval,talk,3
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,0,0
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,551,200,0,0
+	animation297.pattern1,overlay,-1,200,0,0
+	animation296.interval,never
+	animation296.pattern0,overlay,555,200,0,0
+	animation296.pattern1,overlay,-1,200,0,0
+	animation295.interval,never
+	animation295.pattern0,overlay,556,200,0,0
+	animation295.pattern1,overlay,-1,200,0,0
+	
+	animation200.interval,never
+	animation200.pattern0,overlay,550,1,0,0
+	animation201.interval,never
+	animation201.pattern0,overlay,551,1,0,0
+	animation202.interval,never
+	animation202.pattern0,overlay,552,1,0,0
+	animation203.interval,never
+	animation203.pattern0,overlay,553,1,0,0
+	animation204.interval,never
+	animation204.pattern0,overlay,554,1,0,0
+	animation205.interval,never
+	animation205.pattern0,overlay,555,1,0,0
+	animation206.interval,never
+	animation206.pattern0,overlay,556,1,0,0
+	animation207.interval,never
+	animation207.pattern0,overlay,557,1,0,0
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,650,1,0,0
+	animation301.interval,never
+	animation301.pattern0,overlay,651,1,0,0
+	animation302.interval,never
+	animation302.pattern0,overlay,652,1,0,0
+	animation303.interval,never
+	animation303.pattern0,overlay,653,1,0,0
+	animation304.interval,never
+	animation304.pattern0,overlay,654,1,0,0
+	animation305.interval,never
+	animation305.pattern0,overlay,655,1,0,0
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,706,1,0,0
+	animation401.interval,never
+	animation401.pattern0,overlay,707,1,0,0
+
+	animation499.interval,always
+	animation499.pattern0,overlay,700,500,20,10
+	animation499.pattern1,overlay,701,500,20,10
+	animation499.pattern2,overlay,702,500,20,10
+	animation499.pattern3,overlay,-1,800
+}
+//sit
+surface.append14
+{
+	animation299.interval,talk,3
+	animation299.pattern0,alternativestart,(297,296,295)
+	animation299.pattern1,overlay,-1,200,12,152
+	
+	animation298.interval,never
+	animation298.pattern0,stop,299
+	
+	animation297.interval,never
+	animation297.pattern0,overlay,551,200,13,152
+	animation297.pattern1,overlay,-1,200,13,152
+	animation296.interval,never
+	animation296.pattern0,overlay,555,200,13,152
+	animation296.pattern1,overlay,-1,200,13,152
+	animation295.interval,never
+	animation295.pattern0,overlay,556,200,13,152
+	animation295.pattern1,overlay,-1,200,13,152
+	
+	animation200.interval,never
+	animation200.pattern0,overlay,550,1,13,152
+	animation201.interval,never
+	animation201.pattern0,overlay,551,1,13,152
+	animation202.interval,never
+	animation202.pattern0,overlay,552,1,13,152
+	animation203.interval,never
+	animation203.pattern0,overlay,553,1,13,152
+	animation204.interval,never
+	animation204.pattern0,overlay,554,1,13,152
+	animation205.interval,never
+	animation205.pattern0,overlay,555,1,13,152
+	animation206.interval,never
+	animation206.pattern0,overlay,556,1,13,152
+	animation207.interval,never
+	animation207.pattern0,overlay,557,1,13,152
+	
+	animation300.interval,never
+	animation300.pattern0,overlay,650,1,13,152
+	animation301.interval,never
+	animation301.pattern0,overlay,651,1,13,152
+	animation302.interval,never
+	animation302.pattern0,overlay,652,1,13,152
+	animation303.interval,never
+	animation303.pattern0,overlay,653,1,13,152
+	animation304.interval,never
+	animation304.pattern0,overlay,654,1,13,152
+	animation305.interval,never
+	animation305.pattern0,overlay,655,1,13,152
+	
+	animation400.interval,never
+	animation400.pattern0,overlay,706,1,13,152
+	animation401.interval,never
+	animation401.pattern0,overlay,707,1,13,152
+	
+
+	animation499.interval,always
+	animation499.pattern0,overlay,700,500,32,162
+	animation499.pattern1,overlay,701,500,32,162
+	animation499.pattern2,overlay,702,500,32,162
+	animation499.pattern3,overlay,-1,800
+}
+
+
+	//Collisions: always start at upper left corner (extra part collisions @Extra parts)
+//basic stand; head,face
+surface.append0,2,4,6,199
+{
+	collisionex0,head,polygon,106,15,123,16,139,30,138,43,132,51,122,40,105,33,92,29
+	collisionex1,face,polygon,92,29,105,33,122,40,132,51,125,62,104,73,93,57
+}
+//basic sit; head,face
+surface.append1,3,5,7,198
+{
+	collisionex0,head,polygon,118,168,135,168,149,182,150,195,144,203,134,192,117,185,104,181
+	collisionex1,face,polygon,104,181,117,185,134,192,144,203,137,214,116,225,105,209
+}
+//side stand; head,face
+surface.append8,11
+{
+	collisionex0,head,polygon,106,18,125,15,139,28,139,45,125,58,117,57,118,46,110,39,90,35,90,30
+	collisionex1,face,polygon,90,30,90,35,110,39,118,46,117,57,100,71,92,54,88,49,92,44
+}
+//side sit; head,face
+surface.append9,12
+{
+	collisionex0,head,polygon,118,170,137,167,151,180,151,197,137,210,129,209,130,198,122,191,102,187,102,182
+	collisionex1,face,polygon,102,182,102,187,122,191,130,198,129,209,112,223,104,206,100,201,104,196
+}
+
+//sleep stand; head,face 
+surface.append13
+{
+	collisionex0,head,polygon,86,34,109,17,131,31,132,46,123,57,121,45,95,44,86,50
+	collisionex1,face,polygon,86,50,95,44,121,45,123,57,109,79,96,70,91,64,90,58
+}
+//sleep sit; head,face
+surface.append14
+{
+	//stand + 12,152
+	collisionex0,head,polygon,98,186,121,169,143,183,144,198,135,209,133,197,107,196,98,202
+	collisionex1,face,polygon,98,202,107,196,133,197,135,209,121,231,108,222,103,216,102,210
+}
+
+//phone stand; pocket,phone
+surface.append2,6,11,199
+{
+	collisionex2,pocket_empty,polygon,118,163,142,160,143,175,149,184,143,201,120,206,119,181
+	collisionex3,phone,polygon,100,140,118,140,119,151,107,151
+}
+//phone sit; pocket,phone
+surface.append3,7,12,198
+{
+	collisionex2,pocket_empty,polygon,141,311,161,310,165,321,154,326,142,332
+	collisionex3,phone,polygon,118,296,137,296,137,305,125,305
+}
+
+//stand; pocket
+surface.append0,4,8,13
+{
+	collisionex2,pocket,polygon,118,169,144,164,146,188,152,191,154,203,133,217,118,190
+}
+//sit; pocket
+surface.append1,5,9,14
+{
+	collisionex2,pocket,polygon,141,303,164,295,175,306,180,317,160,324,141,333
+}
+//stand; hand
+surface.append0,2,4,6,8,11,13,199
+{
+	collisionex4,hand,polygon,66,210,79,215,79,239,62,236
+}
+//sit; hand
+surface.append1,3,5,7,9,12,14,198
+{
+	collisionex4,hand,polygon,91,334,100,333,103,336,102,346
+}
+
+//stand; costume
+surface.append0,2,4,6,199
+{
+	animation599.collisionex9,costume,polygon,79,15,95,12,136,21,130,26,124,41,95,34,87,38,86,26
+}
+//sit; costume
+surface.append1,3,5,7,198
+{
+	animation599.collisionex9,costume,polygon,91,167,107,164,148,173,142,178,136,193,107,186,99,190,98,178
+}
+//side stand; costume
+surface.append8,11
+{
+	animation599.collisionex9,costume,polygon,83,13,92,11,101,11,101,15,109,19,116,20,109,38,101,34,89,34,89,17
+}
+//side sit; costume
+surface.append9,12
+{
+	animation599.collisionex9,costume,polygon,95,165,104,163,113,163,113,167,121,171,128,172,121,190,113,186,101,186,101,169
+}
+//napping stand; costume
+surface.append13
+{
+	animation599.collisionex9,costume,polygon,102,26,114,26,111,35,114,44,100,43,84,51,77,47,66,51,84,33
+}
+//napping sit; costume
+surface.append14
+{
+	animation599.collisionex9,costume,polygon,114,178,126,178,123,187,126,196,112,195,96,203,89,199,78,203,96,185
+}
+
+
+
+	//Dress up (collisions @Collisions)
+//normal (transitions @Transitions)
+surface.append0,2,4,6,308,309,199
+{
+	animation599.interval,bind
+	animation599.pattern0,add,710,1,0,0
+	
+	animation598.interval,bind + runonce
+	animation598.pattern0,overlay,710,1,0,0
+	animation598.pattern1,overlay,720,401,0,0
+	animation598.pattern2,overlay,721,350,0,0
+	animation598.pattern3,overlay,722,300,0,0
+	animation598.pattern4,overlay,723,401,0,0
+	animation598.pattern5,overlay,724,401,0,0
+	animation598.pattern6,overlay,725,401,0,0
+	animation598.pattern7,overlay,726,401,0,0
+}
+surface.append1,3,5,7,310,311,198
+{
+	animation599.interval,bind
+	animation599.pattern0,add,710,1,12,152
+
+	animation598.interval,bind + runonce
+	animation598.pattern0,overlay,710,1,12,152
+	animation598.pattern1,overlay,720,401,12,152
+	animation598.pattern2,overlay,721,350,12,152
+	animation598.pattern3,overlay,722,300,12,152
+	animation598.pattern4,overlay,723,401,12,152
+	animation598.pattern5,overlay,724,401,12,152
+	animation598.pattern6,overlay,725,401,12,152
+	animation598.pattern7,overlay,726,401,12,152
+}
+//side (transitions @transitions)
+surface.append8,11
+{
+	animation599.interval,bind
+	animation599.pattern0,add,711,1,0,0
+}
+surface.append9,12
+{
+	animation599.interval,bind
+	animation599.pattern0,add,711,1,12,152
+}
+//napping (transitions @transitions)
+surface.append13
+{
+	animation599.interval,bind
+	animation599.pattern0,add,713,1,0,0
+}
+surface.append14
+{
+	animation599.interval,bind
+	animation599.pattern0,add,713,1,12,152
+}
+

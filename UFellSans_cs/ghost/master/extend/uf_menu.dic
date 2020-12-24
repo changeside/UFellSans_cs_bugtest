@@ -1,0 +1,582 @@
+//------------------------------------------------------------------------------
+// File		:uf_menu.dic
+//
+//			:Sakura Menu
+//
+// Var		:sleeptrue
+//			 state
+//			 feedbackreminder
+//			 updatecheck
+//			 passmintotal
+//			 datetrue
+//			 deletetrue
+//			 colortrue
+//			 polltrue
+//			 hourremindtrue
+//			 upperworld
+//			 pausetrue
+//			 pronoun
+//			 aitalkinterval
+//			 patreonCode
+//			 updateURL
+//			 Version
+//------------------------------------------------------------------------------
+
+OnMenu
+{
+	_surface = ""; _text = ""
+	if sleeptrue && reference0 != "wakeup";
+		OnMenu_Sleep
+	else {
+		if reference0 == "wakeup";	_surface = "(s_wake)(s_1)"
+		else; 						_surface = "(s_0)"
+		if reference0 == "wakeup";	_text = OnMenu_Wakeup
+		else; 						_text = OnMenu_Dialogue
+		if state != 3;	state = 0
+
+		"\0%(_surface)\_q\b2\n\n/
+		\_l[-10]%(OnMenu_Render)/
+		\_q\_l[0,0]%(_text)"
+	}
+}
+OnMenu_Sleep : nonoverlap
+{
+	"\i[298]%(m)(You contemplate waking him.)"
+	"\i[298]%(m)(Should you wake him?)"
+	"\i[298]%(m)(He's deeply asleep.)"
+	"%(m)z... z.. ."
+	"\i[298]%(m)(...)"
+	--
+	"\n\n\n\_q\![*]\q[Shake him awake,OnMenu,wakeup]\n/
+	\![*]\q[Nevermind,script:\e]"
+}
+
+OnMenu_Dialogue : nonoverlap
+{
+	if AFF(30,50,70) && state == 1; "\i[304]%(m)oh, you're back?"
+	if AFF(50,70) && state == 1; "\i[204]\i[298]%(m)(He acknowledges you with a small smile.)"
+	if AFF(50,70) && state == 1; "\i[301]%(m)ah 'kay. \i[204]how'd it go?"
+	if AFF(50,70) && state == 1; "%(m)%(greeting)."
+	if AFF(50,70) && state == 1; "\i[202]%(m)wanna share what ya' did?"
+	if AFF(50,70) && state != 1; "\i[304]%(m)want anythin'?"
+	if AFF(50,70) && state != 1; "\i[301]%(m)go on."
+	if AFF(50,70) && state != 1; "%(m)i'm listenin'."
+	if AFF(50,70) && state != 1; "%(m)fire away %(nickname)."
+	if AFF(50,70) && state != 1; "%(m)shoot."
+	if AFF(50,70) && state != 1; "\i[304]%(m)wha's the matter?"
+	
+	
+	if AFF(30) && state == 1; "\i[298]%(m)(He hums, then goes back to doing nothing.)"
+	if AFF(30) && state == 1; "\i[298]%(m)(He gives a short hum.)"
+	if AFF(30) && state == 1; "%(m)ah 'kay. %(greeting)."
+	if AFF(30) && state != 1; "\i[301]"
+	if AFF(30) && state != 1; "\i[304]%(m)yeah?"
+	if AFF(30) && state != 1; "\i[301]%(m)whasup?"
+	if AFF(30) && state != 1; ""
+	
+	if AFF(0,15) && state == 1; "(s_2)\i[104]%(m)%(whisper)well what a fuckin' pleasure ta have ya' back."
+	if AFF(0,15) && state == 1; "\i[298]%(m)(He acknowledges you, then goes back to... doing nothing.)"
+	if AFF(0,15) && state == 1; "\i[298]%(m)(It doesn't look like he cares.)"
+	if AFF(0,15) && state == 1; "\i[107]\i[302]%(m)"
+	if AFF(0,15) && state != 1; ""
+}
+OnMenu_Wakeup : nonoverlap
+{
+	"\i[109]\i[301]%(m)huh?\w8\w4(s_0)\i[102]\i[302]\w8\w5(s_0)"
+	"\i[110]\i[301]\w8\w4(s_0)\i[102]\i[302]\w8\w5(s_0)"
+	"\i[109]\i[301]%(m)eh?\w8\w4(s_0)\i[102]\i[302]\w8\w5(s_0)"
+}
+
+OnMenu_Render
+{
+	pnumb = 0; _lastTalk = ""; _poll = ""; _feedback = ""; _update = ""
+	
+	if feedbackreminder >= 60; feedbackreminder = 0
+	else; feedbackreminder++
+	
+	if lastTalk != ""; 			_lastTalk = "\![*]\q[Repeat please,OnLastTalk]"
+	if polltrue == 2; 			_poll = "%(lightup)"
+	if feedbackreminder >= 50;	_feedback = "\![*]\q[Feedback,OnBug_Feedback]"
+	if updatecheck; 			_update = "\![*]\q[Update,OnUpdate_Select]"
+	
+	"%(cmenu1)/
+	\![*]\q[Chatter,OnRndTalk]/
+	\_l[80]\![*]\q[Speak,OnChat]/
+	\_l[150]%(_lastTalk)%(def)/
+	/
+	%(cmenu2)/
+	\n\n[half]\_l[-10]\![*]\q[Joke,OnJoke]/
+	\_l[80]\![*]\q[Check,OnCheck]/
+	\_l[150]\![*]\q[Ask for a favor,OnUtility]%(def)/
+	/
+	%(cmenu3)/
+	\n\n[half]\_l[-10]\![*]\q[Games,OnGame]/
+	\_l[80]\![*]%(st)Music Player%(stoff)\n\n[half]%(def)/
+	%(cmenu4)\_l[-10]\![*]\q[Shop,OnShop]/
+	\_l[80]\![*]\q[Bag,OnBag]%(def)/
+	%(cmenu5)%(_poll)/
+	\n\n[half]\_l[-10]\![*]\q[Config Menu,OnConfig]%(def)/
+	\_l[110]%(lightup)%(_feedback)%(def)/
+	\_l[210]%(lightup)%(_update)%(def)/
+	/
+	%(cmenu6)/
+	\_l[-80,135]\n%(DayName) %(Time), %(CurDate)/
+	\nMoney: %(money)G%(def)/
+	%(buttons(2,'Nevermind','OnCancel'))"
+		//music player line for once it gets fixed
+	//\_l[80]\![*]\q[Music Player,OnMusic_Player]\n\n[half]%(def)/
+}
+
+OnCancel
+{
+	if MD("angry"); "\0(s_0)\i[102]\i[301]%(m)then not really, (s_0) it's your choice... \i[302]an' my fuckin' time."
+	if MD("angry"); "\0(s_0)\i[302]\i[298]%(m)(He's grumbling.)"
+	
+	if MD("bored"); "\0(s_0)\i[298]%(m)(He utters a suffering sigh.)"
+	if MD("bored"); ""
+	if MD("bored"); "\0%(s_2)"
+	if MD("bored"); ""
+	
+	if !MD("angry") && !MD("bored"); ""
+	if !MD("angry") && !MD("bored") && AFF(0); "\0(s_0)%(m)\i[116]not like i care."
+	if !MD("angry") && !MD("bored"); ""
+	if !MD("angry") && !MD("bored"); ""
+}
+
+//------------------------------------------------------------------------------
+// Menu selections; in order of listing.
+//------------------------------------------------------------------------------
+OnRndTalk
+{
+	AiTalk
+}
+
+OnChat
+{
+	_p = OnRenderInterface("Chat","",6)
+	"\b2\_q%(m)(Tell him-)\n\n[half]%(_p)/
+	%(buttons(2,'Go back','OnMenu'))"
+}
+OnChat_Array //OnSansChat & OnAsk & OnAFK (@uf_additional.dic); OnClose (@uf_boot.dic)
+{
+	_arr = IARRAY
+
+	//if sanschat == 1; _arr ,= "|(You want to talk to him.)||OnSansChat|||"
+	if INV('askbutton')[0]; _arr ,= "|(You want to ask him something.)||OnAsk|||"
+	_arr ,= "|(You'll be gone for a bit)|afk|OnAFK||"
+	if state == 3; _arr ,= "|(You aren't busy anymore.)|busystop|OnAFK||"
+		else; _arr ,= "|(You're busy.)|busy|OnAFK||"
+	_arr ,= "|(Goodbye and send him back.)|warned|OnClose|||"
+	
+	_arr
+}
+
+OnLastTalk //prevents last talk repeat if not possible; also fixes surfaces
+{
+	if sleeptrue;
+		"\i[298]%(m)(You think Sans can't repeat right now.)\e"
+	elseif "\s[4]" _in_ lastTalk || "\s[9]" _in_ lastTalk;
+		"%(m)(He was asleep.)\n\n%(m)(He wouldn't be able to repeat himself.)\e"
+	
+	if sittrue {
+		if "\s[5]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[5]","\s[0]")
+		if "\s[6]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[6]","\s[1]")
+		if "\s[7]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[7]","\s[2]")
+		if "\s[8]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[8]","\s[3]")
+	}
+	else {
+		if "\s[0]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[0]","\s[5]")
+		if "\s[1]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[1]","\s[6]")
+		if "\s[2]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[2]","\s[7]")
+		if "\s[3]" _in_ lastTalk; lastTalk = REPLACE(lastTalk,"\s[3]","\s[8]")
+	}
+	--
+	lastTalk
+}
+
+//OnJoke @uf_joke.dic
+
+OnCheck
+{
+	_color = IARRAY; _check = ""; _p = ""
+	
+	if reference0 == "CheckUser" || _argv[0] == "CheckUser" {
+		_color = (greyedout,lightup)
+		_check = "CheckUser" 
+		_p = OnCheck_User
+	}
+	else {
+		_color = (lightup, greyedout)
+		_check = "CheckSans"
+		_p = OnCheck_Sans
+	}
+	
+	"\0\b2\_q%(b)/
+	%(_color[0])\_l[20]\q[Check Sans,OnCheck,CheckSans]/
+	%(_color[1])\_l[150]\q[Check Yourself,OnCheck,CheckUser]%(def)\n\n/
+	%(_p)/
+	%(buttons(2,'Go back','OnMenu'))"
+}
+OnCheck_Sans : nonoverlap
+{
+	"%(m)SANS LV 5  10 HP  1 DEF  8 ATK\n\n[half]"
+	--
+	if AFF(70) && datetrue;	"%(m)(He thinks you're too good for him.)"
+	if AFF(70) && datetrue;	"%(m)(He's really happy to be with you.)"
+	if AFF(70) && datetrue;	"%(m)(He doesn't take you for granted.)"
+	if AFF(70) && datetrue;	"%(m)(He's worried you'll leave him.)"
+	if AFF(70) && datetrue;	"%(m)(He's glad you're there.)"
+	if AFF(70) && datetrue;	"%(m)(For once, he seems truly happy.)"
+
+	if AFF(70) && !datetrue; "%(m)(He's kind of nervous. Why?)"
+	if AFF(70) && !datetrue; "%(m)(He's happy to be here.)"
+	if AFF(70) && !datetrue; "%(m)(He likes this place.)"
+	if AFF(70) && !datetrue; "%(m)(He values your presence.)"
+	if AFF(70) && !datetrue; "%(m)(He thinks it's nice here.)"
+	if AFF(70) && !datetrue; "%(m)(Sans is content.)"
+	
+	if AFF(50) && ARRINFO("user","small"); "%(m)(He thinks your height is funny. He reconsiders, but is still amused.)"
+	if AFF(50);	"%(m)(He is getting less nervous to be here.)"
+	if AFF(50);	"%(m)(He thinks this place isn't so bad after all.)"
+
+	if AFF(30); "%(m)(He seems less tense in the grand view of things.)"	
+	if AFF(30); "%(m)(He appears to get used to your place.)"
+	if AFF(30); "%(m)(He is still wary, but getting better.)"
+	
+	if AFF(15) && passallhour >= 1; "%(m)(He doesn't know what to make of you yet.)"
+	if AFF(15) && passallhour < 1; 	"%(m)(He doesn't know what to make of you.)"
+	if AFF(15);	"%(m)(He seems wary.)"
+	if AFF(15);	"%(m)(He doesn't seem to %(it)hate%(itoff) you.)"
+	if AFF(15); "%(m)(You two could definitely get along better.)"
+
+	if AFF(0) && ARRINFO("user","rude"); "%(m)(He really really hates you.)"
+	if AFF(0) && ARRINFO("user","rude"); "%(m)(He thinks you're just like everyone else.)"
+	if AFF(0) && ARRINFO("user","boring"); "He doesn't get along with you."
+	if AFF(0) && ARRINFO("user","loner"); "He thinks you should find some friends and stop bothering him."	
+	if AFF(0); "%(m)(He doesn't seem happy to be here.)"
+	if AFF(0); "%(m)(Why does he keep staring at you?)"
+	if AFF(0); "%(m)(Is it you or does he seem tense?)"
+	if AFF(0); "%(m)(Feels like you two went wrong somewhere.)"
+	if AFF(0); "%(m)(He's not too happy to be here.)"
+	--
+	"\n\n[half]---------\n\n[half]"
+	--
+	if MD("angry"); "%(m)(You think he looks mad.)"
+	if MD("angry"); "%(m)(You don't know who spiked his ire.)"
+	if MD("angry"); "%(m)(You don't know why he looks more grumpy than usual.)"
+
+	if MD("bored"); "%(m)(You think he looks disinterested.)"
+	if MD("bored"); "%(m)(You don't know why he keeps twitching.)"
+
+	if MD("sad"); "%(m)(You think something is off about him.)"
+
+	if MD("pleased"); "%(m)(You hear him humming.)"
+	if MD("pleased"); "%(m)(You think his smile looks less forced.)"
+	if MD("pleased"); "%(m)(You notice how he looks less tense than usual.)"
+
+	if MD("tired"); "%(m)(You see his eyes drooping.)"
+	if MD("tired"); "%(m)(You hear him stiffle a yawn.)"
+
+	if MD("amused"); "%(m)(You hear his constant quiet snickering.)"
+	if MD("amused"); "%(m)(You regard him. He seems amused.)"
+	if MD("amused"); "%(m)(You think you see him grinning from time to time.)"
+
+	if MD("happy"); "%(m)(You think his smiles seem less forced.)"
+
+	if MD("relaxed"); "%(m)(You think his shoulders are less tense than usual.)"
+	if MD("relaxed"); "%(m)(You note how he looks more lax.)"
+
+	if MD("embarrassed") && !phonetrue; "%(m)(You think his hand is fiddling with the inside of his pocket.)"
+	if MD("embarrassed"); "(s_0)\i[105]%(m)(You see him continuously glancing away.)"
+
+	if MD("neutral"); "%(m)(You assume it's hard to judge him, when his face doesn't contort.)"
+	if MD("neutral"); "%(m)(You regard him. He looks like usual.)"
+	if MD("neutral"); "%(m)(You think, nothing is off.)"
+}
+OnCheck_User
+{
+	_mood = ""
+	if usermood != "";
+		_mood = "%(m)Sans thinks you are feeling %(lightup)%(usermood)%(def)."
+	
+	"%(m)Time passed for this boot:\n/
+		%(lightup)%(ghostupinfo[0])h and %(ghostupinfo[1])min%(def)\n\n[half]/
+	%(m)Time passed since last reset:\n/
+		%(lightup)%(totalinfo[0])h and %(totalinfo[1])min%(def)\n\n/
+	%(_mood)"
+}
+
+OnUtility
+{
+	_text = ""; _p = ""; _buttons = ""
+	if _argv[0] != "util"; _text = OnUtility_Dialogue
+	if passmintotal <= 10; _p = OnMenu_Render
+	else {
+		_p = OnRenderInterface("Utility","",6)
+		_buttons = buttons(2,'Go back','OnMenu')
+	}
+	"\0\_q\b2\n\n\n[half]/
+		%(_p)/
+		%(_buttons)/
+		\_q\_l[0,0]%(_text)"
+}
+OnUtility_Dialogue : nonoverlap
+{
+	if passmintotal <= 10; "(s_0)\i[113]\i[302]%(m)ya' can't be fucking serious?%(VARC('angry','+2'))"
+	if passmintotal <= 10; "(s_0)\i[113]%(m)...%(VARC('angry','+2'))"
+	if passmintotal <= 10; "(s_0)\i[105]\i[302]\i[298]%(m)(He scoffs.)%(VARC('angry','+1'))"
+	if passmintotal <= 10; "%(m)%(whisper)can ya' believe that nerve?%(def)(s_2)\i[302]%(VARC('angry','+2'))"
+
+	if passmintotal > 11 && passmintotal <= 20; "(s_0)\i[302]\i[298]%(m)(He's grumbling, but let's you speak.)"
+
+	if passmintotal > 21 && (AFF(0,15,30)||MD("angry")); "(s_0)\i[104]%(m)sure, make me do your shit. \i[302]i'll get back at ya' one day."
+	if passmintotal > 21 && (MD("happy")||MD("relaxed")); "(s_0)\i[298]%(m)(He is only barely grumbling)"
+	if passmintotal > 21 && AFF(0,15,30); "(s_0)%(m)\i[203]\i[301]sure, \i[102]why the hell not. (s_0)\i[113]\i[207]go the fuck ahead!"
+	if passmintotal > 21 && AFF(50,70); "(s_0)\i[304]"
+	if passmintotal > 21 && MD("sad"); "(s_0)\i[116]"
+	if passmintotal > 21 && MD("sad"); "(s_0)\i[108]\i[302]%(m)what fuckin' ever."
+	if passmintotal > 21 && MD("bored"); "(s_0)\i[298]%(m)(He doesn't seem to complain.)"
+}
+OnUtility_Array //Price|Print Name|Item ref/Column|Function|Description|refs/color
+{
+	_arr = IARRAY
+	_arr ,= "|Calendar|calendar|OnUtility_Calendar||%(cmenu1)"
+	_arr ,= "|Clock|THREE|OnUtility_Clock||%(cmenu1)"
+	_arr ,= "|Alarms|THREE2|OnAlarm||%(cmenu1)"
+	_arr ,= "|Email||OnUtility_Mail||%(cmenu2)"
+	_arr ,= "|Recycle bin|THREE|OnUtility_Bin||%(cmenu2)"
+	_arr ,= "|SSP Pref|THREE2|OnUtility_SSPConfig||%(cmenu2)"
+	_arr ,= "|System info||OnUtility_Sysinfo||%(cmenu3)"
+	_arr ,= "|Reset|THREE2|OnReset||%(cmenu3)"
+	_arr
+}
+OnUtility_Calendar
+{
+	"\![open,calendar]%(OnUtility('util'))"
+	--
+	"(s_0)\i[116]%(m)betta check those %(it)important%(def) appointments."
+	if !datetrue; "(s_0)\i[112]%(m)except for you, the calendar actually has dates."
+	if ARRINFO("user","loner"); "(s_0)%(m)doubt there's much ta' look for."
+	"(s_0)%(m)welp, \i[102]calendar there we go."
+}
+OnUtility_Clock //Clock @uf_additional.dic
+{
+	"\7"
+}
+//OnAlarm @uf_additional.dic
+OnUtility_Mail //BIFF @uf_additional.dic
+{
+	"\![biff]"
+}
+OnUtility_Bin
+{
+	_gomicheck = FUNCTIONEX("plugin/gomi.dll", "-n")
+	
+	if _gomicheck == 0 //If the recycle bin is empty/an error occurs.
+	{
+		"\0%(OnUtility('util'))(s_1)\i[102]%(m)it's already as empty as yer head.(s_0)"
+	}
+	elseif _gomicheck >= 1
+	{
+		"\0(s_0)%(m)k' doing yer work.\n\n"
+		--
+		if !MD("bored"); "\i[107]%(m)(He sighs.)"
+		if MD("angry"); "\i[302]"
+		"%(m)%(whisper)why 'm i even obeyin'. the fuck?"
+		if ( RND(20) && !MD("happy") && !MD("sad") ); "%(m)gggggggggghhhhhhhh"
+		if _gomicheck >= 50; "%(m)\i[302]%(swear). you are a trash herd..."
+		--
+		"(s_0)\i[102]\w8\w8\w8\s[-1]\![raise,OnUtility_BinClean]\w9\w9\w9\w8\w8%(OnUtility('util'))(s_0)\c%(m)done."
+	}
+}
+OnUtility_BinClean { _gomi = FUNCTIONEX("plugin/gomi.dll", "-f") }
+OnUtility_SSPConfig
+{
+	"\![open,configurationdialog]%(OnUtility('util'))"
+}
+OnUtility_Sysinfo
+{
+	_osname = FUNCTIONEX("plugin/saori_cpuid.dll","os.name")
+	_osversion = FUNCTIONEX("plugin/saori_cpuid.dll","os.version")
+	_cpuname = FUNCTIONEX("plugin/saori_cpuid.dll","cpu.name")
+	_cpuclockex = FUNCTIONEX("plugin/saori_cpuid.dll","cpu.clockex")
+	--
+	"\0\b2\_q/
+	\f[bold,1]OS:\f[bold,0] %(_osname) %(_osversion)\n/
+	\f[bold,1]Memory Load:\f[bold,0] %(memoryload)%\n/
+	\f[bold,1]Physical Memory:\f[bold,0] %(memoryavailphys) KB\n/
+	\f[bold,1]CPU:\f[bold,0] %(_cpuname) %(_cpuclockex)MHz/
+	%(buttons(2,'Cancel','script:\e','Go back','OnUtility'))"
+}
+OnReset
+{
+	"\_q\n\![*]\q[Reset everything,OnReset_Check]/
+	%(buttons(0,'Cancel','OnCancel','Go back','OnUtility'))"
+}
+OnReset_Check
+{
+	"(s_0)\i[298]%(m)(He's staring at you, but you doubt he knows what you're up to.)\n%(m)(Do you really want to do this?)\n\n/
+	\![*]\q[Reset everything,OnReset_Confirm]/
+	%(buttons(0,'Cancel','OnCancel','Go back','OnUtility'))"
+}
+OnReset_Confirm //Only punishment is 2 affection minus on start up and a tiredness boost.
+{
+	OnVariablesSet("reset")
+	--
+	"\i[298]%(m)(You reset him. He looks kind of lost.)/
+	%(VARC('affection','-2','tired','+5'))"
+}
+
+//OnGame @uf_game.dic
+
+//OnMusic_Player @uf_musicplayer.dic
+
+//OnShop & OnBag @uf_inventory.dic
+
+OnConfig
+{
+	_p = OnRenderInterface("Config","",10)
+	_ver = TOSTR(Version); _ver = SUBSTR(_ver,0,4)
+	"\0\_q\b4%(cmenu6)%(b)Configuration%(def)/
+	\_l[200]Ver: %(_ver)\n\n/
+	%(_p)/
+	%(buttons(4,'Go back','OnMenu'))"
+}
+OnConfig_Array //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/color
+{
+	_delete = IARRAY; _hour = IARRAY;_colors = IARRAY; _hem = ""; _di = ""
+	_joke = IARRAY; _jnb = ARRAYSIZE(jokestopicAr); _jmax = ARRAYSIZE(OnJoke_Topics)
+		if deletetrue;	_delete = ("On",lightup)
+		else; 			_delete = ("Off",greyedout)
+		if colortrue;	_colors = ("On",lightup)
+		else;			_colors = ("Off",greyedout)
+		if _jnb == _jmax; _joke = ("All dark topics")
+		elseif _jnb == 0; _joke = ("No dark topics",greyedout)
+		elseif _jnb == 1; _joke = ("One dark topic",lightup)
+		else; 			  _joke = ("%(_jnb) dark topics",lightup)
+		if polltrue >= 1; polltrue = 1
+		if hourremindtrue;	_hour = ("On",lightup)
+		else;				_hour = ("Off",greyedout)
+		if upperworld;	_hem = "Upper"
+		else; 			_hem = "Lower"
+		if !pausetrue;	_di = "Wait to proceed"
+		else;			_di = "Click to proceed"
+	
+	//Start settings list
+	_arr = IARRAY
+	_arr ,= "|Your name: %(username)||OnTeachname||"	//@uf_user.dic
+	_arr ,= "|Your pronouns: %(pronoun[0])/%(pronoun[1])/%(pronoun[3])||OnConfig_Pronoun" 
+	if PrintBirthday != ""; _arr ,= "|Your birthday: %(PrintBirthday)||OnBirthday||"	//@uf_user.dic
+	_arr ,= "!|Talk rate: \q[%(talkintervalprint),OnConfig_Talkinterval]"
+	_arr ,= "!|Uninstall: %(_delete[1])\q[%(_delete[0]),OnConfig_Uninstall]"
+	_arr ,= "!|Patreon URL: \q[%(patreonCode),OnPatreon_CodeChange] \q[(X),OnPatreon_Default]"
+	if polltrue >= 1; _arr ,= "!|Current poll: \_a[https://goo.gl/forms/FS3kziJNDqXhBKJ72]Later Kofi Goal?\_a"
+	_arr ,= "!|Joke topics: %(_joke[1])\q[%(_joke[0]),OnJoke_Manage]"	//@uf_joke.dic
+	_arr ,= "!|Hour notifs: %(_hour[1])\q[%(_hour[0]),OnConfig_Hour]"
+	_arr ,= "!|Colors: %(_colors[1])\q[%(_colors[0]),OnConfig_Colors]"
+	//misc settings here
+	if ARRINFO("user","place"); _arr ,= "!|Hemisphere: \q[%(_hem),OnConfig_Hemisphere]"
+	_arr ,= "!|Dialogue: \q[%(_di),OnConfig_Dialogue]"
+	_arr ,= "|Manage Save file backup||OnBackup_Menu||" //@uf_bootend.dic
+	_arr
+}
+OnConfig_Pronoun
+{
+	"\_q\![*](Your pronouns are:)\n\n[half]/
+	\![*]\q[He/Him,OnPronoun,he]	\_l[140]\![*]\q[They/Them,OnPronoun,they]\n/
+	\![*]\q[She/Her,OnPronoun,she]	\_l[140]\![*]\q[User defined,OnPronoun,user]/
+	%(buttons(0,'Go back','OnConfig'))"
+}
+OnPronoun
+{
+	case reference0
+	{
+		when "he"; pronoun = "he,him,his,his,himself,s"
+		when "she"; pronoun = "she,her,her,hers,herself,s"
+		when "they"; pronoun = "they,them,their,theirs,themselves,"
+		when "user"; OnPronoun_Own
+	}
+	--
+	if reference0 != "user" && !togglefirst; OnConfig
+}
+OnPronoun_Own
+{
+	_t = "she,her,her,hers,herself,s"
+	_text = "\i[298]%(m)(Please define your personal pronoun like this:)"
+	"\b2\_q\n\n/
+	%(b)Subject%(def) 				\_l[150]they\n/
+	%(b)Object%(def) 				\_l[150]them\n/
+	%(b)Possesive Adjective%(def)	\_l[150]their\n/
+	%(b)Possesive Pronoun%(def)		\_l[150]theirs\n/
+	%(b)Reflexive/Intensive%(def)	\_l[150]themselves\n/
+	%(b)Verbs ending with s%(def)	\_l[150]\n\n[half]/
+	%(b)She written example:%(def)\n/
+	she,her,her,hers,herself,s/
+	\_q\_l[0,0]%(_text)/
+	\![open,inputbox,OnPronoun_Set,-1,%(_t)]"
+}
+OnPronoun_Set
+{
+	pronoun = reference0
+	if !togglefirst; OnConfig
+}
+OnConfig_Talkinterval
+{
+	case aitalkinterval {
+		when 45; aitalkinterval = 90
+		when 90; aitalkinterval = 270
+		when 270; aitalkinterval = 400
+		when 400; aitalkinterval = 0
+		when 0; aitalkinterval = 45
+		others; aitalkinterval = 270
+	}
+	OnConfig
+}
+OnConfig_Uninstall
+{
+	deletetrue = (deletetrue++)%2
+	OnConfig
+}
+OnPatreon_CodeChange
+{
+	"\![open,inputbox,OnPatreon_CodeConfirm,-1]"
+}
+OnPatreon_CodeConfirm
+{
+	patreonCode = reference0
+	updateURL = OnUpdateURLSet("patreon")
+	OnConfig
+}
+OnPatreon_Default
+{
+	patreonCode = "None"
+	updateURL = OnUpdateURLSet
+	OnConfig
+}
+OnConfig_Hour
+{
+	hourremindtrue = (hourremindtrue++)%2
+	OnConfig
+}
+OnConfig_Colors
+{
+	colortrue = (colortrue++)%2
+	OnConfig
+}
+OnConfig_Hemisphere
+{
+	upperworld = (upperworld++)%2
+	OnConfig
+}
+OnConfig_Dialogue
+{
+	pausetrue = (pausetrue++)%2
+	OnConfig
+}
+
+//OnBug_Feedback @uf_log.dic
+
+OnUpdate_Select
+{
+	"\![update,ghost+shell+balloon]"
+}

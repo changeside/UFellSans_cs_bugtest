@@ -1,0 +1,510 @@
+descript
+{
+	version,1
+}
+
+//------------------------------------------------------------------------------
+// File		:surfaces1.txt
+//
+//			:Implements all files that do not follow
+//			 naming convention.
+//
+// Surfaces	:surface4** (eyes)
+//			 surface5**	(mouth)
+//			 surface6** (eyebrows)
+//			 surface7** (extra)
+//			 surface8** (pose)
+//------------------------------------------------------------------------------
+
+
+//eyes
+	//main
+surface400
+{
+	element0,replace,face/m_eyes_def.png,0,0
+}
+surface401
+{
+	element0,replace,face/m_eyes_0.png,0,0
+}
+surface402
+{
+	element0,replace,face/m_eyes_1.png,0,0
+}
+surface403
+{
+	element0,replace,face/m_eyes_2.png,0,0
+}
+surface404
+{
+	element0,replace,face/m_eyes_3.png,0,0
+}
+surface405
+{
+	element0,replace,face/m_eyes_4.png,0,0
+}
+surface406
+{
+	element0,replace,face/m_eyes_5.png,0,0
+}
+surface407
+{
+	element0,replace,face/m_eyes_6.png,0,0
+}
+surface408
+{
+	element0,replace,face/m_eyes_7.png,0,0
+}
+surface409
+{
+	element0,replace,face/m_eyes_8.png,0,0
+}
+surface410
+{
+	element0,replace,face/m_eyes_9.png,0,0
+}
+surface411
+{
+	element0,replace,face/m_eyes_10.png,0,0
+}
+surface412
+{
+	element0,replace,face/m_eyes_11.png,0,0
+}
+surface413
+{
+	element0,replace,face/m_eyes_12.png,0,0
+}
+surface414
+{
+	element0,replace,face/m_eyes_13.png,0,0
+}
+	//side
+surface499
+{
+	element0,replace,face/s_eyes_def.png,0,0
+}
+surface498
+{
+	element0,replace,face/s_eyes_0.png,0,0
+}
+surface497
+{
+	element0,replace,face/s_eyes_1.png,0,0
+}
+surface496
+{
+	element0,replace,face/s_eyes_2.png,0,0
+}
+surface495
+{
+	element0,replace,face/s_eyes_3.png,0,0
+}
+
+//mouths
+	//main
+surface500
+{
+	element0,replace,face/m_mouth_def.png,0,0
+}
+surface501
+{
+	element0,replace,face/m_mouth_0.png,0,0
+}
+surface502
+{
+	element0,replace,face/m_mouth_1.png,0,0
+}
+surface503
+{
+	element0,replace,face/m_mouth_2.png,0,0
+}
+surface504
+{
+	element0,replace,face/m_mouth_3.png,0,0
+}
+surface505
+{
+	element0,replace,face/m_mouth_4.png,0,0
+}
+surface506
+{
+	element0,replace,face/m_mouth_5.png,0,0
+}
+surface507
+{
+	element0,replace,face/m_mouth_6.png,0,0
+}
+	//napping
+surface550
+{
+	element0,replace,face/n_mouth_def.png,0,0
+}
+surface551
+{
+	element0,replace,face/n_mouth_0.png,0,0
+}
+surface552
+{
+	element0,replace,face/n_mouth_1.png,0,0
+}
+surface553
+{
+	element0,replace,face/n_mouth_2.png,0,0
+}
+surface554
+{
+	element0,replace,face/n_mouth_3.png,0,0
+}
+surface555
+{
+	element0,replace,face/n_mouth_4.png,0,0
+}
+surface556
+{
+	element0,replace,face/n_mouth_5.png,0,0
+}
+surface557
+{
+	element0,replace,face/n_mouth_6.png,0,0
+}
+	//side
+surface599
+{
+	element0,replace,face/s_mouth_def.png,0,0
+}
+surface598
+{
+	element0,replace,face/s_mouth_0.png,0,0
+}
+surface597
+{
+	element0,replace,face/s_mouth_1.png,0,0
+}
+surface596
+{
+	element0,replace,face/s_mouth_2.png,0,0
+}
+surface595
+{
+	element0,replace,face/s_mouth_3.png,0,0
+}
+surface594
+{
+	element0,replace,face/s_mouth_4.png,0,0
+}
+
+//eyebrows
+	//main
+surface600
+{
+	element0,replace,face/m_brows_def.png,0,0
+}
+surface601
+{
+	element0,replace,face/m_brows_0.png,0,0
+}
+surface602
+{
+	element0,replace,face/m_brows_1.png,0,0
+}
+surface603
+{
+	element0,replace,face/m_brows_2.png,0,0
+}
+surface604
+{
+	element0,replace,face/m_brows_3.png,0,0
+}
+surface605
+{
+	element0,replace,face/m_brows_4.png,0,0
+}
+	//napping
+surface650
+{
+	element0,replace,face/n_brows_def.png,0,0
+}
+surface651
+{
+	element0,replace,face/n_brows_0.png,0,0
+}
+surface652
+{
+	element0,replace,face/n_brows_1.png,0,0
+}
+surface653
+{
+	element0,replace,face/n_brows_2.png,0,0
+}
+surface654
+{
+	element0,replace,face/n_brows_3.png,0,0
+}
+surface655
+{
+	element0,replace,face/n_brows_4.png,0,0
+}
+	//side
+surface699
+{
+	element0,replace,face/s_brows_def.png,0,0
+}
+surface698
+{
+	element0,replace,face/s_brows_0.png,0,0
+}
+surface697
+{
+	element0,replace,face/s_brows_1.png,0,0
+}
+surface696
+{
+	element0,replace,face/s_brows_2.png,0,0
+}
+
+//extra parts
+	//napping Zs
+surface700
+{
+	element0,replace,other/sleep_0.png,0,0
+}
+surface701
+{
+	element0,replace,other/sleep_1.png,0,0
+}
+surface702
+{
+	element0,replace,other/sleep_2.png,0,0
+}
+	//extra main
+surface703
+{
+	element0,replace,face/m_extra_0.png,0,0
+}
+surface704
+{
+	element0,replace,face/m_extra_1.png,0,0
+}
+surface705
+{
+	element0,replace,face/m_extra_2.png,0,0
+}
+	//extra napping
+surface706
+{
+	element0,replace,face/n_extra_0.png,0,0
+}
+surface707
+{
+	element0,replace,face/n_extra_1.png,0,0
+}
+	//extra side
+surface708
+{
+	element0,replace,face/s_extra_0.png,0,0
+}
+surface709
+{
+	element0,replace,face/s_extra_1.png,0,0
+}
+	//costume
+surface710
+{
+	element0,replace,other/m_costume_0.png,0,0
+}
+surface711
+{
+	element0,replace,other/s_costume_0.png,0,0
+}
+surface712
+{
+	element0,replace,other/s_costume_1.png,0,0
+}
+surface713
+{
+	element0,replace,other/n_costume_0.png,0,0
+}
+surface714
+{
+	element0,replace,other/n_costume_1.png,0,0
+}
+surface715
+{
+	element0,replace,other/n_costume_2.png,0,0
+}
+surface716
+{
+	element0,replace,other/n_costume_3.png,0,0
+}
+surface717
+{
+	element0,replace,other/sit_costume_0.png,0,0
+}
+surface718
+{
+	element0,replace,other/sit_costume_1.png,0,0
+}
+surface719
+{
+	element0,replace,other/sit_costume_2.png,0,0
+}
+surface720
+{
+	element0,replace,other/m_fall_costume_0.png,0,0
+}
+surface721
+{
+	element0,replace,other/m_fall_costume_1.png,0,0
+}
+surface722
+{
+	element0,replace,other/m_fall_costume_2.png,0,0
+}
+surface723
+{
+	element0,replace,other/m_fall_costume_3.png,0,0
+}
+surface724
+{
+	element0,replace,other/m_fall_costume_4.png,0,0
+}
+surface725
+{
+	element0,replace,other/m_fall_costume_5.png,0,0
+}
+surface726
+{
+	element0,replace,other/m_fall_costume_6.png,0,0
+}
+
+surface728
+{
+	element0,replace,other/n_fall_costume_0.png,0,0
+}
+surface729
+{
+	element0,replace,other/n_fall_costume_1.png,0,0
+}
+surface730
+{
+	element0,replace,other/n_fall_costume_2.png,0,0
+}
+surface731
+{
+	element0,replace,other/n_fall_costume_3.png,0,0
+}
+surface732
+{
+	element0,replace,other/n_fall_costume_4.png,0,0
+}
+
+//buffer for other costume parts
+
+	//phone tap main
+surface754
+{
+	element0,overlay,other/phonetap_m_0.png,0,0
+}
+surface755
+{
+	element0,overlay,other/phonetap_m_1.png,0,0
+}
+	//phone tap sit
+surface756
+{
+	element0,overlay,other/phonetap_s_0.png,0,0
+}
+surface757
+{
+	element0,overlay,other/phonetap_s_1.png,0,0
+}
+	//phone scroll main
+surface758
+{
+	element0,overlay,other/phonescroll_m_0.png,0,0
+}
+surface759
+{
+	element0,overlay,other/phonescroll_m_1.png,0,0
+}
+	//phone scroll sit
+surface760
+{
+	element0,overlay,other/phonescroll_s_0.png,0,0
+}
+surface761
+{
+	element0,overlay,other/phonescroll_s_1.png,0,0
+}
+
+
+//pose files
+surface800
+{
+	element0,replace,surface8_0.png,0,0
+}
+surface801
+{
+	element0,replace,surface9_0.png,0,0
+}
+surface802
+{
+	element0,replace,surface11_0.png,0,0
+}
+surface803
+{
+	element0,replace,surface12_0.png,0,0
+}
+surface804
+{
+	element0,replace,surface13_0.png,0,0
+}
+surface805
+{
+	element0,replace,surface13_1.png,0,0
+}
+surface806
+{
+	element0,replace,surface13_2.png,0,0
+}
+surface807
+{
+	element0,replace,surface14_0.png,0,0
+}
+surface808
+{
+	element0,replace,surface14_1.png,0,0
+}
+surface809
+{
+	element0,replace,surface14_2.png,0,0
+}
+surface810
+{
+	element0,replace,surface1_0.png,0,0
+}
+surface811
+{
+	element0,replace,surface1_1.png,0,0
+}
+surface812
+{
+	element0,replace,surface1_2.png,0,0
+}
+surface813
+{
+	element0,replace,surface2_0.png,0,0
+}
+surface814
+{
+	element0,replace,surface2_1.png,0,0
+}
+surface815
+{
+	element0,replace,surface3_0.png,0,0
+}
+surface816
+{
+	element0,replace,surface3_1.png,0,0
+}

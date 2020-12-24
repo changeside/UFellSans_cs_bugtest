@@ -1,0 +1,526 @@
+//------------------------------------------------------------------------------
+// File		:uf_bootend.dic
+//
+//			:Boot and close related.
+//------------------------------------------------------------------------------
+OnVersionSet { TOREAL(2.01) }
+OnUpdateURLSet { //OLD: "http://changeside.usite.pro/ufsans"
+	if _argv[0] == "patreon"; "https://raw.githubusercontent.com/changeside/UFellSans_cs_"+patreonCode+"/main/UFellSans_cs/"
+	else; "https://raw.githubusercontent.com/changeside/UFellSans_cs/main/UFellSans_cs/"
+}
+OnVariablesSet //_argv[0] = first/boot/reset
+{
+	//Shiori vars
+	if _argv[0] == "first"; aitalkinterval = 270
+	--
+	//Function initialized vars
+	if _argv[0] != "boot"; OnMood_Init
+	--
+	if _argv[0] != "boot"; OnJoke_Reset
+	--
+	//Global temp vars
+	if _argv[0] != "boot"; togglefirst = 1
+	if _argv[0] != "boot"; togglerock = 1
+	if _argv[0] != "boot"; togglesock = 1
+	if _argv[0] != "boot"; togglemail = 1
+	if _argv[0] != "boot"; toggleclock = 1
+	if _argv[0] != "boot"; togglecall = 1
+	if _argv[0] != "boot"; toggletall = 1
+	if _argv[0] != "boot"; tempnb = -1
+	if _argv[0] != "boot"; bornmonth = -1
+	//Global toggles
+	if _argv[0] != "reset"; phonetrue = 0
+	if _argv[0] != "reset"; sittrue = 0
+	if _argv[0] != "reset"; sleeptrue = 0
+	if _argv[0] == "first"; deletetrue = 0
+	if _argv[0] == "first"; colortrue = 0
+	if _argv[0] == "first"; pausetrue = 0
+	if _argv[0] != "boot"; datetrue = 0
+	if _argv[0] == "first"; 24htrue = 0
+	if _argv[0] != "boot"; upperworld = 1
+	medblocktrue = 0
+	if _argv[0] == "first"; hourremindtrue = 1
+	if _argv[0] == "first"; polltrue = 0
+	if _argv[0] == "first"; updatecheck = 0
+	//Global var
+	Version = OnVersionSet
+	if _argv[0] == "first"; tspeed = 25
+	pnumb = 0
+	lastTalk = ""
+	if _argv[0] == "first"; feedbackreminder 
+	seccount = 0
+	if _argv[0] != "boot"; passmintotal = 0
+	alarmNotify = IARRAY
+	if _argv[0] == "first"; updateURL = OnUpdateURLSet
+	if _argv[0] == "first"; patreonCode = "None"
+	stroke = 0
+	timeClosed = IARRAY
+	if _argv[0] != "boot"; jokesTold = IARRAY
+	if _argv[0] == "first"; kofiC = 0
+	if _argv[0] == "first"; backupPath = ""
+	if _argv[0] == "first"; songAr = IARRAY
+	if _argv[0] == "first"; songNb = -1
+	//Sans related
+	if _argv[0] != "boot"; affection = 20
+	timeAr = (0,0,0,0)
+	//User related
+	if _argv[0] == "first"; username = ""
+	if _argv[0] != "boot"; userbirthday = IARRAY
+	if _argv[0] == "first"; pronoun = IARRAY
+	usermood = ""
+	state = 0
+	afkvar = 0
+	if _argv[0] != "boot"; money = 0
+	if _argv[0] != "boot"; countAr = (0,0,0,0,0,0,0)
+	if _argv[0] != "boot"; invAr = IARRAY
+	if _argv[0] != "boot"; userAr = IARRAY
+	//Char arrays
+	if _argv[0] != "boot"{
+		papyrusAr = IARRAY
+		grillbyAr = IARRAY
+		alphysAr = IARRAY
+		undyneAr = IARRAY
+		asgoreAr = IARRAY
+		mettatonAr = IARRAY
+	}
+}
+//------------------------------------------------------------------------------
+//  Shiori function for when ghost is loaded/unloaded in any way
+//------------------------------------------------------------------------------
+OnGhostLoad { }
+OnGhostUnload { OnBackup_Save("close") }
+
+
+//------------------------------------------------------------------------------
+// First boot (only occurs once)
+//------------------------------------------------------------------------------
+OnFirstBoot
+{
+	OnVariablesSet("first")
+	--
+	//Introduction
+	OnFirstBoot_Dialogue(0)
+}
+OnFirstBoot_Dialogue
+{
+	//_argv0 = progression of dialogue
+	
+	if _argv[0] == 0; "\![enter,passivemode]\1\s[-1]\0(s_0)\w8\w8/
+		\i[105]\w8\w8(s_0)\i[106]\w8\w8\i[302]\i[298]%(m)...\n\n[half]%(m)(He seems kind of lost.)\n\n[half]/
+		%(m)(You feel like perhaps you should read the readme file carefully if you haven't used a ghost before.)\x/
+		%(m)(You get the feeling he might say harmful and sensual jokes. Are you comfortable with that? /
+		The topic options can later be changed in the settings.)\n\n[half]/
+		\![*]\q[Yes I am,OnFirstBoot_Humor,1]\n/
+		\![*]\q[No I am not,OnFirstBoot_Humor,0]"
+	if _argv[0] == 1; "\w8(s_0)\i[105]\i[301]\w8\w8(s_0)\i[301]/
+		%(m)hey\i[106], do i know ya'?\n\n[half](s_2)%(m)do i know . . \i[302]them (s_2)\i[303] ... him. . (s_2)her??\n\n[half]/
+		\i[298]%(m)(You tell him you use-)\n\n[half]/
+		\![*]\q[He/Him,OnFirstBoot_Pron,he]		\_l[140]\![*]\q[They/Them,OnFirstBoot_Pron,they]\n/
+		\![*]\q[She/Her,OnFirstBoot_Pron,she]	\_l[140]\![*]\q[User defined,OnFirstBoot_Pron,user]"
+	if _argv[0] == 2; "\w8(s_0)%(m)whatever you say kid. \i[102]i could %(it)probably%(itoff) care less than a rats ass 'bout it but. (s_0)if ya' had to pull me away from my shift-\n\n[half]/
+		\i[305]\i[106]%(m)%(whisper)however the fuck... %(def)\n\n[half]/
+		(s_0)%(m)might as well do this right.\x/
+		\![leave,passivemode](s_0)\i[203]%(m)the name's sans... \i[102]\n\n/
+		%(m)what's yers?\n\n/
+		\i[298]%(m)(Now would be a good time to tell him your name.)\w5/
+		\![open,inputbox,OnTeachname_Check,-1]"
+	
+	//First boot officially ends in uf_user.dic | OnTeachname_Done
+}
+OnFirstBoot_Humor
+{
+	if reference0 == "1"; countAr[6] += 3
+	else {
+		jokestopicAr = IARRAY
+		countAr[5] += 5
+	}
+	OnFirstBoot_Dialogue(1)
+}
+OnFirstBoot_Pron 
+{
+	//sets pronouns in uf_menu.dic with reference0
+	"\![raise,OnPronoun,%(reference0)]"
+	--
+	OnFirstBoot_Dialogue(2)
+}
+
+
+//------------------------------------------------------------------------------
+// Regular startup
+//------------------------------------------------------------------------------
+OnBoot
+{
+	_txt = "\p[999]\s[-1]\p[998]\s[-1]\p[997]\s[-1]\1\s[-1]\w8\w8\w8\0(s_0)"
+	
+	OnVariablesSet("boot")
+	//Specific variable changes
+	timeClosed = OffTimeCalc //@uf_func.dic
+	if (timeClosed[3] == 1|| timeoff[2] >= 10); //increase booting streak; 1 day || >= 10 hours
+		daystreak++ 
+
+	updatecheck = 1; _txt += "\![updatebymyself,checkonly]" //Check if update is available
+
+	case TimeSlot { //bootlate
+		when "earlymorning","morning"; countAr[3]--
+		when "midnight","latenight"; countAr[3]++
+	}
+	if (TimeSlot == "evening"||TimeSlot=="latenight"||TimeSlot=="midnight") && (weekday == 0 || weekday > 5);
+		countAr[2]++ //userloner
+	OnHabits_Check 	//@uf_user.dic
+
+	OnMood_RND		//@uf_moods.dic
+
+	OnAlarm_CounterSet //@uf_additional.dic
+
+	if !INV('kofinote')[0]; //unlock kofi notice
+		_txt += "\p[299]\s[299]\![set,alignmenttodesktop,bottom]\0"
+	if !ARRINFO("user","socks") && totalinfo[0] > 1 && RND(50); //sock event
+		_txt += "\p[298]\s[298]\![set,alignmenttodesktop,bottom]\0"
+	
+
+	//Special dialogue checks
+	if datetrue == 2 {
+		_txt += "\i[106]\i[206]\i[303]\i[400]\i[401]\i[298]%(m)...\n\n/
+			%(m)(...)\n%(m)(He is still uncomfortable.)%(pause)/
+			(s_0)\i[108]\i[205]\i[303]\i[400]\i[209]/
+			%(m)(You ask him how he feels about dating you.)(s_2)\i[102]/
+			%(m)%(it)sigh%(def)...(s_0)\i[105]\w8\w8(s_0)\i[102]\i[303]/
+			i-\n\n(s_0)\i[102]%(m)yeah sure. if you really wanna so badly...\w8(s_0)\i[302]just. shut up 'bout it./
+			VARC('angry','+5','tired','+3')"
+		datetrue = 3
+	}
+	elseif datetrue == 3 {
+		_txt += "\i[105]\i[401]\i[298]%(m)(He seems to have come to terms with it.)\n\n/
+			%(m)(You're glad.)"
+		datetrue = 1
+	}
+	elseif DAY(userbirthday); _txt += Boot_Birthday
+	elseif DAY("15,9") { //release undertale
+		_txt += "\i[298]%(m)(You remember that Undertale was released today in 2015.)\n\n/
+			%(m)(It feels strange that it has been %(TOINT(year)-2015) years)"
+	}
+	elseif DAY("31,10") || (!INV('costume')[0] && month == 11 && day <= 15){ //halloween
+		ARRADD('inv','costume,1,-1')
+		_txt += "\![bind,Misc,Costume,1]\i[105]\i[298]%(m)... \n\n/
+			%(m)(Should you inquire about the costum-e?)"
+	}
+	elseif totalinfo[0] >= 2 && affection >= 40 && PrintBirthday == "" {
+		_txt += "\w8\w8\w8\i[304]%(m)did i ever asked for yer birthday?\n\n/
+			(s_0)%(m)tha's a big thing fer humans, aint' it?\w8/
+			\![raise,OnBirthday]"
+	}
+	else; _txt += Boot_Default
+	
+	//User mood check @uf_moods.dic
+	if ( datetrue && !MD("tired") && RND(80) );
+		_txt += "\![raise,OnMood_User]"
+	if ( !datetrue && !MD("sad","angry","tired") && AFF(70) && RND(70) );
+		_txt += "\![raise,OnMood_User]"
+	
+	//Important notices
+	if backupPath == "" { //making sure a backup path is defined
+		_txt += "%(pause)\i[298]%(m)(Please choose a path to back up your variables in.)\n\n/
+			%(m)(You can change it under Settings later.)"
+		OnBackup_Define("boot") //@uf_log.dic
+	}
+	_txt
+}
+Boot_Default //specialized checks for normal boots
+{
+		//same day boot?
+		if timeClosed[2] == 0 && timeClosed[3] <= 20; _day = 1
+		else; _day = 0
+	//time he stayed closed
+	if timeClosed[0] >= 1; 		Boot_Oneyear
+	elseif timeClosed[2] >= 14; Boot_Twoweeks
+	elseif _day && timeClosed[4] < 10; 	Boot_Sametenmin
+	elseif _day && timeClosed[3] < 5; 	Boot_Samefivehours
+	elseif _day && RND(20); 			Boot_Sameday
+	//consecutive day streak
+	elseif daystreak == 7; Boot_Streak
+	//late weekend booting
+	elseif weekday == 5 && hour > 18 && RND(50); Boot_Eveningfriday
+	elseif weekday == 6 && hour > 18; 			 Boot_Eveningsaturday
+	elseif weekday == 0 && hour > 18; 			 Boot_Eveningsunday
+	//time of the day
+	elseif TimeSlot == "earlymorning";	Boot_Earlymorning
+	elseif TimeSlot == "morning";		Boot_Morning
+	elseif TimeSlot == "lunch"; 		Boot_Lunch
+	elseif TimeSlot == "afternoon"; 	Boot_Afternoon
+	elseif TimeSlot == "evening"; 		Boot_Evening
+	elseif TimeSlot == "latenight"; 	Boot_Latenight
+	elseif TimeSlot == "midnight"; 		Boot_Midnight
+	
+	//special chance dialogue
+	if ARRINFO("user","beverage") && RND(5)
+	{
+		_beverage = ASEARCH("beverage",userAr) + 1
+		--
+		"\i[102]\i[301]%(m)y' know. i'd bring ya' a %(_beverage)\n\n/
+			(s_0)\i[302]%(m)if you wouldn't blip me away whenever!"
+	}
+}
+Boot_Birthday : nonoverlap
+{
+	if AFF(70); "\i[204]\w8\w8\i[112]%(m)happy birthday, %(nickname)."
+	if AFF(70); "\i[102]\i[203]\i[301]%(m)if you've got a party on today, i'd love to join ya'\n\n/
+		(s_0)\i[204]%(m)eh, \i[105]if i had time y'know."
+	//check if user drinks alc?
+	//if AFF(70); "\i[]\i[204]birthday today, eh?\n\n(s_0)\i[203]don't get too drunk %(nickname)."
+	
+	if AFF(30,50) && MD("angry"); "\i[114]\i[201%(m)ya' got nothing better to do on yer %(swearing) birthday?\n\n/
+		%(m)i was %(it)\w6kinda\w6%(def) busy."
+	if AFF(30,50); "\i[304]%(m)%(Date(userbirthday))?\n\n/
+		(s_0))\i[102]%(m)happy birthday, %(nickname)."
+	if AFF(30,50); "%(m)congratz, you're a year older now\n\n\w8/
+		\i[105]\i[302]%(m)if i'm correct."
+	
+	if AFF(0,15) && MD("angry"); "\i[113]\i[305]%(m)ya' got nothing better to do on yer %(swearing) birthday?\n\n/
+		%(m)i was %(it)\w6kinda\w6%(def) busy.%(VARC('angry','+3'))"
+	if AFF(0,15); "\i[113]\i[201]\i[302]\w8\w8(s_0)\i[105]\i[201]\i[302]"
+	if AFF(0,15); "\i[105]%(VARC('angry','+1'))"
+}
+Boot_Oneyear : nonoverlap
+{
+	"\i[102]%(m)wow. \i[203]an' i thought i was finally rid of ya'.\n\n/
+		(s_0)\i[203]\i[298]%(m)...\n\n/
+		(s_0)\i[103]\i[203]\i[302]%(m)what a fuckin' shame./
+		%(VARC('affection','-20','angry','+5'))\e"
+}
+Boot_Twoweeks : nonoverlap
+{
+	"\i[302]%(m)was startin' to think\w5 ya were either very busy, or finally let off me.\n\n/
+		%(m)sadly, 's not the latter.\n\n/
+		(s_1)\i[102]%(m)eh, (s_0)a guy can dream."
+	"%(m)yknow, should shoot me a message next time, statin'-\n\n/
+		%(m)%(it)''imma just pull ya back without warnin' after like what. two weeks?''%(def)"
+	"\i[102]%(m)sigh.\n\n/
+		(s_0)\i[105]%(m)and i had hope."
+}
+Boot_Sametenmin : nonoverlap
+{
+	"%(m)well... \i[302]\n\n%(m)aren't ya %(swearing) desperate?"
+	"\i[105]\i[302]%(m)why'd ya let me leave at all then?"
+}
+Boot_Samefivehours : nonoverlap
+{
+	"\i[304]%(m)%(greeting)...\n\n(s_0)\i[105]\i[302]%(m)again... i guess."
+}
+Boot_Sameday : nonoverlap
+{
+	"\i[304]%(m)finished whatever ya' were doin'?"
+	if AFF(0,15,30); "%(m)i'd say happy to see ya' again but...\n\n%(m)ya know. that'd be a lie."
+}
+Boot_Streak : nonoverlap
+{
+	"\i[302]%(m)is it a force o' habit ta open me every day\n\n/
+		%(m)or do ya' jus' have nothing better to do?"
+	"\i[102]\i[302]%(m)i know i'm amazin'...\n\n/
+		(s_0)\i[302]%(m)but ya' could let me have one day off. alright?"
+}
+Boot_Eveningfriday : nonoverlap
+{
+	"%(m)nothin' better to do? week's over.\n\n/
+		%(m)enjoy it, instead of... \i[302]whatever you are doing here."
+	"\i[301]%(m)enjoyed the week?"
+	
+	if ARRINFO("user","loner"); "%(m)ya' know... \n\n\i[102]%(m)'m not surprised."
+	if ARRINFO("user","loner"); "\i[102]%(m)%(greeting)."
+}
+Boot_Eveningsaturday : nonoverlap
+{
+	"%(m)i figured humans partied or somethin' on a saturday evening?"
+	"\i[304]%(m)no plans?"
+	
+	if ARRINFO("user","loner"); "%(m)ya' know... \n\n%(m)'m not surprised."
+	if ARRINFO("user","loner"); "\i[301]%(m)ya' seem to have even less friends than i do."
+	if ARRINFO("user","loner"); "\i[102]%(m)%(greeting)."
+}
+Boot_Eveningsunday : nonoverlap
+{
+	"%(m)don't wanna prepare for next week instead of summoning me 'ere?"
+	
+	if hour >= 21; "\i[302]%(m)don't ya' have things to do tomorrow?\n\n/
+		%(m)it's pretty late, %(nickname)."
+	if ARRINFO("user","loner"); "%(m)ya' know... \n\n\i[102]%(m)'m not surprised."
+	if ARRINFO("user","loner"); "\i[102]%(m)%(greeting)."
+}
+Boot_Earlymorning : nonoverlap
+{
+	if MD("angry"); "(s_2)\i[102]\w8\w8(s_2)\i[104]%(m)%(whisper)it's too early for this shit.%(def)/
+		%(VARC('angry','+3','tired','+2'))\e"
+	if MD("angry"); "\i[298]%(m)(He's mumbling. (s_0)You can't understand anything.)/
+		%(VARC('angry','+1','tired','+3'))\e"
+	
+	if ARRINFO("user","earlybird"); "\i[304]%(m)knew you'd be here at this time."
+	if ARRINFO("user","earlybird"); "\i[303]%(m)somethin' is seriously wrong with you."
+	if ARRINFO("user","earlybird"); "\i[104]\i[298]%(m)(He's merely grumbling. Maybe he is used to it by now?)"
+	
+	if ARRINFO("user","nightowl"); "%(m)oh.\n\n\i[304]%(m)unusual for ya'./
+		%(VARC('tired','+2'))"
+	if ARRINFO("user","nightowl"); "\i[301]%(m)%(confused)?/
+		%(VARC('tired','+2'))"
+
+	"\i[303]%(m)%(greeting) %(nickname).\n\n/
+		%(m)ain't it a bit too early for you to hang around here?"
+	"\i[102]%(m)i'm not judging... \i[302]but... ain't it too early for most people?"
+}
+Boot_Morning : nonoverlap
+{
+	if MD("depressed") || MD("sad"); "\i[105]\i[201]%(m)mornin'."
+	if MD("depressed") || MD("sad"); "\i[105]\i[201]\i[298]%(m)...."
+
+	if MD("angry"); "\i[102]\i[201]\i[302]%(m)mornin'."
+	
+	if AFF(70); "\i[102]\i[204]%(m)mornin' %(nickname)."
+	if AFF(70); "\i[102]\i[204]%(m)good mornin' %(nickname)."
+
+	"\i[107]%(m)mornin', i guess."
+	"%(m)good mornin'."
+}
+Boot_Lunch : nonoverlap
+{
+	if MD("angry"); "\i[301]\i[298]%(m)...\n\n/
+		(s_0)\i[102]%(m)thanks for savin' me from work./
+		%(VARC('pleased','+2','angry','-1'))"
+	
+	if ARRINFO("user","earlybird") || ARRINFO("user","nightowl"); "\i[108]\i[302]%(m)at least it isn't at an ungodly hour this time..."
+
+	"%(m)%(greeting)."
+}
+Boot_Afternoon : nonoverlap
+{
+	if ARRINFO("user","earlybird") || ARRINFO("user","nightowl"); "\i[304]%(m)%(greeting), ain't it an unusual time for ya'?"
+	
+	"%(m)%(greeting)."
+}
+Boot_Evening : nonoverlap
+{
+	if AFF(30,50,70); "%(m)%(greeting)."
+	if AFF(0,15); "\i[298]%(m)(He sighs.)(s_2)"
+	
+	"\i[105]\i[302]%(m)%(whisper)guess i can forget dinner now.%(def)"
+}
+Boot_Latenight : nonoverlap
+{
+	if AFF(30,50,70); "%(m)%(greeting)."
+	
+	"%(m)kay...\n\n\i[108]\i[302]%(m)no sleep then./
+		%(VARC('tired','+2'))"
+}
+Boot_Midnight : nonoverlap
+{
+	"%(VARC('tired','+5'))"
+	--
+	if ARRINFO("user","nightowl"); "%(m)yeah...\n\n/
+		\i[302]%(m)still really wish you wouldn't keep me up."
+	if ARRINFO("user","nightowl"); "%(m)%(whisper)who am i to judge...%(def)(s_2)"
+	if ARRINFO("user","nightowl"); "\i[298]%(m)(He sighs. It seems tired.)(s_2)"
+
+	if ARRINFO("user","earlybird"); "\i[303]%(m)%(confused)?\n\n/
+		(s_0)\i[301]%(m)didn't expect ya' to be honest."
+	
+	"\i[302]%(m)wish you wouldn't keep me up this fucking late."
+	"\i[302]\w8\w8\i[298]%(m)(He keeps starring at you.....\n\n/
+		%(m)(Did you do something wrong?)/
+		%(VARC('angry','+1'))"
+	"\i[302]%(m)%(whisper)i. hate. this.%(def)/
+		%(VARC('angry','+1'))"
+}
+
+
+//------------------------------------------------------------------------------
+//  Closing functions (warned @uf_menu.dic)
+//------------------------------------------------------------------------------
+OnClose
+{
+	LastCloseSecCount = GETSECCOUNT()
+	--
+	if reference0 == "warned" {
+		if !ARRINFO("user","socks") && SHIORI3FW.IsVisible[298]; OnEvent_Socks("close","warning")
+		else; CloseTrue_def
+		
+		if timeClosed[1] > 2; countAr[4]++
+	}
+	else {
+		if !ARRINFO("user","socks") && SHIORI3FW.IsVisible[298]; OnEvent_Socks("close","force")
+		elseif sleeptrue; 			Close_sleep
+		elseif ghostupinfo[1] < 5;	Close_wake_fivemin
+		else; 						Close_wake_def
+		
+		if timeClosed[1] > 2; countAr[4]--
+	}
+	--
+	"\w8\w8\w8\-"
+}
+CloseTrue_def : nonoverlap
+{
+	//generic
+	"(s_0)\i[102]%(m)(Sans is surely appreciating the sentiment.)"
+	"(s_0)\i[105]\i[301]%(m)%(eh)... bye to ya' too %(nickname)."
+	"(s_0)\i[304]%(m)%(bye)."
+	if totalinfo[0] > 10; "(s_0)\i[102]%(m)guess i'll see ya' later %(nickname)."
+	if timeClosed[1] < 1; "(s_0)%(m)yeah yeah(s_2) %(bye), %(nickname).\n\n/
+		(s_0)\i[105]\i[302]%(m)gimme at least an hour break next time though."
+	if close < 8; "(s_0)\i[109]\i[301]\i[298]%(m)(Did he look stunned-)\n\n/
+		(s_0)\i[105]\i[400]\i[298]%(m)(Or was that just your imagination?)"
+	if ghostupinfo[1] < 40 || TimeSlot == "earlymorning" || TimeSlot == "latenight" || TimeSlot == "midnight";
+		"(s_0)%(m)at least kind enough ta' say goodbye... %(s_2)"
+	
+	//specific time
+	if TimeSlot == "latenight"; "(s_0)\i[102]\i[298]%(m)(You wish Sans a good night.)\n\n/
+		(s_0)%(m)goodnight %(nickname)."
+	if TimeSlot == "latenight"; "(s_0)\i[102]\i[298]%(m)(You wish Sans good night.)\n\n/
+		%(m)(He makes to tell you bye, \i[201]but a yawn cuts him off.)"
+		//if TimeSlot == "latenight"; "(s_0)\i[102]%(m)(You tell him good night.)\n\n/
+		//	%(m)(He waves at you.)"
+	
+	
+	//moods
+	if MD("sad"); "(s_0)%(m)\i[105]yeah yeah see ya' and all that stuff."
+	if MD("sad") || MD("tired"); "(s_0)\i[105]\i[298]%(m)(He sighs, but you hear him muttering a short 'bye'.)"
+	if MD("bored"); "(s_0)\i[105]\i[298]%(m)(You say goodbye. /
+		(s_0)\i[302]\i[298]Sans doesn't look too pleased, /
+		(s_0)\i[105]\i[206] but relents with a sigh.)\n\n/
+		(s_0)\i[105]\i[201]%(m)%(whisper)not like ya' were any more entertainin'."
+	if MD("tired"); "(s_0)\i[102]\i[298]%(m)(He yawns. Maybe he didn't really hear you...)\n\n/
+		%(m)(He does seem pretty tired...)"
+	if MD("tired"); "(s_0)\i[102]\i[201]\i[298]%(m)(A yawn escapes him.)\n\n/
+		(s_0)\i[105]%(m)%(goodbye)."
+	if MD("angry"); "(s_0)\i[102]\i[298]%(m)(You're pretty sure he heard you, even though he doesn't answer.)"
+
+	
+	//affection
+	if AFF(70); "(s_0)\i[105]\i[205]\i[401]%(m)%(eh), bye to ya' too %(nickname)."
+	if AFF(0,15); "(s_0)\i[103]\i[302]%(m)stop actin' all nice."
+	if AFF(0,15); "(s_0)\i[102]\i[203]%(m)sure i'll miss ya' too %(nickname)."
+	if AFF(0,15); "(s_0)\i[305]\i[298]%(m)(He just stares at you.)"
+	if AFF(0,15); "(s_0)\i[305]%(m)fuck ya' %(nickname)."
+}
+Close_sleep : nonoverlap
+{
+	"(s_0)%(m)%(sleepy)"
+}
+Close_wake_fivemin : nonoverlap
+{
+	"(s_0)\i[114]%(m)this was %(swearing) unnecessary."
+	"(s_0)%(m)%(goodbye)."
+	
+	if AFF(0,15) && MD("angry"); "(s_0)\i[114]\i[302]%(m)i know why fuckin' i hate you."
+	if AFF(0,15); "(s_0)\i[102]\i[203]%(m)good riddance."
+}
+Close_wake_def : nonoverlap
+{
+	if TimeSlot == "earlymorning";"(s_0)\i[302]%(m)yeah, fuckin'. %(it)great%(def)./"
+	
+	if TimeSlot == "morning"; "(s_0)\i[102]%(m)least still in time fer breakfast."
+
+  	if TimeSlot == "evening"; "(s_0)\i[105]\i[302]%(m)thank the stars, i get ta' fuckin' sleep."
+	
+	if TimeSlot == "latenight";"(s_0)\i[102]\i[206]\i[298]%(m)(He's heaving a sigh.)"
+	
+	if TimeSlot == "midnight"; "(s_0)\i[105]\i[302]%(m)how bout ya don't try to turn me into a tired corpse next time?"
+	if TimeSlot == "midnight"; "(s_0)\i[302]%(m)too late ta' catch sleep now."
+}
+
+

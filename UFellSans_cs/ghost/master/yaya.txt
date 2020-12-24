@@ -1,0 +1,42 @@
+﻿
+//sets the main encoding to UTF-8 (english)
+charset, UTF-8
+charset.dic, UTF-8
+charset.output, UTF-8
+charset.file, UTF-8
+charset.save, UTF-8
+charset.extension, UTF-8
+
+//sets the aya debugger to english
+msglang,english
+
+//SHIORI-3.0 system dic. do not remove.
+include, system_config.txt
+
+dic, base/uf_bootend.dic
+dic, base/uf_consistency.dic
+dic, base/uf_func.dic
+dic, base/uf_string.dic
+dic, base/uf_mood.dic
+dic, extend/uf_mouse.dic
+dic, extend/uf_user.dic
+dic, extend/uf_phone.dic
+dic, extend/uf_menu.dic
+dic, extend/uf_joke.dic
+dic, extend/uf_log.dic
+dic, extend/uf_game.dic
+dic, extend/uf_musicplayer.dic
+dic, extend/uf_inventory.dic
+dic, extend/uf_additional.dic
+dic, extend/uf_aitalk.dic
+dic, extend/uf_commu.dic
+
+
+//Debug tool settings
+
+ignoreiolog, ID: OnAnchor
+ignoreiolog, ID: OnSecondChange // Ignore OnSecondChange
+ignoreiolog, ID: OnMouse // OnMouse ignore
+//iolog, off
+
+//log, ayame.log		

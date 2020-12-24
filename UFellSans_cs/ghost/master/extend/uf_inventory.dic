@@ -1,0 +1,211 @@
+//------------------------------------------------------------------------------
+// File		:uf_inventory.dic
+//
+//			:Bag, Shop and general item handling.
+//
+// Var		:datetrue
+//			 money
+//			 affection
+//			 happy, relaxed, pleased
+//			 medblocktrue
+//			 dresslogAr
+//------------------------------------------------------------------------------
+
+
+
+
+//------------------------------------------------------------------------------
+// Shop functions
+//------------------------------------------------------------------------------
+OnShop
+{
+	//_argv[0] = ShopUndernet/ShopSans
+	//_argv[1] = (description of hover)
+	_color = IARRAY
+	_shop = ""
+	
+	if reference0 == "ShopUndernet" || _argv[0] == "ShopUndernet" {
+		_color = (greyedout,lightup)
+		_shop = "ShopUndernet" 
+	}
+	else {
+		_color = (lightup, greyedout)
+		_shop = "ShopSans"
+	}
+	_p = OnRenderInterface(_shop,_argv[1],6)
+	
+	"\b8\_q%(b)/
+	%(_color[0])\_l[20]\q[Sans' Shop,OnShop,ShopSans]/
+	%(_color[1])\_l[150]\q[Undernet-buy,OnShop,ShopUndernet]%(def)\n\n[half]/
+	%(_p)/
+	%(buttons(2,'Go back','OnMenu'))"
+}
+//Price|Print Name|Item ref/Column|Function|Description|refs/color
+OnShopSans_Array
+{
+	_arr = IARRAY
+	
+	_arr ,= "|pay off my fucking tab. please|kofibuy|OnKofi_Buy|Open donation information.|"
+	_arr ,= "10|best quality snow only here|snow|OnBuy|It is what it says.|-1"
+	if !INV('askbutton')[0]; _arr ,= "80|(Bribe him)|askbutton|OnBuy|He should talk to you then?|-1"
+	//if !INV('programs')[0]; _arr ,= "100|gimme your passwords|programs|OnBuy|Let him handle a list of programs he can open for you.|-1"
+	//"\q[get a cool game,OnBuy,game1]"
+	_arr
+}
+OnShopUndernet_Array
+{
+	_arr = IARRAY
+	
+	if !datetrue && !INV('rose')[0]; _arr ,= "200|Red rose|redrose|OnBuy|Show your romantic interest.|0"
+	_arr ,= "20|Painkillers|painmeds|OnBuy|Something to aleviate pains.|0"
+	_arr ,= "60|Spicy Mustard|mustard|OnBuy|Spicy and fresh. Tasty.|-1"
+	if INV('food')[1] < 21; _arr ,= "8|Gross food|food|OnBuy|Do you really want to buy him more disgusting things?|-1"
+	
+	_arr
+}
+OnBuy
+{
+	_item = ""; _price = 0; _give = -1
+	
+	_item = reference0
+	_price = TOINT(reference1)
+	_give = TOINT(reference4)
+	_p = OnShop(reference2)
+	
+	if _price <= money
+	{
+		money -= _price
+		
+		if INV(_item)[0] == 0; invAr ,= "%(reference0),1,%(_give)"
+		else; INV_1(_item,'++')
+			
+			//special item handling
+		if _item == "food" && (INV('food')[1]%4) == 0;
+			affection++	//add affection every 4 food
+		
+		_p = OnShop(reference2) //re-check shop
+		
+		"\i[298]%(m)(You bought it.)\c%(_p)"
+	}
+	else; "\i[298]%(m)(You don't seem to have enough money...)\c%(_p)"
+}
+
+//------------------------------------------------------------------------------
+//　Bag and Inventory (also fetches Ko-Fi count)
+//------------------------------------------------------------------------------
+OnBag
+{
+	//_argv[0] = "Bag"
+	//_argv[1] = (description of hover)
+	_p = OnRenderInterface("Bag",_argv[1],6)
+	
+	"\b8\_q%(b)\_l[120]%(lightup)Bag%(def)\n\n[half]/
+	\![execute,http-get,https://ko-fi.com/widget/counterwidget/B0B1EAGS,--async=OnKofi_Counter,--file=kofi.txt,--nodescript]/
+	%(_p)/
+	%(buttons(2,'Go back','OnMenu'))"
+}
+//Price|Print Name|Item ref/Column|Function|Description|refs/color
+OnBag_Array
+{
+	_arr = IARRAY
+	
+	if INV('kofinote')[0]; _arr ,= "|Ko-Fi notice|kofi|OnKofi_Menu|Ko-Fi goals and details.|"
+	_arr ,= "|Feedback|feedback|OnBug_Feedback|Feedback and bug report page.|"
+	if INV('costume')[0] {
+		if DRESS("Misc","Costume"); _arr ,= "|Costum-e|costume|OnBag_Choose|Take the costum-e back.|off"
+		else; _arr ,= "|Costum-e|costume|OnBag_Choose|Tape the costum-e on.|on"
+	}
+	if INV('rose')[1] == 1; _arr ,= "|Red Rose|rose|OnBag_Choose|Ask him out.|"
+	if INV('snow')[0]; _arr ,= "|Snow: %(INV('snow')[1])||OnBag|Is it melting?|"
+	if INV('painmeds')[1] != -1; _arr ,= "|Painkillers: %(INV('painmeds')[1])||OnBag|They look cheap...|"
+	if INV('mustard')[1] != -1 {
+			//only available to be given if enabled in ask menu
+		if INV('mustard')[2] != -1; _arr ,= "|Mustard: %(INV('mustard')[1])|mustard|OnBag_Choose|Maybe Sans would like some?|"
+		else; _arr ,= "|Mustard: %(INV('mustard')[1])||OnBag|You wonder if it actually does taste good.|"
+	}
+	if INV('food')[0]; _arr ,= "|Gross Food: %(INV('food')[1])||OnBag|Why did you even buy more of it..?|"
+	if INV('askbutton')[0]; _arr ,= "|Ask Button||OnBag|You've bought the key to endless questioning.|"
+	if INV('programs')[0]; _arr ,= "|Program tabs||OnBag|You bribed Sans to open programs fro you."
+
+	_arr
+}
+OnBag_Choose
+{
+	case reference0
+	{
+		when "costume";
+			"\p[97]\s[-1]\0\![raise,OnDressup_Change,Misc,Costume]"
+		when "rose"
+		{
+			if AFF(70) && datetrue == 0;
+				"(s_0)\i[109]\i[400]\i[401]\i[298]%(m)(He stares...)/
+				\n\n\s[-1]%(m)(Then disappears.)\w8\w8\c/
+				%(m)(It seems like your offer of courtship has startled him.)\n\n/
+				%(m)(You hope he doesn't think ill of you now..)/
+				/
+				%(VARC('dating','=2'))/
+				%(INV_1('rose','0'))/
+				%(INV_2('rose','1'))/
+				\-"
+			else; 
+				"\i[298]%(m)(It may not yet be time for this...)\n\n%(m)(You should give this to Sans later.)%(pause)"
+		}
+		when "mustard"
+		{	
+			if INV('mustard')[3] < 5;
+				affection++
+			INV_1('mustard','--')
+			INV_2('mustard','++')
+			
+			happy += 3
+			relaxed += 2
+			pleased++
+			--
+			"(s_0)\i[109]\i[301]\i[401]%(m)...\n\n(s_0)\i[113]\i[302]\i[401]%(m)thanks.\x"
+		}
+		when "painmeds";
+			"%(m)(Do you want to offer him some painkillers?)\n\n/
+			\![*]\q[Yes,OnBag_Painmeds,yes]\n/
+			\![*]\q[no,OnBag_Painmeds,no]\x"
+	}
+	--
+	OnBag
+}
+
+OnBag_Painmeds
+{
+	if reference0 == "yes" {
+		INV_1('painmeds','--')
+		INV_2('painmeds','++')
+		medblocktrue = 1
+		if INV('painmeds')[3] < 4;
+			affection++
+
+		"(s_0)\i[102]\i[298]%(m)(He swallows them down.)\n\n(s_0)\i[105]\i[204]\i[298]%(m)(He seems relieved.)"
+	}
+	else;
+		"(s_0)\i[105]\i[298]%(m)(You decide you'd rather not give him any.)"
+}
+
+
+//------------------------------------------------------------------------------
+// Function		:Dress up handling
+//
+//				:Saves state of dress items
+//
+// Var			:dresslogAr
+//------------------------------------------------------------------------------
+OnNotifyDressupInfo
+{
+	//"0,legs,white_sandals,default,mustselect,0,,"
+	dresslogAr = reference
+}
+
+//category, name
+OnDressup_Change
+{
+	_state = -1
+	_state = (TOINT(DRESS(reference0,reference1))+1)%2
+	
+	"\![bind,%(reference0),%(reference1),%(_state)]"
+}

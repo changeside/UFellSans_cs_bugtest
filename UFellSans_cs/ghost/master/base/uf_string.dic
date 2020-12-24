@@ -1,0 +1,689 @@
+//------------------------------------------------------------------------------
+// File		:uf_string.dic
+//
+//			:Shiori and SSP related functions (right click menu etc.)
+//
+// Var		:seccount
+//			 passmintotal
+//			 money
+//			 alarmNotify
+//			 affection
+//			 state
+//			 sleeptrue
+//			 SHIORI3FW.CanTalk
+//			 bored; tired
+//			 timeAr
+//			 afkVar
+//			 SHIORI3FW.IsVisible
+//			 SHIORI3FW.LastSurface
+//			 updatecheck
+//			 Version
+//			 tspeed
+//			 displaybpp; displaywidth; displayheight
+//			 updateURL
+//			 deletetrue
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Time track SHIORI functions
+//------------------------------------------------------------------------------
+OnSecondChange
+{
+	//reference4 = time amount of mouse not moved
+	//reference3 = when talk can be played
+
+	_sec = GETSECCOUNT()-SHIORI3FW.LastTalkTime
+
+	if seccount >= 59 {
+		seccount = 0
+		passmintotal++
+	}
+	else; seccount++
+
+	if money < -50; money = -50
+
+	if _sec >= 8 && !sleeptrue; idle //@uf_func.dic
+	
+		//Alarm system; only capture if On & current time & counter 0 / current day
+	_month = month; _day = day
+	if month < 10; _month = "0" + month
+	if day < 10; _day = "0" + day
+	_cur = '^1\|(.*)\|'+ time +'\|(\d*\/\d*,\d,0\||\|)(?=.*('+date+'|X\/'+_month+'|'+_day+'|X\/)|).*'
+	_alarm = RE_ASEARCHEX(_cur,alarmAr)
+	if ARRAYSIZE(_alarm) > 0; alarmNotify ,= _alarm
+	if reference3 == 1 && ARRAYSIZE(alarmNotify) > 0 && _sec > 2; OnAlarm_Remind //@uf_additional.dic
+}
+OnMinuteChange
+{	
+		//continuously adds money
+	if totalinfo[1]%15 == 0; money += 3
+		//adds affection ten times
+	if totalinfo[1] >= 59 && totalinfo[0] < 10;
+		affection += 2
+
+		//time bored
+	if state == 1 || state == 3; 			timeAr[0] = 0
+	elseif !sleeptrue && SHIORI3FW.CanTalk;	timeAr[0]++
+	elseif !SHIORI3FW.CanTalk;				timeAr[0] = 0
+	if timeAr[0] > 30 {
+		bored += 2; tired++; timeAr[0] = 0
+	}
+		//time sitting
+	if sittrue && timeAr[1]<0;	 timeAr[1] = 0
+	if sittrue && timeAr[1]>=0;  timeAr[1]++
+	if !sittrue && timeAr[1]>0;	 timeAr[1] = 0;
+	if !sittrue && timeAr[1]<=0; timeAr[1]--
+		//time sleeping
+	if sleeptrue; state = 0
+	if sleeptrue && timeAr[2]<0; timeAr[2] = 0
+	if sleeptrue; timeAr[2]++
+	if !sleeptrue && timeAr[2]>0; timeAr[2] = 0 
+	if !sleeptrue && timeAr[2]<=0; timeAr[2]--
+			//toggle sleeping
+		if sleeptrue && RAND(100)<(timeAr[2]-20); wakeupdialogue //@uf_aitalk.dic
+		if !sleeptrue && timeAr[2]<-90 {
+			if MDPER("tired")>=20 || (TimeSlot == "midnight" && RND(30) && MDPER("tired")>=13);
+				"(s_sleep)"
+		}
+		//time music
+	//if (statusmusic == "play" && isplayed == 1); musictime = TOINT(musictime++);
+	
+		//afkvar reduction (afkvar too high = fakeAfk)
+	if afkvar > 0 && ghostupinfo[1] % 15 == 0; afkvar--
+	
+		//pick up note
+	if !INV("kofinote")[0] && totalinfo[1] > 10 && !sleeping && SHIORI3FW.IsVisible[299];
+		"\0(s_0)\i[115]\i[302]%(m)look %(nickname). if ya' won't pick up yer trash\n\n/
+			\p[299]\s[-1]\0(s_0)\i[102]%(m)there.\n\n\i[298]%(m)(You put the note in your bag.)/
+			%(ARRADD('inv','kofinote,1,-1'))"
+}
+OnHourTimeSignal
+{
+	OnAlarm_CounterSet //@uf_additional.dic
+}
+
+
+//------------------------------------------------------------------------------
+// Shiori function occurs on key press
+//------------------------------------------------------------------------------
+OnKeyPress
+{
+	case reference0
+	{
+		when "t"; AiTalk
+		when "r"; lastTalk
+		when "f1"; "\![open,readme]"
+		//when "u";
+		//{if musicmenumode == 1; "\![raise,OnMoveSong,up]";}
+		//when "d";
+		//{if musicmenumode == 1; "\![raise,OnMoveSong,down]";}
+		when "n"; //next song
+		{
+			//if SHIORI3FW.CanTalk || musicmenuopen == 1 {"\![raise,OnSkipMusic,forward]"}
+		}
+		when "b"; //song before
+		{
+			//if SHIORI3FW.CanTalk || musicmenuopen == 1 {"\![raise,OnSkipMusic,backward]"}
+		}
+		when "s"; //stop song/play song
+		{
+			//if SHIORI3FW.CanTalk || musicmenuopen == 1 {"\![raise,OnMusicStatus,stop]"}
+		}
+		when "p"; //pause, resume song
+		{
+			//if SHIORI3FW.CanTalk || musicmenuopen == 1 {"\![raise,OnMusicStatus,play]"}
+		}
+		//when "m"; OnMusicMenu;
+	}
+
+}
+
+
+//------------------------------------------------------------------------------
+// Rendering chars on screen/Changing ghosts
+//------------------------------------------------------------------------------
+OnRender //basic render function
+{
+	_txt = ""
+	for _c = 0; _c < ARRAYSIZE(SHIORI3FW.IsVisible); _c++ {
+		if SHIORI3FW.IsVisible[_c] {
+			if _c > 1; _txt += "\p[" + _c + "]"
+			else; _txt += "\%(_c)"
+			
+			_txt += "\s[" + SHIORI3FW.LastSurface[_c] + "]"
+		}
+	}
+	_txt
+}
+OnSurfaceRestore { OnRender } //when reloading or sth
+OnWindowStateRestore : nonoverlap //un-minimizing
+{
+	OnRender
+	--
+	//if !sleeptrue; "\0(s_0)%(m)well.\w5\w3\i[302] welcome back to me."
+	//if !sleeptrue; "\0(s_0)\i[102]\i[302]%(m)don't %(swearing) do that."
+	if !sleeptrue; "\0(s_0)\i[302]\i[400]%(m)%(confused)?"
+	//if !sleeptrue; "\0(s_0)\i[304]%(m)%(greeting)."
+	if !sleeptrue; "\0(s_0)\i[302]"
+	if !sleeptrue; "\0(s_0)\i[116]\i[302]\i[400]"
+	
+	if sleeptrue; "\0(s_0)\i[302]%(m)gnh."
+	if sleeptrue; "\0(s_0)\i[302]%(m)hh."
+	if sleeptrue; "\0(s_0)"
+	if sleeptrue; "\0(s_0)\i[302]"
+	
+}
+OnGhostChanging : nonoverlap //changing to a ghost
+{
+	OnRender
+	--
+	if reference0 == "Sans"; "\0\i[298]%(m)(You're reloading him)\w8\w8\e"
+	if reference0 == "Sans"; "\0\w8\w8\e"
+	if reference0 == "Sans"; "\0\i[298]%(m)(You don't think he's aware of this.)\w8\w8\e"
+
+ 	if reference0 != "Sans"; OnClose
+}
+OnGhostChanged //being changed to
+{
+	OnRender
+	--
+	//statusmusicstop = "play";
+	//statusmusicplay = "";
+	//statusmusic = "stop";
+	//isplayed = 0;
+	--
+	if reference0 == "Sans" && !sleeptrue; "\0%(m)%(confused)?"
+	if reference0 == "Sans" && sleeptrue; "\0%(m)%(sleepy)"
+	
+	if reference0 != "Sans"; OnBoot
+}
+
+//------------------------------------------------------------------------------
+// Shiori function that handles file drops (reference0=filepath)
+//------------------------------------------------------------------------------
+OnFileDrop2
+{
+	_droppedfilepath = SPLITPATH(reference0)
+	_filepath = _droppedfilepath[1]
+	_filename = _droppedfilepath[2]
+	_fileext = TOLOWER(_droppedfilepath[3])
+	--
+	case _fileext
+	{
+		when ".jpg",".jpeg",".bmp" ,".png" 
+		{
+			//"\0%(m)%(beginning) wanna set (s_pout)\i[304]this as wallpaper?"
+			"\0(s_0)\i[298]%(m)(Do you want to set the file as your wallpaper?)/
+				\n\n[half]/
+				\![*]\q[Centered,OnSetWallpaper,centered,%(reference0)]\n/
+				\![*]\q[Tiled,OnSetWallpaper,tiled,%(reference0)]\n/
+				\![*]\q[Stretched,OnSetWallpaper,stretched,%(reference0)]\n\n[half]/
+				\![*]\q[No thanks,OnSetWallpaper,cancel,%(reference0)]"
+		}
+		when ".mid", ".wav", ".mp3", ".au", ".ogg", ".wma"
+		{
+			//_paths = RE_SPLIT(reference0,',(?=C:)')
+			//OnMusic_AddFolder(_paths)
+		}
+		when ".m3u"//,".pls"
+		{
+			//OnMusic_Open("","",reference0)
+		}
+		others
+		{
+			//if FATTRIP _attrib [2] // directory = 1 other = 0
+			if (FATTRIB(reference0))[2] == 1
+			{
+				//folderpath = reference0;
+				//_paths = RE_SPLIT(reference0,',(?=C:)')
+				//OnMusic_AddFolder(_paths)
+			}
+			else
+			{
+				_filename = TOLOWER(_filename)
+				--
+				"\0(s_0)%(m)%(nickname), \i[303]i have no idea what to do with %(_filename)."
+				"\0(s_0)\i[304]%(m)did you really have to show me\n'%(_filename)'?"
+				"\0(s_0)\i[116]\i[302]\i[298]%(m)(He doesn't seem to know what to do with it.)"
+				"\0(s_0)\i[301]"
+				"\0(s_0)\i[303]"
+				"\0(s_0)\i[304]"
+				"\0\i[298]%(m)(He doesn't react.)"
+				"\0\i[298]%(m)(It doesn't seem to do anything.)"
+			}
+		}
+	}
+}
+OnSetWallpaper
+{
+	if reference0 == "centered";	"\![set,wallpaper,%(reference1),center]"
+	if reference0 == "tiled"; 		"\![set,wallpaper,%(reference1),tile]"
+	if reference0 == "stretched";	"\![set,wallpaper,%(reference1),stretch]"
+	--
+	//if reference0 == "cancel"; "\i[116]"
+	//if reference0 == "cancel" && (mood == "sad" || mood == "tired" || mood == "bored"); "\i[298]%(m)(He sighs.)"
+	//if reference0 == "cancel" && affection >= 60; "%(m)whatever."
+	//if reference0 == "cancel" && (mood != "sad" || mood != "angry"); "'k"
+
+	if reference0 != "cancel"; "\i[298]%(m)(There, it's %(reference0).)"
+	if reference0 != "cancel"; "\i[298]%(m)(Done and %(reference0).)"
+	//if reference0 != "cancel"; "%(m)here\w6, %(reference0) it."
+	//if reference0 != "cancel"; "%(m)here ya' go\w6, %(reference0)."
+	//if reference0 != "cancel"; "%(m)done."
+}
+
+
+//------------------------------------------------------------------------------
+// Update functions
+//------------------------------------------------------------------------------
+OnUpdateCheckComplete //Check if new update available
+{
+	if (reference0 == "none" && updatecheck); updatecheck = 0 //no new files
+ 	else; updatecheck = 1
+}
+OnUpdateCheckFailure { updatecheck = 0 }
+OnUpdateBegin //Actual update
+{
+	"\0\i[298]%(m)(You're starting the update)."
+	"\0\i[298]%(m)(Update started.)"
+	"\0\i[298]%(m)(He's looking indifferent.)"
+}
+OnUpdateReady
+{
+	tempnb = TOINT(reference0[0])
+	"\0\i[298]%(m)(There are %(reference[0]) new files.)"
+	//"\0%(m)found %(reference[0]) new things.\w8\e"
+}
+OnUpdate.OnDownloadBegin
+{
+	reference0 = TOLOWER(reference0)
+	--
+ 	if "aitalk" _in_ reference0; "\_q%(m)(It looks like he'll say different stuff.)"
+	elseif "phone" _in_ reference0; "\_q%(m)(Phone might ping new stuff.)"
+	elseif "menu" _in_ reference0; "\_q%(m)(The menu got changed.)"
+	elseif "mouse" _in_ reference0; "\_q%(m)(He might act differently for mouse actions.)"
+	elseif "game"; "\_q%(m)(Perhaps games were changed.)"
+	elseif "string"; "\_q%(m)(Special stuff might have changed.)"
+	//else; "\_q"
+}
+OnUpdateComplete
+{
+	if reference0 == "none" && !updatecheck == 0 //if the ghost had nothing to update with
+ 	{
+ 		"\0\i[298]%(m)(Nothing new.)"
+		"\0\i[298]%(m)(No new files.)"
+		//"\0(s_0)\i[102]%(m)didn't know what ya' were hopin' for."
+	}
+	elseif reference0 == "none" && updatecheck;
+		updatecheck = 0
+ 	else //if the ghost has updated successfully
+	{
+		"\0\i[298]%(m)(Done.)"
+		"\0\i[298]%(m)(Finished.)"
+		--
+		OnUpdate_Finish
+ 	}
+}
+OnUpdateFailure
+{
+	updatecheck = 0
+	
+	if reference0 == "timeout"; "\0\i[298]%(m)(The connection timed out.)"
+	if reference0 != "timeout"; "\0\i[298]%(m)(Something went wrong.)\n\n[half]%(m)('%(reference0)' was given as error.)\e"
+}
+OnUpdate.OnMD5CompareFailure //occurs if a file is missing.
+{
+	"\0%(m)(A file seems to be missing.)\w8"
+}
+OnUpdate_Finish
+{
+	Version = OnVersionSet
+	updatecheck = 0
+	//variables
+}
+
+
+//------------------------------------------------------------------------------
+// Adds evaluation/animations/auto pauses to all skript
+//------------------------------------------------------------------------------
+OnTranslate
+{
+    _talk = reference0
+	_talk = EVAL('"' + REPLACE(_talk,'"','" + CHR(0x22) + "') + '"')
+	_talk = TextOnlyTranslator(_talk,'TextOnlyTranslatorFunc')
+	_talk = EVAL('"' + REPLACE(_talk,'"','" + CHR(0x22) + "') + '"')
+	TOSTR(_talk)
+	//_talk = "\_?" + _talk //bugfix
+}
+TextOnlyTranslator
+{
+	_string = RE_SPLIT(_argv[0],'\\(\\|q\[.*?\]\[.*?\]|[!&8cfijmpqsn]\[.*?\]|[-*+014567bcehntuvxz]|_[ablmsuvw]\[.*?\]|__(t|[qw]\[.*?\])|_[!?+nqsV]|[sipw][0-9])')
+	_n = ARRAYSIZE(_string)
+	_tag = RE_GETSTR()
+	_tr = ''
+	_qs = 0
+
+		_transition = IARRAY; _insert = IARRAY; _wait = IARRAY; _surfaces = IARRAY; _positions = IARRAY
+		_lastS = ""; _nextS = ""; _printat = ""; _letters = ""
+		_NBTime = 0; _count = 0
+			//GET surfaces[]; positions[]
+		_temp = JOIN(_string,"")
+		_count = RE_GREP(_temp,'\(s_[^\)]*\)')
+		_surfaces = RE_GETSTR() //fetch all surfaces (s_STH)
+		_positions = RE_GETPOS() //fetch positions
+			//GET transition surface; position to insert
+		for _x = 0; _x < ARRAYSIZE(_surfaces); _x++ {
+				//Get surface before & now
+			if _x == 0;	_lastS = SHIORI3FW.LastSurface[0]
+			else;		_lastS = _surfaces[_x-1]
+						_nextS = _surfaces[_x]
+				
+				//return surfacenb,time
+			_transition ,= OnSurface_Transition(_nextS,_lastS)
+			_printat = TOINT(_transition[_x][1]/tspeed)
+				//get amount of letters in the specific string section
+			if _x == 0; _letters = _positions[0]
+			else; 		_letters = _positions[_x] - (STRSTR(_temp,")",_positions[_x-1]) + 1)
+				//add waiting pauses & position to insert at
+			if _printat > _letters {
+				_NBTime = TOINT(_printat - _letters + 1) * 25
+				_wait ,= ("\_w[" + _NBTime + "]") //ms to wait
+				_insert ,= _positions[_x] - _letters
+			}
+			else {
+				_wait ,= ""
+				_insert ,= _positions[_x] - _printat
+			}
+		}
+	_track = 0; _length = 0
+	_begin = 0
+	_trans = ""
+	_oldlength = 0
+	_TAG = 0 //IF TAG ONLY STRING; DONT INSERT ANIMATION
+	for _i = 0 ; _i < _n ; _i++ { //fix inserting look at uf_phone.dic example for not working
+	
+		_oldlength = STRLEN(_string[_i])
+			if _oldlength == 0; _TAG = 1
+			else; _TAG = 0
+		
+		while (_track < ARRAYSIZE(_insert)) {
+			if _TAG; break
+			if TOINT(_insert[_track]-_length) > _oldlength; break
+			
+			_newlength = STRLEN(_string[_i])
+			
+			_begin = _insert[_track] - _length + (_newlength - _oldlength)
+			_trans = _transition[_track][0] + _wait[_track] 
+			_string[_i] = INSERT(_string[_i],_begin,_trans)
+			_track++
+		}
+	
+		_length += _oldlength
+		_tr += EVAL("%(_argv[1])(_string[_i],_qs)")
+		
+		//add tag & toggle quick section
+		_tr += _tag[_i]
+		if '\_q' _in_ _tag[_i] {
+			_qs = ! _qs
+		}
+	}
+	
+		//pause insertion; only insert when not \_q
+	_temporary = RE_SPLIT(_tr,'\\_q'); _tr = ""
+	for _i = 0; _i < ARRAYSIZE(_temporary); _i++ {
+		if (_i%2) == 0 {
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '(?<!(\\w[0-9]))\\n\\n(?!\[)', '\w9\w3\n\n')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '(?<!(\\w[0-9]))\\n\\n\[half\]' , '\w9\w3\n\n[half]')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '\.\.\.(?=\s|\\n)', '...\w9')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , ',(?=\s|\\n)', ',\w5')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '-(?=\s|\\n)', '-\w5')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '\.(?=\s|\\n)', '.\w9')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] , '\?(?=\s|\\n)', '?\w9')
+			_temporary[_i] = RE_REPLACE(_temporary[_i] ,'(?<!\\)!(?=[^!]|\\n)', '!\w9')
+		}
+		_tr += _temporary[_i]
+		if ARRAYSIZE(_temporary) > 1; _tr += "\_q"
+	}
+		//Replace a talking mouths after \i[298] with non-talking
+	//_tr = RE_REPLACEEX(_tr,'(?<=\\i\[298\])(.*?\i\[2\d\d)\]','$10]')
+	_tr = RE_REPLACEEX(_tr,'\(s_([^\)]*)\)','\![embed,Ons_$1]')
+	_tr
+}
+TextOnlyTranslatorFunc
+{
+	//_argv[0] = text to parse
+	//_argv[1] = if it's a quicksection
+	
+	_text = _argv[0]
+	//_text = REPLACE(_text, "* (", "\__v[disable]*\__v (")
+	_text = REPLACE(_text,"(s_sleep)","\![embed,OnSleeptrue](s_0)")
+	_text = REPLACE(_text,"(s_wake)","\![embed,OnSleepfalse](s_0)")
+	_text = REPLACE(_text,"(s_pout)","\![embed,OnPhonetrue](s_0)")
+	_text = REPLACE(_text,"(s_pback)","\![embed,OnPhonefalse](s_0)")
+	_text = REPLACE(_text,"(s_sit)","\![embed,OnSittrue](s_0)")
+	_text = REPLACE(_text,"(s_stand)","\![embed,OnSitfalse](s_0)")
+	//_text = RE_REPLACEEX(_text,'\(s_(?=[^\)]*\))','%(s_')
+	_text = REPLACE(_text,"''","%(CHR(34))")
+		
+	_text
+}
+
+
+//------------------------------------------------------------------------------
+// Anchor selection (enables websites in anchors)
+//------------------------------------------------------------------------------
+OnAnchorSelect
+{
+	if "http://" _in_ reference0 || "https://" _in_ reference0;
+		"\j[%(reference0)]"
+}
+
+
+//------------------------------------------------------------------------------
+// Shiori function to save screen sizes in case they change???
+//------------------------------------------------------------------------------
+OnDisplayChange
+{
+	displaybpp = reference0
+ 	displaywidth = reference1
+	displayheight = reference2
+}
+
+
+//------------------------------------------------------------------------------
+// Installation of ghost files
+//------------------------------------------------------------------------------
+OnInstallBegin
+{
+	//"\0(s_0)%(m)do i just?\w8\w3\n%(m)%(beginning)\w3, there we go."
+	"\0(s_0)\i[298]%(m)(Installation begin.)"
+}
+OnInstallComplete
+{
+	//reference1 = TOLOWER(reference1)
+ 	//--
+	"\0\i[298]%(m)(Installed %(reference1).)"
+	// case reference0
+	// {
+		// when "shell"
+		// {
+			// "%(beginning)\w5, a\w8 shell\w7, called %(reference1)\w7, installed."
+		// }
+		// when "ghost"
+		// {
+			// "%(beginning)\w5, a\w8 ghost\w7, called %(reference1)\w7, installed.\e"
+			// "%(m)the ghost\w7, %(whisper)what the %(whatswear) is a ghost??\f[default]\w2, %(reference1)\w5, got installed.\e"
+		// }
+		// when "balloon"
+		// {
+			// "%(beginning)\w5, a\w8 balloon\w7, called %(reference1)\w7, installed.\e"
+			// "%(m)installed %(reference1).\e"
+		// }
+		// when "plugin"
+		// {
+			// "%(beginning)\w5, a\w8 plugin\w7, called %(reference1)\w7, installed.\e"
+			// "%(m)installed %(reference1).\e"
+		// }
+	// }
+}
+OnInstallFailure
+{
+	"\0\i[298]%(m)(Installation failed. Reason: %(reference0).)"
+	// --
+	// case reference0
+	// {
+		// when "unsupported"
+		// {
+			// "%(m)'s unsupported.\e"
+		// }
+		// when "extraction"
+		// {
+			// "%(m)couldn't wrangle it out properly.\e"
+			// "%(m)(Extraction went wrong.)\e"
+		// }
+		// others
+		// {
+			// "%(m)%(sshrug)%(stuff) went wrong."
+		// }
+	// }
+}
+OnInstallRefuse
+{	
+	//reference0 = TOLOWER(reference0);
+	"\0\i[298]%(m)(This isn't for Sans.)\n\n[half]%(m)(Try %(reference0) instead.)"
+	//"\0%(s)%(m)this ain't fer me.\w8 try out %(reference0) instead.\e"
+}
+
+
+//------------------------------------------------------------------------------
+// Uninstalling the ghost
+//------------------------------------------------------------------------------
+OnVanishSelecting
+{ 
+	//if affection <= 15; "\0%(s)%(m)go ahead\w3, %(nickname)\e"
+	//else; "\0%(s)\i[302]%(m)better decide carefully %(nickname)\e"
+	"\0(s_0)\i[298]%(m)(Do you really want to uninstall him?)"
+}
+OnVanishSelected
+{
+	//if affection <= 5 {"\0%(s)%(m)(Is he laughing?)\w9\w9\e"}
+	//elseif affection <= 30 {"\0%(s)%(m)good riddance.\w9\w9\w5\e"}
+	//elseif dating = 1 {"\0%(s)\i[302]\i[112]%(m)fuckin' fine.\w9\w9\w9\e"}
+	//else {"\0%(sshrug)\i[102]%(m)fuckin' fine.\w9\w9\w9\e"}
+	"\0(s_0)\i[116]\i[298]%(m)(Goodbye Sans.)"
+}
+OnVanishCancel
+{
+	//if affection <= 10; "\0%(s)\i[104]\i[301]\i[202]%(m)(He seems disappointed.)\e"
+	//elseif affection <= 30; "\0%(sshrug)\i[102]%(m)%(eh)\w7, was worth a try.\e"
+	//else; "\0%(s)%(m)\w2.\w2.\w2.\![raise,OnMood_Change,affection,-20]\e"
+	"\0\i[298]%(m)(You change your mind.)"
+}
+//said by the next ghost after uninstalling the current.
+OnVanished
+{
+	"\0(You uninstalled %(reference0).)"
+}
+
+
+//------------------------------------------------------------------------------
+// Shiori function; occurs when creating update data/NARs
+//------------------------------------------------------------------------------
+OnUpdatedataCreating	{ "\0\i[298]%(m)(Working on the updates2.dau file, you assume.)" }
+OnUpdatedataCreated		{ "\0\i[298]%(m)(Done)." }
+OnNarCreating 			{ "\0\i[298]%(m)(He's working on the .nar file, you assume.)" }
+OnNarCreated 			{ "\0\i[298]%(m)(Done)." }
+
+
+//------------------------------------------------------------------------------
+// Shiori function; occurs on low battery/system resources
+//------------------------------------------------------------------------------
+OnBatteryLow
+{
+	//"\0%(s)%(m)%(beginning)\w6, this things battery's low.\w8\n%(m)there's %(reference0) left.\e"
+	"\0\i[298]%(m)(The battery is getting low. %(reference0) left.)"
+}
+OnBatteryCritical
+{
+	//"\0%(s)%(m)(oh)\w5, %(nickname)\w6, you should really check this.\e"
+	"\0\i[298]%(m)(There's only %(reference0) energy left!)"
+}
+OnSysResourceLow
+{
+	"\0\i[298]%(m)(The system resources are low.)"
+}
+
+
+//------------------------------------------------------------------------------
+// Functions related to ssp menu/aya
+//------------------------------------------------------------------------------
+On_homeurl
+{
+	updateURL
+	//"http://changeside.usite.pro/ufsansghost/"
+	//https://raw.githubusercontent.com/changeside/UFellSans_cs/master/
+}
+On_username { username }
+On_recommendrootbutton.caption { "Reference Sites" }
+On_sakura.recommendsites
+{
+	"SSP/
+		%ASC(1)http://ssp.shillest.net/%ASC(2)/
+	Ukagaka Dream Team Tumblr/
+		%ASC(1)https://ukagakadreamteam.tumblr.com/%ASC(2)"
+}
+On_portalrootbutton.caption { "Developers sites" }
+On_sakura.portalsites
+{
+ 	"Tumblr/
+		%ASC(1)http://changeside.tumblr.com%ASC(2)"
+}
+On_updatebutton.caption { "Update" }
+On_vanishbutton.caption { "Uninstall" }
+On_vanishbutton.visible
+{
+ 	if deletetrue == 1; "1"
+	else; "0"
+}
+On_headlinesenserootbutton.caption { "News" }
+On_ghostrootbutton.caption { "Change Ghost" }
+On_callghostrootbutton.caption { "Call Ghost" }
+On_otherghostname
+{
+	ghostexlist = ""; _i = 0
+	while _i >= 0 {
+		_ghostname = EVAL(reference[_i])
+		if _ghostname != "" {
+			if _i > 0; ghostexlist += ","
+			ghostexlist += _ghostname[0]
+			_i++
+		}
+		else; _i = -1;
+	}
+	ghostexcount = ARRAYSIZE(ghostexlist)
+}
+On_shellrootbutton.caption { "Change look" }
+On_dressuprootbutton.caption { "Clothes" }
+On_readmebutton.caption {"Information" }
+On_quitbutton.caption{ "Quit" }
+
+On_version { GETSETTING(AYAINFO_VERSION) }
+On_craftman { "umeici" }
+On_craftmanw { "?럖" }
+On_name { "AYA" }
+
+On_uniqueid { uniqueid = reference0 }
+
+On_hwnd
+{
+	sakurahwnd    = reference0[0]
+	kerohwnd      = reference0[1]
+	sakurablnhwnd = reference1[0]
+	keroblnhwnd   = reference1[1]
+}
+
+On_\person
+{
+ 	person
+}

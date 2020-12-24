@@ -1,0 +1,155 @@
+//------------------------------------------------------------------------------
+// File		:uf_moods.dic
+//
+//			:Mood system.
+//
+// Var		:happy
+// 			 sad
+// 			 angry
+// 			 relaxed
+// 			 bored
+// 			 interested
+//			 amazed
+//			 embarrassed
+//			 pleased
+//			 tired
+//			 amused
+//			 usermood
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Mood variables/mashups
+//------------------------------------------------------------------------------
+OnMood_Names
+{
+	_arr = <<'
+	happy
+	sad
+	angry
+	relaxed
+	bored
+	interested
+	amazed
+	embarrassed
+	pleased
+	tired
+	amused
+	'>>
+	_arr = SPLIT(_arr,C_CRLF)
+	_arr
+}
+OnMood_Combine	//combined mood|mood1|mood2
+{
+	_arr = <<'
+	melancholic,happy,sad
+	coldangry,angry,relaxed
+	annoyed,angry,tired
+	annoyed,angry,relaxed
+	smug,amused,happy
+	'>>
+	_arr = SPLIT(_arr,C_CRLF)
+	_arr
+}
+
+//------------------------------------------------------------------------------
+// Outputs
+//------------------------------------------------------------------------------
+OnMood_Out
+{
+	_arr = OnMood_Names
+	_print = ""
+	foreach _arr; _var {
+		_print += _var + ":" + EVAL("%(_var)") + "\n"
+	}
+	"\b2\_q%(_print)"
+}
+
+//------------------------------------------------------------------------------
+// Initializing/Randomizing
+//------------------------------------------------------------------------------
+OnMood_Init
+{	
+	_arr = OnMood_Names
+	foreach _arr; _var {
+		EVAL("%(_var) = 0")
+	}
+	
+	_nb = RAND(ARRAYSIZE(_arr))
+	_rnd = _arr[_nb]
+	EVAL("%(_rnd) = 5")
+}
+OnMood_RND
+{
+	_arr = OnMood_Names
+	foreach _arr; _var {
+		_nb = RAND(101)
+		EVAL("%(_var) = %(_nb)")
+	}
+}
+
+
+//------------------------------------------------------------------------------
+// Mood checking
+//------------------------------------------------------------------------------
+OnMood_Percent
+{
+	_arr = OnMood_Names
+	_nb = EVAL("%(_arr)") //values
+	_perc = IARRAY
+	_total = 0.0
+	foreach _nb; _val {
+		_total += _val
+	}
+	foreach _nb; _val {
+		_perc ,= (TOREAL(_val) / _total) * 100
+	}
+	_perc
+}
+OnMood_Check //collect all applicable moods
+{
+	_arr = OnMood_Percent
+	_names = OnMood_Names
+	_comb = OnMood_Combine
+	_highest = IARRAY
+	_last = 0
+	_diff = 2
+	
+	for _i = 0; _i < ARRAYSIZE(_arr); _i++ {
+		_current = TOINT(ROUND(_arr[_i]))
+		
+		if (_current > _last+_diff) {
+			_highest = IARRAY
+			_highest = _names[_i]
+			_last = _current
+		}
+		elseif (_current >= _last-_diff); _highest ,= _names[_i]
+	}
+	for _i = 0; _i < ARRAYSIZE(_comb); _i++ {
+		if ASEARCH(_comb[_i][1],_highest) != -1 && ASEARCH(_comb[_i][2],_highest) != -1 {
+			if ASEARCH(_comb[_i][0],_highest) == -1;
+				_highest ,= _comb[_i][0]
+		}
+	}
+	_highest
+}
+
+
+//------------------------------------------------------------------------------
+// User mood defining (@uf_bootend.dic)
+//------------------------------------------------------------------------------
+OnMood_User
+{
+	if reference0 != "" {
+		usermood = reference0
+	}
+	elseif AFF(70) {
+		"(s_0)\i[102]/
+		%(m)anyway, how are ya feelin?\n\n[half]\_q/
+		\![*]\q[terrible,OnMood_User,terrible]\n/
+		\![*]\q[bad,OnMood_User,bad]\n/
+		\![*]\q[okay,OnMood_User,okay]\n/
+		\![*]\q[good,OnMood_User,good]\n/
+		\![*]\q[perfect,OnMood_User,perfect]"
+	}
+}

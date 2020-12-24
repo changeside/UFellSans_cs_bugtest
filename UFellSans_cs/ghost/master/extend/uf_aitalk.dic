@@ -1,0 +1,480 @@
+//------------------------------------------------------------------------------
+// File		:uf_aitalk.dic
+//
+//			:All random dialogue (including unlock events)
+//
+// Var		:sleeptrue
+//			 sittrue
+//			 lastTalk
+//			 ChainTalk (SHIORI variable)
+//			 month
+//			 day
+//			 weekday
+//			 medblocktrue
+//			 money
+//			 state
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Random talk balancing/choose algorithm
+//------------------------------------------------------------------------------
+AiTalk //AiTalk functionality based on SHIORI
+{
+	_dialogue = ""
+    /* Unused template AiTalk
+        if RAND(100) < communicateratio && sleeping == 0
+        {
+            StartCommunicate;
+        }
+        elseif mikireflag != 0 && sleeping == 0
+        {
+            MikireTalk;
+        }
+    */
+	if CHAIN.IDName != "" && !sleeptrue;
+		lastTalk = ChainTalk
+    else {
+        _dialogue = OnAiTalk_Check
+        if _dialogue == "" && !sleeptrue; lastTalk = OnAiTalk_Choose
+		else; lastTalk = _dialogue
+    }
+    lastTalk
+}
+
+OnAiTalk_Draw : nonoverlap { parallel EVAL(_argv[0]) } //enables nonoverlap for all array pools
+OnAiTalk_Choose //recursive function to draw an array pool (based on amount of lines & total lines)
+{
+	_max = 0; _poolsize = 0
+		//calculates the amount of all current lines
+	for _i = 0; _i < ARRAYSIZE(LinePools); _i++ {
+		if LinePools[_i] == "OnJoke"; _max += TOREAL( ARRAYSIZE(OnJoke_Light) + ARRAYSIZE(OnJoke_Dark) )
+		else; _max += TOREAL(ARRAYSIZE( EVAL(LinePools[_i]) ))
+	}
+		//runs once for every currently possible element in LinePools
+	for _i = 0; _i < ARRAYSIZE(LinePools); _i++ {
+		if LinePools[_i] == "OnJoke"; _poolsize = ARRAYSIZE(OnJoke_Light) + ARRAYSIZE(OnJoke_Dark)
+		else; _poolsize = ARRAYSIZE( EVAL(LinePools[_i]) )
+			if _poolsize == 0; continue
+
+		_r = TOREAL((RAND(100)+1)/100.00) //draws a rand number
+		_amount = TOREAL(_poolsize)
+		_calc = TOREAL(_amount/_max)
+		if _r < _calc || (_r <= _calc && RAND(100) <= 30) || (_r >= _calc && RAND(100) <= 5)
+		{
+			if LinePools[_i] == "OnJoke"; OnJoke("aitalk")
+			else; OnAiTalk_Draw(LinePools[_i])
+			return
+		}
+	}
+	OnAiTalk_Choose
+}
+LinePools : array //Lists all possible convo pools
+{
+        //General
+    "RandomTalk"
+    if RND(80); "kofishoutout" //@uf_log.dic
+    "snoopstuff"
+		if (month == 12 && day >= 20 && day <= 26); "christmasweek"
+		if (month == 10 && day >= 25); "halloweenweek"
+		if Season == "spring"; "springseason"
+		if Season == "summer"; "summerseason"
+		if Season == "autumn"; "autumnseason"
+		if Season == "winter"; "winterseason"
+    "weekspecificdialogue"
+    "timespecificdialogue"
+	if RND(20); "OnJoke"
+
+        //Mood related
+	if MD("sad");  "depressedrambling"
+	if MD("relaxed"); "relaxeddialogue"
+
+        //Strictly affection specific
+	if AFF(50,70); "affectionhigh"
+	    elseif AFF(30); "affectionnormal"
+	    else; "affectionlow"
+
+        //State specific
+	if AFF(30,50,70) && sittrue; "sittingdialogue"
+    if INV('phone')[0]; "OnPhone"
+	//if (isplayed == 1 && statusmusic == "play"); "songcomment"
+}
+
+//------------------------------------------------------------------------------
+// Dialogue pools (in AiTalk)
+//------------------------------------------------------------------------------
+RandomTalk : array
+{	
+	if MD("angry"); "(s_0)\i[108]\i[305]%(m)%(enraged)!\n\n%(m)fuck it!"
+		//stories
+	if MD("amused")&&AFF(30,50,70); "(s_0)\i[298]%(m)(He's telling you a story about some drunkards in a bar.)"
+		//papyrus
+	if !MD("sad")&&AFF(30,50,70); "(s_0)\i[105]%(m)my brother's certainly... somethin'.\n\n(s_0)\i[102]\i[205]%(m)wonder what he's up to...%(ARRADD('papyrus','family'))"
+		//talking about his day
+	if MD("angry"); "(s_0)%(m)this day was absolute shit so far. i'm not even %(swearing) kidding, %(swearing) %(swear).\echain=shittyday"
+	if AFF(50,70); "(s_0)%(m)won't believe what %(papyrus('s',1)) did. \i[302]ya' know, that guy's \i[115]%(it)so%(itoff) busy... (s_0)\i[113]\i[207]jus' had to waltz off even more work onta me!\n(s_0)\i[105]\i[302]%(m)doin' the dishes from his %(swearing) '%(it)awesome cooking lessons%(itoff)'.%(pause)(s_0)\i[305]%(m)the whole thing's a god awful nightmare that's what it is!"
+		elseif AFF(15,30); "(s_0)\i[115]\i[302]%(m)been ordered ta' ''dish duty'' now.\n\n(s_0)\i[107]\i[207]%(m)ya' could probs stab me 'n it'd still be better."
+		else; "(s_0)\i[106]%(m)%(swear) man. \i[302]doin' dishes %(it)sucks.%(itoff)"
+	if !medblocktrue
+	{
+		if AFF(50,70); "(s_0)%(m)\i[102]\i[302]%(swear), (s_0)\i[102]everythin' hurts.\n\n(s_0)%(m)%(papyrus('s',1)) bossed me 'round once again in one o' his %(it)moods%(itoff).%(pause)(s_0)\i[305]%(m)guess what happens when high and mighty thinks 'bout redecoratin'?\n\n\i[105]%(m)i have ta' move every lil' piece of furniture across t' whole fuckin' room.%(pause)(s_0)\i[105]\i[302]%(m)an' he jus' stands at the door barkin' orders like some military fucker.\n\n(s_0)\i[114]%(m)'n that for %(it)hours%(itoff)."
+		elseif AFF(30); "(s_0)\i[114]\i[302]%(m)ergh... (s_0)\i[302] %(it)someone%(itoff) thought i'd be a good cheap workin' fucker, (s_0)\i[107]responsible ta' move a dozen heavy %(swearing) objects for 24 hours.%(pause)(s_0)%(m)i swear,\i[102]\i[203] some day he's gonna pay."
+		else; "(s_1)\i[304]%(m)can't book ya' to move furniture can i?\n\n(s_0)\i[203]%(m)better ya' than me."
+		--
+		if INV("painmeds")[1] > 0; "\![raise,OnBag_Choose,painmeds]"
+	}
+			//gross food
+	"%(m)(s_0)\i[201]BELCH\w5 ugh.\n\n(s_0)\i[116]\i[302]%(m)%(grossfoodlist)."	
+		//money
+	if money < 0; "(s_0)\i[304]got ripped off, %(nickname)?\n\n(s_0)\i[105]\i[204]\i[302]%(m)damn, doin' that was my job."
+	if money < 0; "(s_0)\i[102]\i[205]\i[302]too bad i didn't see it happen.\n\n%(m)would rip ya' off too, %(s_1)but yer already broke."
+
+	//how about the time they were watching TV and paps decided to add seasoning to the popcorn cuz he a nasty fucker and all sans could taste for 3 days was fucking caramel, lime, and chili powder
+		/*if affection >= 50 {}
+			elseif affection <= 15 {}
+			else {}*/
+	//ok how about the time sans decided to swap paps' weird workout drink with soapy water and paps pulled a total fucking power move and chugged it while maintaining direct eye contact and it was badass af    until he was sneezing bubbles for the rest of forever
+}
+grossfoodlist
+{
+	"pasta crisps" //like pasta, but cooked and dried into chips and burned black
+	"cinnamon pickle soda"
+	"black pepper cake"
+	"mushroom smoothie"
+	"pickled carrots"
+	"ice cream salad"
+	"egg salad pie"
+	"stuffed egg"
+	"mince meat kabob"
+	"tuna loaf"
+	"salsa muffins"
+	"spicy lemongrass"
+	"cracker broth"
+	"pumpkin 'n vinegar mash"
+	"vinegar pickle meat loaf"
+	"jalapeño ginger nachos"
+	"salted spinach cookies"
+	"beet puffs"
+	"cabbage salt youghurt"
+	"broccoli bean steak"
+	"fuzzy apple sunday"
+	"bubblegum nachos"
+	"bbq coffee"
+	"ranch dressing soda"
+	"pickle soda"
+	"milk and tuna smoothie"
+	"grass soda"
+	"oyster pudding"
+	"nacho cheese 'n fish dip"
+	if INV("food")[1] > 0; "cheese 'n carrot flan"
+	if INV("food")[1] > 1; "vinegar sandwich"
+	if INV("food")[1] > 2; "water and tuna smoothie"
+	if INV("food")[1] > 3; "bean water"
+	if INV("food")[1] > 4; "grass ice"
+	if INV("food")[1] > 5; "salt"
+	if INV("food")[1] > 6; "sweet tuna n' marinara pasta"
+	if INV("food")[1] > 7; "avocado and beef smoothie"
+	if INV("food")[1] > 8; "caramel pork chops"
+	if INV("food")[1] > 9; "marshmallow fish cake"
+	if INV("food")[1] > 10; "ghost pepper sardines"
+	if INV("food")[1] > 20; "crunshed crystal"
+}
+
+snoopstuff : array
+{
+	"(s_0)\i[107]%(snoopplace)\n\n"
+	--
+		//reaction to his findings
+	"%(snoopreaction)"
+	"%(snoopreaction)"
+	"%(snoopreaction)"
+}
+snoopplace : nonoverlap
+{
+	"\i[298]%(m)(He's looking through %(userscomputer).)\w8\w8"
+	"\i[298]%(m)(He seems to have spaced out.)\w8\w8\n%(m)(No, he's just looking at %(userscomputer).)\w8\w8"
+	"\i[298]%(m)(Is he snooping through %(userscomputer)?)\w8\w8"
+	"\i[298]%(m)(You wonder what he's doing.)\w8\w8"
+	if MD("angry")||AFF(0,15); "\i[298]%(m)(You hope he doesn't mess with stuff.)\w8\w8"
+}
+snoopreaction : nonoverlap
+{
+	"\w8(s_0)\i[302]%(m)what the %(swear), %(nickname)?"
+	"(s_0)\i[302]%(m)what %(isare) %(heshe) stockin up 'ere?"
+	"(s_0)\i[302]%(m)why %(dodoes) %(heshe) have this?"
+	"(s_0)\i[304]%(m)\w3o\w5k... (s_0)\i[105]"
+	if AFF(0,15); "(s_0)\i[102]\i[204]\i[304]%(m)didn't expect anythin' else than even more shit."
+	if AFF(0,15); "(s_0)\i[304]%(m)'n i thought yer main place was trash."
+	if AFF(0,15); "(s_0)\i[204]\i[304]%(m)%(nickname), what a dump."
+}
+
+christmasweek : array
+{
+	"(s_0)\i[102]%(m)deadass can't wait fer %(swearing) gyftmas this year.\n\n(s_0)\i[203]%(m)%(whisper)'s the only time people look twice before killin'.\f[default]"
+	"(s_0)\i[400]%(m)ya' got anythin' fer this holiday jazz already?"
+	"(s_0)\i[302]%(m)shitty ass time."
+	"(s_0)\i[113]\i[302]%(m)don't ya dare spout sappy bullshit 'bout gyftmas."
+		//how asgore destroyed gyftmas
+	if AFF(30,50,70); "(s_0)\i[203]%(m)still remember asgore stormin' up to snowdin. \i[102]no one's seen the gyftmas monster since then.%(ARRADD('asgore','name','gyftmas'))"
+	if AFF(0,15); "(s_0)\i[207]%(m)wish you'd disappear like the gyftmas monster %(nickname)."
+		//if knowing what asgore did
+	if ARRINFO("asgore","gyftmas"); "(s_0)\i[108]%(m)i wonder if anyone else even remembers gyftmas, or if they're just all too scared ta mention it."
+}
+halloweenweek : array
+{
+	"(s_0)\i[302]%(m)ugh, horrorween. can't wait fer the next contest %(papyrus('s',1)) gonna force us to.\n\n\i[298]%(m)(You inquire about the name. Does he mean Halloween?)%(pause)%(m)eh, we usually call it holloween.\n\n\i[298]%(m)(He ignores the name you use.)"
+	if !INV("costume")[0]; "(s_0)\i[302]%(m)why the fuck. do i have the strange feelin'\i[105] something's gonna happen on horrorween..."
+	"(s_0)\i[102]\i[207]%(m)like ta call it horrorween cuz' there ain't nothin better than seein' dust coated monsters roam the streets."
+}
+springseason : array
+{
+	"(s_0)\i[105]\i[302]%(m)i swear. i saw a flower peekin' out of the snow the other day.\e:chain=flowerpop"
+	"(s_0)%(m)%(papyrus('s',1)) started cleaning recently, lemme tell ya', it's the %(it)worst%(itoff) sorta' thing.\n%(m)take a wild animal, n' put it in a cage full of it's enemies, except, the enemies are dust... ehr, dirt."
+}
+summerseason : array
+{
+	"(s_0)%(m)feel like snowdin has gotten warmer.\n\n\i[108]\i[302]%(m)maybe the core got some problems."
+	"(s_0)%(m)went to that one place, close to the mountains barrier.\n\n[half]%(m)almost felt scaldin' there, instead of the usual warmth.\n\n[half]\i[105]%(m)%(whisper)wonder what's up with that..."	
+}
+autumnseason : array { }
+winterseason : array { }
+
+weekspecificdialogue : array
+{
+		//1 (monday)
+	if weekday == 1 && !MD("happy"); "(s_0)\i[108]\i[302]%(m)i fuckin' hate mondays.\n\n%(m)on second thought? (s_0)\i[302]i hate every day."
+		//2 (tuesday)
+		//3 (wednesday)
+		//4 (thursday)
+		//5 (friday)
+		//6 (saturday)
+		//0 (sunday)
+	if weekday == 0 && RND(20); "(s_0)\i[301]%(m)ya' think ya' could keep me 'ere the whole week?"
+}
+timespecificdialogue : array
+{
+		//earlymorning
+	if TimeSlot == "earlymorning"; "(s_2)\i[102]\i[298]%(m)(He sighs once again.)(s_2)"
+	if TimeSlot == "earlymorning"; "(s_0)\i[104]\i[302]%(m)why the fuck did ya' have to be one of %(it)those%(itoff) freaks?\n\n%(m)up %(swearing) early..."
+	if TimeSlot == "earlymorning"; "(s_0)\i[302]%(m)'m ninety nine percent %(swearing) sure it's insane ta' wander the earth at this fuckin' hour."
+		//morning
+	if TimeSlot == "morning"; "(s_0)\i[105]\i[302]%(m)%(swear).\n\n%(m)%(whisper)missed my shift."
+	if TimeSlot == "morning" {
+		if AFF(30,50,70); "(s_0)\i[302]%(m)it's yer fault %(papyrus('s',1)) 's gonna be chewin' me out again."
+		if AFF(0,15); "(s_0)\i[302]%(m)it's yer fault he's gonna be chewin' me out again."
+	}
+		//lunch
+	if TimeSlot == "lunch" {
+		if AFF(50,70); "(s_0)\i[304]%(m)any lunch yet %(nickname)?"
+		if AFF(0,15,30); "(s_0)\i[304]%(m)any lunch yet %(nickname)?\n\n\i[102]%(m)cuz i'd like ta' not starve, but ay, (s_0)\i[302]yer keepin' me here."
+	}
+		//afternoon
+		//evening
+		//latenight
+	if TimeSlot == "latenight"; "(s_0)\i[304]%(m)you should probably go ta' bed, %(nickname). jus' a suggestion tho."
+	if TimeSlot == "latenight"; "(s_0)\i[102]\i[206]\i[298]%(m)(He's yawning.)(s_0)\i[102]%(VARC('tired','++'))"
+	if TimeSlot == "latenight"; "(s_0)\i[107]%(m)...\n\n%(m)god fucking- (s_0)\i[302] go to bed %(nickname)."
+	if TimeSlot == "latenight" && ARRINFO("user","nightowl"); "(s_0)\i[102]%(m)look, (s_0)\i[302]i know yer not someone to do that. \i[105]but come on %(nickname). (s_0)\i[303]go ta' bed."
+	if TimeSlot == "latenight" && ARRINFO("user","nightowl"); "(s_0)\i[102]%(m)ya' know,  i get it, (s_0)\i[105]\i[301]i really do.\n\n(s_0)\i[302]%(m)but if ya' could let me go, so at least one of us can catch some z's. (s_0)\i[302]then that'd be very %(swearing) appreciated %(nickname)."
+	
+		//midnight
+}
+
+depressedrambling: array //mood = sad
+{
+	//"\0%(s)\i[105]\i[302]%(m)ever thought bout how the world would be without ya'?\e"
+	//"\0%(s)\i[102]\i[301]%(m)wanna hear the truth 'bout existence?\w8\w5 everythin' we do is pointless anyway.\e"
+	//"\0%(s)\i[102]\i[204]%(m)we could all die 'n no one would care.\e"
+	//if affection >= 30 {"\0%(s)%(m)%(whisper)sometimes\w8\i[104], i wish i'd just %(swearing) die already.\f[default]\e:chain=depressedtalk"}
+	//"\0%(s)\i[302]%(m)is it even worth it?\e"
+	//"\0%(s)\i[104]%(m)%(whisper)wish i didn't have to make the choice.\e"
+	//"\0%(s)\i[302]%(m)%(whisper)why am i even still here?\e"
+	//"\0%(s)\i[302]%(m)%(whisper)why me?\e"
+	//"\0%(s)\i[302]\i[104]%(m)%(whisper)i wish it'd finally end.\e"
+
+	"(s_1)%(m)stopped wondering why everythin' goes to shit as soon as i arrive."
+	if totalinfo[1] > 1; "(s_0)\i[302]%(m)%(whisper)'m kinda surprised ya' haven't ditched me yet."
+	"(s_0)\i[102]%(m)life's a hellhole. betta' accept it early."
+	"(s_0)\i[302]%(m)there's no point in doing %(it)anything%(itoff)."
+	"(s_0)\i[105]\i[298]%(m)(He sighs.)"
+	"(s_0)\i[108]%(m)%(whisper)all of this is pointless.%(def)"
+	"(s_0)\i[298]%(m)(He keeps quiet.)"
+	"(s_0)\i[103]\i[298]%(m)(He doesn't seem to be fully there.)"
+	"(s_0)\i[108]\i[304]%(m)wonder when it's finally done."
+	"(s_0)\i[106]\i[302]\i[298]%(m)(He's mumbling so quietly, you can't hear him.)"
+	"(s_0)\i[108]\i[302]\i[298]%(m)(He seems out of it.)"
+	"(s_0)\i[108]\i[298]%(m)(You can't tell if he looks tense, or relaxed.)\n\n%(m)(It's a strange mix.)"
+	"(s_0)\i[113]\i[298]%(m)(All he does is stare.)"
+	"(s_0)\i[302]\i[298]%(m)..."
+	"(s_0)\i[102]%(m)%(whisper)i'm.. so tired."
+}
+relaxeddialogue : array { }
+
+affectionhigh : array //AFF=50,70
+{
+	if MD("bored"); "(s_0)\i[114]%(m)don't wanna play some shit?"
+	if MD("bored"); "(s_0)\i[102]%(m)suggestion.\n\n%(m)%(suggestion)"
+	"(s_0)\i[302]%(m)what is this place anyway?"
+	"(s_spout)\i[303]%(m)%(whisper)should i text 'im?"
+	//if ASEARCH("music",userhabits) != -1; "\0%(s)%(m)\i[302]\i[107](He's mumbling under his breath. It sounds like song lyrics.)";
+	//if ASEARCH("music",userhabits) != -1; "\0%(s)%(m)\i[304]ya' like music\w6, don't ya'?";
+	//if ASEARCH("music",userhabits) != -1; "\0%(s)%(m)\i[102]some of yer music reminds me%(s)\i[304] o' that one wannabe dj we got.\i[104]";
+}
+affectionnormal : array //AFF=30
+{
+	"(s_2)%(m)the fuck even is this?"
+	"(s_0)\i[304]%(m)what ya' doin' anyway?"
+	"(s_0)%(m)if ya' got nothin' goin'.. \i[102]\i[203]it'd be %(it)awesome%(itoff) if ya' could let %(it)me%(itoff) go."
+	"(s_0)\i[113]\i[302]%(m)this is terrible."
+	"(s_0)\i[302]%(m)ya' know. (s_0)\i[102]even the dump looks nicer."
+	"(s_0)\i[316]%(m)probably the worst shithole i've seen."
+	"(s_0)\i[113]\i[302]%(m)eva' heard of cleanin'?"
+	"(s_0)\i[315]%(m)what ya' wastin' yer time with now?"
+	//if ASEARCH("music",userhabits) != -1; "\0%(s)%(m)some of yer music reminds me%(s)\i[304] o' that one wannabe dj we got.\i[104]";
+	"(s_0)\i[302]%(m)don't even know the %(stuff) lyin' around 'ere, but-\n\i[303]%(m)c'mone even i can tell tha's not how ya' should sort these."
+	"(s_0)\i[302]%(m)%(beginning) this is even worse than the backyard of alphys.%(ARRADD('alphys','name'))"
+}
+affectionlow : array //AFF=0,15
+{
+	"(s_0)\i[102]\i[298]%(m)(He seems content not to talk to you.)"
+	"(s_0)\i[304]%(m)someone ever told ya' what a fuckin' dump ya' have?"
+	"(s_2)\i[301]%(m)ya' know, i'd say i've seen worse.\n\n(s_0)\i[203]\i[304]%(m)but that'd be a filthy lie."
+	"(s_0)\i[115]\i[302]%(m)what ya' wastin' yer time with now?"
+	"(s_0)\i[102]%(m)jus' sayin'. (s_0)\i[301]it'd be a perfect opportunity ta' let me leave now."
+	"(s_0)\i[113]\i[207]%(m)how bout ya' play friendly an' lemme go back?\n\n%(m)sound good, huh?"
+	"(s_0)\i[105]\i[302]\i[298]%(m)(He's grumbling.)"
+}
+
+sittingdialogue : array
+{
+	"(s_0)\i[102]\i[298]%(m)(You think he started humming.)\n\n%(m)(It's barely noticeable.)%(VARC('relaxed','++'))"
+	"(s_0)\i[102]\i[204]\i[298]%(m)(He seems to enjoy his new seat.)%(VARC('relaxed','++'))"
+	if MD("relaxed"); "(s_0)\i[304]%(m)the floor is comfier than it looks."
+}
+songcomment : array //currently disabled
+{
+	_i = TOLOWER(songname);
+		--
+	"(s_0)\i[304]%(m)ya' enjoyin' %(it)%(_i)%(itoff)?"
+	"(s_0)\i[102]\i[298]%(m)(Could it be that he likes your music?)%(VARC('bored','--'))"
+	if AFF(30,50,70); "(s_0)\i[102]\i[304]%(m)yer music's pretty good %(nickname).%(VARC('pleased','++'))"
+	"(s_0)\i[102]\i[298]%(m)(He quietly listens to the song.)"
+	if MD("relaxed")||MD("happy"); "(s_0)\i[298]%(m)(Sans is humming along.)"
+	"(s_0)\i[102]%(m)(Is it you, or is he very slightly tapping his finger in rhythm to the beat?)"
+}
+
+
+sleepdialogue : nonoverlap //only dialogue pool if sleeptrue
+{
+	"(s_0)\i[298]%(m)(You wish him sweet dreams.)"
+	"(s_0)\i[298]%(m)(You hope he doesn't suffer nightmares.)"
+	"(s_0)\i[298]%(m)(You think about how peaceful he looks.)"
+	"(s_0)\i[298]%(m)zz..zz..z...."
+	"(s_0)\i[298]%(m)zzz..."
+	"(s_0)\i[298]%(m)(snore.)"
+}
+wakeupdialogue //@uf_string.dic
+{
+	"%(VARC('tired','-10'))"
+	--
+	"(s_wake)\w8\w8\i[302]%(m)huh?\w8\w8\i[102]\w8\w8\w8(s_0)\i[302]\w8\w5\w8\n\i[298]%(m)(He appears to be awake now.)"
+	"(s_0)\i[298]%(m)...\n(s_wake)\i[302]%(m)mh-?"
+}
+		
+selftalk : nonoverlap //afk talk when user is away
+{
+	if AFF(0,15) && totalinfo[1] > 0; "(s_0)\i[302]%(m)%(swearing)%(swear)...\n%(m)i'm still not out of here..."
+	if MD("sad"); "(s_0)\i[116]\i[302]%(m)%(it)sigh.%(itoff)"
+	"(s_0)\i[102]\i[302]%(m)one... two... three.\n\n%(m)%(it)sigh.%(itoff)"
+}
+
+busytalk : nonoverlap //talk for when the user is busy. like self talk but less extreme.
+{
+	
+}
+
+
+//------------------------------------------------------------------------------
+// Chain dialogue (in AiTalk)
+//------------------------------------------------------------------------------
+shittyday : nonoverlap
+{{CHAIN
+	"(s_0)\i[107]\i[305]%(m)%(papyrus('s',1)) ordered me on extra duty, (s_0)despite bloody well knowin' \i[305] i already was at a %(swearing) unscheduled shift.\e:chain=end"
+	"(s_0)\i[102]%(m)%(undyne('s',1)) showed up 'n \i[302]wanted ta' boss me around, (s_0)\i[302]she ain't even commander anymore!\n \i[115]%(m)can ya' fuckin' believe that? (s_0)\i[302]%(ARRADD('undyne','job'))\e:chain=end"
+}}CHAIN
+
+depressedtalk : nonoverlap
+{{CHAIN
+	"%(m)it'd be better that way.\e:chain=end"
+	"%(m)everyone would finally have their peace.\e:chain=end"
+	"%(m)it wouldn't change anythin' anyway.\e:chain=end"
+	"%(m)no one would care.\e:chain=end"
+}}CHAIN
+
+flowerpop : nonoverlap
+{{CHAIN
+	"(s_0)\i[105]\i[302]%(m)%(whisper)am i goin' insane?\e:chain=end"
+	"(s_0)\i[108]\i[302]%(m)wonder if it was that weed.\e:chain=flowerpop2"
+	"(s_0)\i[107]\i[302]%(m)... i think at least...\e:chain=end"
+}}CHAIN
+flowerpop2 : nonoverlap
+{{CHAIN
+	"(s_0)\i[105]\i[301]%(m)didn't think it was still around...\e:chain=end"
+	"(s_0)\i[302]\i[298]%(m)(He still seems to ponder that encounter.)\e:chain=end"
+}}CHAIN
+
+//------------------------------------------------------------------------------
+// Special events (in AiTalk)
+//------------------------------------------------------------------------------
+OnAiTalk_Check
+{
+        //special very long checks
+    if !ARRINFO('user','artist')&&!ARRINFO('user','nonartist')&&totalinfo[0]>0&&RND(1); _artunlock = 1
+    else; _artunlock = 0
+    if !ARRINFO('user','small')&&!ARRINFO('user','tall')&&totalinfo[0]>0&&RND(1); _heightunlock = 1
+    else; _heightunlock = 0
+        //actual checks
+    if sleeptrue; sleepdialogue
+    elseif state == 1; selftalk //lackluster
+    elseif !INV('phone')[0]&&totalinfo[0]>0&&RND(50); phoneunlock
+    elseif !ARRINFO('user','place')&&RND(50); hemisphereunlock
+    elseif _artunlock; artistunlock
+    elseif _heightunlock; heightunlock
+    elseif state == 3 && RND(20); busytalk
+    elseif state == 2 && RND(50); ""
+    else; ""
+	 //elseif !ARRINFO('user','beverage')&&AFF(50,70); beverageunlock
+}
+
+phoneunlock
+{
+	if AFF(30,50,70); "(s_0)\i[301]\i[298]%(m)(There's a catchy song coming from Sans.)(s_0)\i[108]\i[302]\n\n\i[298]%(m)(He's fiddling around in his pocket.)%(pause)(s_0)\i[102]\i[298]%(m)(The music stopped. If he has a phone, why didn't he tell you?)"
+    else; "(s_0)\i[301]\i[298]%(m)(There's a catchy song coming from Sans.)(s_0)\i[108]\i[302]\n\n\i[298]%(m)(He's fiddling around in his pocket.)%(pause)(s_0)\i[102]\i[298]%(m)(The music stopped. Does he have a phone?)"
+	--
+	ARRADD('invAr','phone,1,-1')
+}
+hemisphereunlock
+{
+    "(s_0)\i[302]%(m)heard a young one gushin' 'bout a book they've found, \i[106]detailin' human seasons. kind of forgot they existed.\n\n[half](s_0)\i[304]%(m)but ain't it %(Season) fer ya' now?/
+	\n\n\![*]\q[(It isn't.),OnHabits_Hemisphere,lower]\_l[150]\![*]\q[(He's right.),OnHabits_Hemisphere,upper]"
+}
+artistunlock
+{
+    if AFF(50,70); "(s_0)\i[304]%(m)ay %(nickname), %(alphys('s',1)) has been rantin' my ears off 'bout wantin' ta' find someone ta' draw her weird saucy anime fan shit.%(pause)%(m)ya' wanna play the part?"
+	if AFF(30); "(s_0)\i[304]%(m)ay %(nickname), was wonderin' if ya' were willin' ta' draw a pic or somethin' fer someone.%(pause)%(m)some weird kind o' saucy anime shit."
+	if AFF(0,15); "(s_0)\i[102]%(m)someone's been gettin' on my nerves, tryin' ta' find a pawn to draw their weird anime shit.%(pause)%(m)wanna be that idiot?"
+	--
+	"\n\n\![*]\q[(You'd draw it.),OnHabits_Artist,agree]\n\![*]\q[(You would but are too busy.),OnHabits_Artist,busy]\n\![*]\q[(You're not an artist.),OnHabits_Artist,nonartist]"
+}
+heightunlock
+{
+    if AFF(50,70); "(s_0)%(m)ya' know, %(papyrus('s',1)) told me to grab some %(stuff) from a %(swearing) high shelf.\n%(m)i was annoyed already that he didn't think 'bout doing it himself. cuz' fuck him, he's tall enough to reach it. but after he screamed bloody hell again, i just thought, kay, 'm gonna humor 'im.%(pause)%(m)and, %(nickname), i kid you not, it took me ten whole minutes until i found a way to get there."
+	if AFF(0,15,30); "%(m)i had to try and reach a %(swearing) high shelf, 'cuz of someones orders, and, %(nickname), i kid you not\w6, it took me ten whole minutes until i found a way to get there."
+	--
+	"%(pause)%(m)painful %(swearing) shit, %(nickname).\n\n\n[half]\![*]\q[(You'd have reached it. You're taller.),OnHabits_Shelf,tall]\n\![*]\q[(You wouldn't have reached it either.),OnHabits_Shelf,small]"
+}
+beverageunlock //disabled
+{
+    "(s_2)\i[102]%(m)thanks ta %(papyrus('s',1)) removing all o' my mustard i had ta' resort to coffee instead...%(pause)(s_0)\i[304]%(m)thought i may get ya' some o' his special too."
+	--
+	"\n\n[half]\_q\![*]\q[Coffee sounds great!]\n\![*]\q[Tea is better!]\n\![*]\q[I'd prefer hot chocolate.]"
+}

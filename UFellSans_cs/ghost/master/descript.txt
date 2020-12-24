@@ -1,0 +1,25 @@
+﻿
+
+charset,UTF-8
+
+name,Underfell Sans
+type,ghost
+
+sakura.name,Sans
+kero.name,
+
+craftman,ChangeSide
+//craftmanw,チェーンチュサイヅ
+craftmanurl,http://changeside.tumblr.com
+
+
+sstp.allowunspecifiedsend,0
+shiori,yaya.dll
+
+
+balloon,Underfell_cs
+balloon.dontmove,false
+
+
+icon,sprites/icon.ico
+

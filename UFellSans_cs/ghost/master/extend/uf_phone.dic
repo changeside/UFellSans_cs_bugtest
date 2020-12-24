@@ -1,0 +1,515 @@
+//------------------------------------------------------------------------------
+// File		:uf_phone.dic
+//
+//			:Functions for phone interactions and sprites.
+//
+// Var		:phonetrue
+//			 togglecall
+//------------------------------------------------------------------------------
+click { "%(pause)\b0\i[298]%(m)(Click...)" }
+
+//------------------------------------------------------------------------------
+// Guide	:Character Sprites
+//
+//	Paps (p):0|def,1|look away,2|sigh,3|sweat,4|surprised,
+//			 5|provocative happy,6|happy,7|genuine happy
+//	Grill(g):0|def,1|laugh,2|frown,3|angry
+//	Alph (a):0|def,1|dead,2|angry,3|mocking laughter,
+//			 4|judging,5|judging unamused,6|mirth
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Being called (start @uf_aitalk.dic)
+//------------------------------------------------------------------------------
+OnPhone : array
+{
+	"(s_pout)"
+	--
+	OnCalled_Unknown
+	OnCalled_Papyrus
+	OnCalled_Grillby
+	OnCalled_Alphys
+	OnCalled_Undyne
+	--
+	"%(click)"
+}
+
+OnCalled_Unknown : array
+{
+	if MD("tired"); "(s_pback)%(gaze_0)\i[298]%(m)(He didn't even read the message.)"
+	if MD("tired"); "(s_pback)%(gaze_0)\i[298]%(m)(He didn't even spare the call a second glance.)\n(s_pback)"
+	if MD("angry")||MD("sad"); "(s_0)\i[298]%(m)(It seems to be a message.)\n\n%(m)(He doesn't appear to be in a mood to share.)(s_pback)"
+	if MD("angry")||MD("sad"); "(s_pback)%(gaze_0)\i[298]%(m)(You're sure he got a message.)\n\n%(m)(Doesn't he want to read it?)"
+	if MD("tired")||MD("sad"); "(s_pback)%(gaze_0)\i[298]%(m)(He didn't pick it up.)"
+	if MD("tired")||MD("sad"); "(s_pback)%(gaze_0)"
+	if AFF(0,30)||MD("angry")||MD("sad"); "(s_pback)%(gaze_0)\i[298]%(m)(Isn't it rude to ignore them?)"
+	if AFF(0,30); "(s_pback)%(gaze_0)\i[298]%(m)(Is he ignoring the call because of you...?)"
+	
+	"\i[304]%(m)huh.\w8\w8\w8(s_pback)"
+	"\i[304]%(m)why... (s_pback)\i[302]"
+	"\i[303]\w8\w8\w8(s_0)\i[102]\i[298]%(m)(He sighs.)(s_pback)"
+	"\i[302]%(m)... \w8\w8(s_pback)"
+}
+OnCalled_Papyrus : array
+{
+	"\b6(s_0)\i[304]%(p2)\i[298]HEY %(it)BROTHER%(def). THERE'S SOME PAPERWORK YOU ARE GOING TO HAVE TO FINISH TODAY.\n\n[half]/
+		(s_0)\i[105]%(m)yeah fine. \i[304]did you at least get me dinner from grillb'z?%(pause)/
+		\b6(s_0)\i[102]%(p1)\i[298]UNFORTUNATELY YES. YOU SHOULD REALLY RAISE YOUR STANDARDS SANS. SEE YOU TONIGHT./
+		%(ARRADD('papyrus','family'))"
+	"\b6(s_0)%(p0)\i[298]WELL, I HAVE GOOD NEWS AND BAD NEWS. THE GOOD NEWS IS, UNDYNE GOT INTO A FIGHT. %(p2)THE BAD NEWS IS, UNDYNE GOT INTO A FIGHT./
+		%(ARRADD('undyne','name'))"
+	"\b6%(p0)\i[298]YOU REALLY NEED TO COME HOME EARLIER, WE MIGHT BE GETTING SOME HELP OUT HERE YES, BUT YOU STILL HAVE OBLIGATIONS!\n\n[half]/
+		(s_0)%(gaze_0)\i[302]%(m)yeah... i wish i could."
+	"\b6(s_0)%(p4)\i[298]SO, THE DINNER YOU MADE ACTUALLY TASTED PRETTY ALRIGHT... %(p7)THANKS FOR THAT.\n\n/
+		(s_0)\i[105]\i[302]\i[400]%(m)uh-"
+	"\b6(s_0)%(p0)\i[298]THE KING'S STIRRING SHIT UP. YOU BETTER GET HERE AS SOON AS YOU CAN.\n\n/
+		(s_0)\i[113]\i[305]%(m)oh, for fuck's sake./
+		%(ARRADD('asgore','job'))"
+	"\b6(s_0)%(p5)\i[298]OKAY... SO TOMORROW YOU HAVE TWELVE SHIFTS TO GO AND-\i[305]"
+	if AFF(50,70); "\b6(s_0)%(p5)\i[298]WELL BROTHER, GLAD YOU'RE HAPPIER LATELY. BUT DO GET YOUR ASS HOME SOON.\n\n\i[102]%(p2)YOU HAVE ANOTHER PILE OF WORK TO FINISH.\i[205]/
+		%(ARRADD('papyrus','family'))"
+	"\b6(s_0)%(p2)\i[298]ALPHYS IS BUGGING ME ABOUT YOU AGAIN. SHOULD I...?\n\n/
+		%(p0)(s_1)\i[102]%(m)nah, it’s fine. ’ll go see what she wants when i get back.(s_0)/
+		%(ARRADD('alphys','name'))"
+	"\b6%(p0)(s_0)\i[400]%(m)hey-\n\n[half]/
+		(s_0)\i[205]\i[302]\i[298]SANS CLEAN YOUR ROOM. I KNOW YOU LIKE YOUR PRIVACY BUT I AM \n%(it)THIS%(itoff) CLOSE TO KICKING THE DOOR IN AND CLEANING IT MYSELF!!"
+		
+	//work
+	"\b6(s_0)%(p0)\i[298]DON'T FORGET, TOMORROW YOU ARE GOING TO THE CAPITAL WHILE I'M GOING TO BE STATIONED BY SNOWDIN AND WATERFALL.%(pause)/
+		\b6%(p0)(s_0)\i[116]\i[302]%(m)yeah, i remember... fuckin' pain in the ass.."
+	{
+		"\b6(s_0)%(p0)\i[298]SANS WHERE DID YOU PUT THE PAPERS THAT YOU WANTED ME TO FINISH UP AGAIN?\n\n"
+		--
+		"(s_0)%(m)top shelf left side."
+		"(s_0)%(m)bottom shelf  somewhere."
+		"(s_0)%(m)my desk drawer on the right."
+		"(s_0)%(m)my desk drawer on the left."
+		"(s_0)%(m)my desk top right side, beneath the sheet notes."
+		"(s_0)%(m)on the drawer to the right"
+		"(s_0)%(m)left them on my bed... i think."
+		"(s_0)%(m)on my desk."
+	}
+	"\b6(s_0)%(p0)\i[298]TRAINING TOMORROW MORNING AT %(RAND(4)+4), DON'T SKIP OUT, I WILL DRAG YOUR ASS OUT OF BED IF I HAVE TO."
+	"\b6%(p0)(s_0)%(m)okay, what do you need?\n\n/
+		(s_0)\i[298]MEETING IN A FEW HOURS, DON'T\nFORGET.\n\n/
+		(s_0)%(m)got it."
+	"\b6%(p1)(s_0)\i[303]%(m)hello?\n\n[half]/
+		(s_0)%(p0)\i[298]FORMAL DINNER HAPPENING AT THE HOTEL, TRY TO WEAR A CLEAN SUIT THIS TIME.%(pause)/
+		\b6%(p0)(s_0)%(m)you know formal shit isn’t my cup of tea.\n\n[half]/
+		(s_0)\i[298]IT IS NOW. EITHER YOU COME HERE ON YOUR OWN FREE WILL, OR METTATON WILL BE ON YOUR ASS.%(pause)/
+		\b6%(p0)(s_0)\i[105]\i[302]%(m)alright, i’ll be there when i get there...\ni guess./
+		%(ARRADD('mettaton','name'))"
+	"\b6(s_0)%(p3)\i[298]DID ANYTHING HAPPEN DURING YOUR SHIFT BEFORE YOU LEFT?\n\n[half]/
+		(s_0)\i[115]\i[302]%(m)couple people were tryin' t' start shit in the shop. took care of that. there’s going ta be some paperwork ’ll\nhave to fill out though...%(pause)/
+		\b6%(p2)\i[298]OH, GOOD.\n\n/
+		(s_0)\i[205]\i[305]%(m)why, did you think i was slackin' off?\n\n/
+		%(p5)\i[298]YES ACTUALLY."
+	if MD("sad")||MD("melancholic"); "\b6(s_0)%(p1)\i[298]SO SANS, ABOUT THAT LAST SHIFT-\n\n[half]/
+		(s_0)\i[105]\i[303]%(m)can we talk 'bout it later? ’m not exactly in a good mindset for that yet.%(pause)/
+		\b6%(p4)\i[298]... alright, BUT WHEN YOU GET HOME-\n\n[half]"
+	{
+		"\b6(s_0)%(p0)\i[298]HAVE YOU BEEN AROUND HOTLAND LATELY?\n\n/
+			(s_0)\i[302]%(m)nope, what's up?%(pause)/
+			\b6(s_0)%(p0)\i[298]WELL. WE'VE BEEN GETTING REPORTS OF SOMETHING STIRRING UP, "
+		--
+		if AFF(50,70);	"I AM GOING TO CHECK THAT OUT LATER. COULD YOU ALSO TAKE A LOOK WHEN YOU CAN?"
+		if AFF(30);		"COULD YOU TAKE A LOOK WHEN YOU CAN?"
+		if AFF(0);		"LOOK INTO THAT!"
+		--
+		if AFF(30,50,70)&&!MD("sad")&&!MD("angry");	"%(pause)\b6%(p0)(s_0)\i[102]\i[205]\i[298]%(m)(You hear a hum of approval.)"
+	}
+	
+	"\b6(s_0)%(p0)\i[298]WE'RE GETTING NEW RECRUITS. I WANT YOU TO TAKE A FEW OF THEM AND TEACH THEM HOW TO FILL OUT THE FILES. %(p2)SADLY, \nYOU'RE MORE EQUIPPED FOR THAT THAN I AM.%(pause)/
+		\b6%(p0)(s_0)\i[206]\i[302]%(m)yeah yeah(s_0)\i[302] 'kay, just... tell me when that’ll be when i get back."
+	"\b6(s_0)%(p3)\i[298]SANS-\n\n/
+		(s_0)\i[102]\i[201]\i[305]%(m)thirteen pages of documents are sitting on the dining room table at the corner next to the rock.%(pause)/
+		\b6%(p3)(s_0)%(m)didn't have time to hand 'em off to you.\n\n/
+		%(p4)\i[298]OH, FINE, THANKS."
+	"\b6(s_0)%(p2)\i[298]DO YOU MIND DEALING WITH UNDYNE LATER? SHE'S BEING A BITCH RIGHT NOW.\n\n[half]/
+		(s_0)\i[102]\i[302]%(m)'ll give  a message to alphys t' get her shit together and deal with her batshit crazy girlfriend./
+		%(ARRADD('undyne','name','date'))%(ARRADD('alphys','name','date'))"
+	"\b6(s_0)%(p2)\i[298]SO THE DOGS ARE BEING IDIOTS AGAIN.\n\n[half]/
+		(s_0)%(m)if you’re having trouble with 'em, toss \n'em all a bone or two.%(pause)/
+		\b6%(p1)\i[298]JUST DEAL WITH THEM. I ALREADY TRIED..."
+		
+	//old
+	"\b6(s_0)\i[304]%(p7)\i[298]I JUST WANTED TO NOTIFY YOU \w5THAT \w8%(rockname('p')) HAS WON THE LATEST BEAUTY(s_0)\i[302]\i[400]\i[298] CONTEST%(p6), MAKING A SPLENDID SHOW\w7%(p5) BY DESTROYING HIS OPPONENTS LIKE FLIES!!!!"
+	"\b6(s_0)\i[105]\i[301]%(p0)\i[298]SWING YOUR TAILBONE BACK TO YOUR STATION!"
+	"\b6(s_0)%(p0)\i[298]WHERE ARE YOU SLACKING OFF TO NOW???!\n\n[half]/
+		(s_0)\i[102]\i[302]%(m)a pretty big shit hole...\n\n[half]/
+		%(p4)\i[298]WAIT. WHAT ARE YOU DOING AT THE DUMP?\i[400]"
+	"\b6(s_0)\i[205]\i[301]%(p2)\i[298]COMMOTION CLOSE TO STATION 3! GET YOUR ASS THERE IMMEDITATELY!\n\n/
+		%(p4)(s_0)\i[105]\i[201]\i[302]%(m)i can't.... per say...%(pause)/
+		\b6\i[302]%(p0)\i[298]WHY???? I DON'T CARE?! I'M BUSY WITH THE STATION IN WATERFALL-\n\n[half]/
+		(s_0)\i[113]\i[302]%(m)then boss undyne around. she's been slackin' off anyway."
+	{
+		"\b6(s_0)%(p2)\i[298]THAT ROWDY BUNNY HAS BEEN ARRESTED AGAIN...  \i[304]SIGH.\n\n(s_0)\i[302]\i[298]%(p1)I NEED TO KNOW WHERE YOU PUT HIS RECORDS.%(pause)"
+		--
+		if AFF(0,30); "\b6%(p4)(s_1)\i[106]\i[302]\i[400]%(m)i don't have 'em boss.\n\n%(m)ask the guards."
+		if AFF(50,70); "\b6%(p1)(s_0)\i[102]%(m)i think i put them in the files,(s_0)\i[107] second shelf."
+	}
+	"\b6(s_0)%(p0)\i[298]I FOUND A QUICHE ROTTING UNDER THE COUCH!!! %(p5)\n\nTAKE A GUESS WHAT YOUR DINNER WILL BE TODAY.\i[109]\i[303]\i[400]"
+	"\b6(s_0)%(p2)\i[298]SIGH. %(undyne('p',0))'S BEEN DISOBEDIENT. \w5AGAIN.\i[301]\n\n%(p1)HOW DO YOU THINK WE SHOULD DEAL WITH THIS?%(pause)/
+		\b6%(p1)\i[102]%(m)i'd say off her but (s_0)\i[105]\i[304]y'know, (s_0)\i[106]just hit her and threaten with social work, or no pay.\n\n/
+		%(p7)\i[298]WELL SAID!"
+	"\b6(s_0)%(p7)\i[298]EXPECT PREMIUM LASAGNA THIS EVENING\i[109]\i[301], DEAR BROTHER."
+	"\b6(s_0)%(p1)\i[298]UNDYNE. IS. A. PAIN.\i[302]/
+		%(ARRADD('undyne','name'))"
+	{
+		"\b6(s_0)%(p1)\i[298]HAVE YOU HEARD ANYTHING UNUSUAL IN WATERFALL LATELY SANS?\n\n/
+			(s_0)\i[105]\i[301]%(m)nah, don't think so. (s_0)\i[304]why?%(pause)/
+			\b6%(p0)\i[298]IT'S BEEN TOO QUIET.... %(p2)THAT IS NEVER A GOOD SIGN."
+		--
+		if AFF(30,50,70) {
+			"\n\n[half](s_0)%(m)maybe they're too busy "
+			--
+			"with "
+			"enjoying "
+			--
+			"not quite outside"
+			"murder"
+			"eating"
+			"food"
+			"some shit show"
+			"tv buzz"
+			"breathin'"
+			"mettatons new movie"
+			--
+			". (s_0)\i[102]who knows?"
+		}
+	}
+}
+OnCalled_Grillby : array
+{
+	"\b6(s_0)%(g0)%(m)hey grillby.\n\n/
+		%(g1)\i[298]Need something later?%(pause)/
+		\b6%(g1)(s_0)\i[205]%(m)maybe some dinner, the usual? (s_0)\i[202]Put it on my tab 'll pay you back within the week.\n\n/
+		%(g0)\i[298]alright Sans. See you."
+	"\b6(s_0)\i[203]%(g2)%(m)%(timegreet) grillby, anything fun happen today?\n\n/
+		%(g3)\i[298]Three people tried to dine and dash.\n\n/
+		(s_0)\i[205]\i[302]\i[400]%(m)at least you got it handled right?"
+	"\b6(s_0)%(g2)\i[298]Sans, I haven’t seen you in a while. Are you staying out of trouble?\n\n[half]/
+		(s_0)\i[102]%(m)yeah i’m doing fine, just caught up in some stuff, it’s alright though.\n\n[half]/
+		(s_0)\i[305]%(g1)\i[298]So you found a date?"
+	"\b6(s_0)%(g0)\i[298]Hello Sans, I have your usual order as well as something made specially for your brother.\n\n/
+		(s_0)\i[301]%(m)oh, thanks grillby."
+	if AFF(30,50,70); "\b6(s_0)%(g0)\i[298]Hello Sans, how has your brother been?\n\n[half]/
+		(s_0)\i[202]\i[116]%(m)t' usual, he’s experimentin' a lot more with food lately. least we don’t have a shortage but at the same time, ’s not the best.%(pause)/
+		\b6(s_0)\i[301]%(g1)\i[298]Practice makes perfect Sans, especially with food. He’ll get better I’m sure.\n\n[half]/
+		(s_0)\i[115]%(m)sure, but ’m still gonna at least have a couple meals at the bar."
+	"\b6(s_0)%(g0)\i[298]Sans, you’ve been to Hotland before yes? Do you know of a spider monster?\w6\n\n[half]/
+		(s_0)\i[302]%(m)not really. heard she charges an insane amount for her food that may or may not kill you though.%(pause)/
+		\b6(s_0)%(g2)\i[298]I see. Do let me know if you see her around closer to Snowdin.\n\n[half]/
+		(s_0)\i[304]%(m)watchin' out for competition?\n\n[half]/
+		(s_0)%(g1)\i[298]Mm, in a way. Anyways, thanks Sans, see you tonight."
+	"\b6(s_0)%(g0)\i[298]Have you seen Alphys lately? I wonder how she is.\n\n[half]/
+		(s_0)\i[105]\i[305]%(m)th' same more or less, kinda bein' a bitch recently but ugh,(s_0) she’s alright enough.%(pause)/
+		\b6%(g1)\i[298]Should tell her to get a drink in here sometime.\n\n/
+		(s_0)\i[205]%(m)maybe, she's been kinda complainin' about the shit food she keeps getting."
+	"\b6(s_0)%(g2)\i[298]The King is raising the tax again.\i[305] At this rate, I’m not sure what’s going to break first.\n\n[half]/
+		(s_0)\i[303]%(m)you’ll probably have to start raising the prices huh?%(pause)/
+		\b6(s_0)%(g2)\i[298]Perhaps... I’ll give you an update later."
+	"\b6(s_0)%(g2)\i[298]Do you mind coming over to the bar later when you’re free?\i[301] There’s a small... group that’s been visiting more often and stirring up trouble. I would deal with them myself but-%(pause)/
+		\b6%(g2)(s_0)%(m)of course, am i gonna get discounts in return?\n\n/
+		\i[202]%(g0)\i[298]Whatever you want, just talk to me about it later."
+	if RND(20); "\b6(s_0)\i[304]%(g0)\i[298]How’s the love life?\n\n[half]/
+		(s_0)\i[305]%(m)wh-\n\n/
+		%(g1)\i[298]%(m)(You hear fire cackling.)"
+}
+OnCalled_Alphys : array
+{
+	"\b6(s_0)%(a6)\i[298]Hey Sans, how's your single life going?\n\n/
+		(s_0)\i[102]\i[305]%(m)better than your horny ass."
+	"\b6(s_0)%(a4)\i[298]So about where you've been going lately-\n\n/
+		(s_0)\i[113]\i[201]\i[302]%(m)like i said, it's a shit hole. dunno why you're so interested.%(pause)/
+		\b6(s_0)\i[105]\i[201]\i[302]\i[400]%(a2)\i[298]uh huh yeah sure you're going to have to tell me sometime.\n\nCan't keep dodging me forever."
+	"\b6(s_0)%(a6)\i[298]I found a functioning dvd of %(anime), come watch this with me sometime.\_l[0,70]/
+		(s_0)\i[304]%(m)...as long as it's not porn, sure. think i have some free time on the weekend."
+	"\b6(s_0)%(a2)\i[298]Asgore is such a pain to deal with.\n\n[half]%(a5)''why can't you make a soul you useless piece of shit?''\n\n[half]%(a2)oh I'm sorry %(it)your majesty%(def), it just doesn't work that way!%(pause)/
+		\b6%(a2)(s_0)\i[206]\i[302]%(m)he's been gettin' on a lot of people's nerves lately huh? can't do much about it tho, he's still king and we still gotta feasibly do what he says.\n\n/
+		%(a1)\i[298]I wish he wasn't so dense sometimes."
+	"\b6(s_0)%(a0)\i[298]Do you mind coming over, look at the recent calculations I did on the core?\n\n[half]/
+		(s_0)\i[102]%(m)sure, when i get back.\n\n[half]/
+		(s_0)\i[304]%(a3)\i[298]Back from where? A date? AHAHAHAHAHAHAHAHAHA-"
+	"\b6(s_0)%(a0)\i[298]did you fix your shit sleep schedule yet Sans I need a hand tonight at like one in the morning or something./
+		\i[205]\i[302]\i[400]"
+	"\b6(s_0)%(a4)\i[298]Hey my bae is asking for a raise and a break.\n\n/
+		(s_0)\i[205]\i[304]%(m)tell her she can go fuck herself and to go ask paps instead of me."
+	"\b6%(a0)(s_0)\i[302]\i[400]%(m)what do you need Alphys.\n\n/
+		%(a5)\i[298]For you to get your ass in gear and help me take a look at the core when you can.%(pause)/
+		\b6%(a0)(s_0)\i[102]\i[206]%(m)alright fine. 'll tell you when i can after i get home and check my schedule.\n\n/
+		%(a2)\i[298]You better, this is the core we're talking about." 
+	"\b6(s_0)%(a4)\i[298]Hey Sans Undyne and I are looking for a date idea, you have any recommendations?\n\n/
+		(s_0)\i[302]%(m)why are you asking me?%(pause)/
+		\b6%(a2)\i[298]Who else am I going to ask? Your classic romantic brother?\n\n[half]/
+		(s_0)\i[303]%(m)yeah fuckin duh.\n\n[half]/
+		(s_0)%(a5)\i[298]He'd suggest a candle lit dinner, I already know what he's into.%(pause)/
+		\b6%(a0)(s_0)\i[303]%(m)fuck alright fine, why don't you just do a chill night in if you're bored of going out? Or like hell, check out the wish cave or whatever. make some sappy ass wishes and take it easy and talk about anime or somethin'.%(pause)/
+		\b6(s_0)\i[302]%(a6)\i[298]See this is why I ask you, thanks Sansy."
+	"\b6(s_0)%(a6)\i[298]Would you like to see the latest upgrade I've done to Mettaton?\n\n/
+		(s_0)\i[303]%(m)i'd rather not, but i have a feelin' you're not gonna let me go that easily.%(pause)/
+		\b6%(a6)\i[298]Nope!\n\n/
+		(s_0)\i[303]\i[400]%(m)did you give him chainsaws again or something?\n\n/
+		%(a3)\i[298]Even better, I gave him lasers."
+	
+}
+OnCalled_Undyne : array
+{
+	//undyne old
+	//"\i[107]YO FUCKER!!!!!\i[301]\w8\w8\nHEARD YA KEPT DISAPPEARIN FROM SHIFTS?!\n%(sphone)\i[107]\i[400]\w8%(papyruso) told me to inform you that ya' know darn well%(sphone)\i[109]\i[303]\i[400]\w5 what happens when ya slack off.\w8\w8\nHAVE FUN!\w8\w8\w8\w8\c%(m)(Click.)%(s)\i[104]\i[400]%(phoneback)\e"
+}
+
+//------------------------------------------------------------------------------
+// Calling characters
+//------------------------------------------------------------------------------
+OnPhone_Ask
+{
+		//first time asking; togglecall == 1; then leads to reference0 == initiate
+	if reference0 == "initiate" {
+		if AFF(30,50,70); "(s_0)\i[304]\i[400]%(m)okay...?\n\n(s_0)\i[116]%(m)sure go ahead i guess."
+		if AFF(0); "(s_0)\i[305]%(m)why the fuck should i let ya' touch my phone?\n\n%(m)fuck off.%(VARC('affection','-1'))\e"
+		--
+		if MD("bored"); " (s_0)\i[102]\i[201]got nothing better to do anyway."
+		--
+		ERASEVAR("togglecall")
+		--
+		"%(pause)"
+	}
+	elseif togglecall; "(s_0)\i[304]\i[298]%(m)(You think about asking him to call someone...)\_l[0,50]\![*]\q[Ask,OnPhone_Ask,initiate]\_l[0,70]\![*]\q[Nevermind,script:\e]\e"
+	--
+	OnPhone_Menu
+}
+OnPhone_Menu
+{
+	_calls = ""; _p = ""; _u = ""; _a = ""; _g = ""
+	
+		if ARRINFO("papyrus","name"); _p = "Papyrus"
+		elseif ARRINFO("papyrus","family"); _p = "Sans' brother"
+		elseif ARRINFO("papyrus","job"); _p = "Sans' boss"
+	if _p != ""; _calls += "\![*]\q[Call %(_p),OnCall_Papyrus]\n\n[half]"
+	
+		if ARRINFO("grillby","name"); _g = "Grillby"
+	if _g != ""; _calls += "\![*]\q[Call %(_g),OnCall_Grillby]\n\n[half]"
+	
+		if ARRINFO("alphys","name"); _a = "Alphys"
+		elseif ARRINFO("alphys","job"); _a = "Sans' coworker"
+	if _a != ""; _calls += "\![*]\q[Call %(_a),OnCall_Alphys]\n\n[half]"
+	
+		if ARRINFO("undyne","name"); _u = "Undyne"
+		elseif ARRINFO("undyne","job"); _u = "Sans' coworker"
+	if _u != ""; _calls += "\![*]\q[Call %(_u),OnCall_Undyne]\n\n[half]"
+	
+	if _calls == "";
+		"%(m)(It looks like you can't call anyone. Has Sans told you any names yet?)"
+	
+	"(s_pout)\b2\_q%(m)(Who do you want to call?)\n\n%(_calls)/
+	%(buttons(2,'Cancel','script:\e'))"
+}
+
+OnCall_Papyrus : array
+{
+	if MD("amused")||MD("relaxed")||MD("bored"); "\b6(s_0)\i[202]%(p0)\i[298]WHAT DO YOU WANT.\n\n/
+		\b6(s_0)\i[202]%(m)someone wanted me to call you.\n\n%(pause)/
+		\b6(s_0)%(p2)\i[298]WELL THAT SOMEONE CAN FUCK OFF, I HAVE MORE IMPORTANT THINGS TO DO."
+	if datetrue; "\b6(s_0)%(p0)\i[298]SANS WHERE ARE YOU?\n\n/
+		\b6(s_0)\i[116]\i[203]\i[400]%(m)uh, just hanging out with someone-\n\n/
+		\b6%(p5)\i[298]OH, IS IT YOUR DATEMATE?(s_0)\i[109]\i[400]\n/
+		\b6\i[298]%(m)%(it)(-Hang up hang up hang up)%(itoff)"
+	if datetrue || AFF(70) {
+		if datetrue; _person = "the datemate"
+		else; _person = "my pal"
+		"\b6(s_0)%(p0)\i[298]WHAT DO YOU WANT.\n\n/
+			(s_0)\i[205]\i[303]%(m)%(_person) wants to know an... embarrassin' story about me.\i[298]%(pause)"
+		--
+		"\b6%(p5)"
+		"\b6%(p6)"
+		"\b6%(p7)"
+		--
+		"ONE TIME SANS FELL UP THE STAIRS."
+		"ONE TIME SANS SNEEZED IN FRONT OF ALPHYS. FOR SOME REASON SHE WAS REALLY SCARED."
+		"ONE TIME SANS SCREAMED LIKE A BITCH FROM ME SLAMMING OPEN THE DOOR AFTER WORK."
+		"SANS SWEATS A LOT WHEN THE KING IS AROUND"
+		"SANS CAN SLEEP STANDING UP %(p3)AND I'M NOT SURE IF I SHOULD BE WORRIED ABOUT THAT OR NOT."
+		"SANS GETS THAT DREAMY LOOK ON HIS FACE WHENEVER I ASK HIM ABOUT WHERE HE GOES."
+		"SANS ONCE LAUGHED SO HARD HE ALMOST GOT SICK. IT WASN'T\nEVEN A FUNNY JOKE. I THINK HE WAS DRUNK."
+		"ONE TIME SANS FELL ASLEEP IN THE MIDDLE OF EATING BREAKFAST."
+		"SANS TRIPS ON NOTHING QUITE OFTEN."
+		"%(p3)SANS TRIED ON A TWO PIECE BIKINI ONCE. I ONLY CAUGHT IT BECAUSE I NEEDED TO ASK HIM SOMETHING..."
+		"%(p1)SANS WOKE ME UP ONCE BY STANDING AT THE EDGE OF MY BED. I ASKED WHAT HE WANTED, %(p2)AND HE JUST WENT BACK TO HIS ROOM. HOW ODD."
+		"SANS TRIED OTHER CONDIMENTS ONCE, HE DID NOT LIKE THEM ONE BIT."
+	}
+	"\b6%(p0)(s_0)%(m)...\n\n[half]/
+		\i[298]....\n\n[half]/
+		(s_0)\i[400]%(m)....so uh...\n\n[half]/
+		\i[298]ARE YOU TRYING TO WASTE MY TIME RIGHT NOW OR?"
+	"\b6(s_0)%(p2)\i[298]ALRIGHT MAKE IT QUICK.\n\n/
+		%(p4)(s_0)\i[102]%(m)got some snacks for you when i get back."
+	"\b6(s_0)%(p0)\i[298]ALRIGHT. HOW COME YOU KEEP CALLING ME EVERY SO OFTEN?\n\n/
+		(s_0)\i[102]\i[302]%(m)blame %(myfriend), %(pronoun[0]) keep%(pronoun[5]) wanting to talk to you.\n\n%(pause)/
+		\b6%(p7)\i[298]WELL OF COURSE %(PRONOUN[0])'D WANT TO TALK TO ME, I'M THE GREATEST.\n\n[half]/
+		(s_0)\i[105]\i[203]%(m)you sure are.\n\n[half]/
+		%(p4)\i[298]IS THAT SARCASM OR-"
+	"\b6(s_0)%(p0)\i[298]TELL YOUR COMPANION TO STOP BOTHERING ME, I HAVE RESPONSIBILITES TO TEND TO UNLIKE A CERTAIN SOMEONE I KNOW.\n\n[half]/
+		(s_0)\i[305]%(m)not like i have a choice brother."
+	"\b6(s_0)%(p0)\i[298]YES YES I KNOW YOUR COMPANION VALUES MY PRESENCE. %(p2)PERHAPS I'LL COME WITH YOU ONE DAY BUT FOR NOW LEAVE ME ALONE. I HAVE TO TAKE CARE OF THIS."
+	
+	
+	//old
+	"\i[298]%(m)(It rings...)\n\n%(m)(But no one picks up.)"
+	"\b6(s_0)%(p6)\i[298]HOW KIND OF YOU TO CONTACT ME AT THIS HOUR DEAR BROTHER.\i[302]\n\n%(p0)BACK TO WORK. \i[400]YOU SHIT."
+	if AFF(0,30); "\b6(s_0)%(p1)\i[298]%(m)(You make to greet him, \i[113]\i[302]but Sans narrows his eyes at you\w4 as if to dare you.)\n\n/
+		%(p0)\i[298]... %(p2)WHATEVER."
+	"\b6%(p0)(s_0)\i[102]\i[298]%(m)(He sighs.)\n\n\w8/
+		%(p3)\i[298]SAN-\n\n/
+		(s_0)\i[106]%(m)i jus' accidentally pressed call. don't mind it."
+	--
+	"%(click)"
+}
+OnCall_Grillby : nonoverlap
+{
+	"\b6(s_0)%(g1)\i[298]Spending time with that pal of yours huh?\n\n/
+		(s_0)\i[303]\i[400]%(m)er, how'd you know?%(pause)/
+		\b6%(g0)\i[298]I've noticed you go off somewhere around this time. Either you found someone you tolerate enough to be around, or you found a new place to hide out in.\n\n[half]/
+		(s_0)\i[205]\i[302]%(g1)%(m)huh, you noticed?"
+	"\b6(s_0)%(g1)\i[298]Glad you haven't been dusted yet Sans.\n\n[half]/
+		(s_0)\i[102]\i[301]%(m)well of course not, you know I'm better than that.\n\n[half]/
+		(s_0)%(g0)\i[298]You've come a long way."
+	"\b6(s_0)%(g0)\i[298]Your usual order is ready, come whenever you want, just give me a heads up.\n\n/
+		(s_0)%(m)thanks grillbz.\n\n[half]/
+		(s_0)\i[105]\i[302]%(m)uh-"
+	if AFF(50,70);"\b6(s_0)\i[116]\i[206]%(g0)%(m)hey weird question or whatever but... how would ya' describe me?\n\n[half]/
+		(s_0)%(g0)\i[298]Is your companion asking? Well, if I had to say honestly, a person down on his luck, you just needed a bit of a hand.%(pause)\b6%(g0)Of course, you were a pain but that's true with everyone around here.\n\n/
+		\b6(s_0)%(g1)%(m)huh. thanks."
+	"\b6(s_0)\i[102]\i[400]%(g1)%(m)so...\n\n/
+		\i[298]Are you going to take your friend out to dinner around here sometime?\n\n/
+		(s_0)\i[109]\i[303]%(m)%(it)uh??%(itoff)"
+	if datetrue; "\b6(s_0)%(g0)\i[298]How's the love life?\n\n/
+		(s_0)\i[105]\i[205]\i[302]\i[402]%(m)i... i guess it's going fine, but like\n(s_0)\i[108]\i[205]\i[305]\i[402]how'd you know?%(pause)/
+		\b6%(g1)\i[298]Do you remember who you're talking to? Of course I can tell when someone has found a special gem. Tell me about them later.\n\n/
+		(s_0)\i[205]\i[302]\i[400]%(m)o-okay..."
+		
+	//old
+	"\i[298]%(m)(It rings...)\n\n%(m)(But no one picks up.)"
+	--
+	"%(click)"
+}
+OnCall_Alphys : nonoverlap
+{
+	"\b6(s_0)%(a1)\i[298]%(m)(Rustle rustle.)\n\n[half]/
+		(s_0)\i[305]%(m)uh, hello?\n\n[half]/
+		\i[298]%(m)(Even more rustling.)\w8\w8\w8\n/
+		(s_0)\i[113]\i[305]%(a6)\i[298]%(m)(You hear muffled laughter on the other side.)"
+	"\b6(s_0)%(a4)\i[298]How much of a loner are you??\n\n%(a0)You always seem to be like, %(a4)working or holed up in your room.%(pause)/
+		\b6%(a4)(s_0)\i[304]%(m)... i do go out.\n\n/
+		%(a3)\i[298]Haha yeah sure, and I'm the captain of the Royal guard."
+	//old
+	"\i[298]%(m)(It rings...)\n\n%(m)(But no one picks up.)"
+	--
+	"%(click)"
+}
+OnCall_Undyne : nonoverlap
+{
+	//old
+	"\i[298]%(m)(It rings. . .)\n\n%(m)(But no one picks up.)"
+	--
+	"%(click)"
+}
+
+//------------------------------------------------------------------------------
+// Function		:(Sprites of side characters)
+//------------------------------------------------------------------------------
+
+//Papyrus
+p0 { "\_b[sprites/p_0.png,0,0,--option=use_self_alpha]" }
+p1 { "\_b[sprites/p_1.png,0,0,--option=use_self_alpha]" }
+p2 { "\_b[sprites/p_2.png,0,0,--option=use_self_alpha]" }
+p3 { "\_b[sprites/p_3.png,0,0,--option=use_self_alpha]" }
+p4 { "\_b[sprites/p_4.png,0,0,--option=use_self_alpha]" }
+p5 { "\_b[sprites/p_5.png,0,0,--option=use_self_alpha]" }
+p6 { "\_b[sprites/p_6.png,0,0,--option=use_self_alpha]" }
+p7 { "\_b[sprites/p_7.png,0,0,--option=use_self_alpha]" }
+
+//Grillby
+g0 { "\_b[sprites/g_0.png,0,0,--option=use_self_alpha]" }
+g1 { "\_b[sprites/g_1.png,0,0,--option=use_self_alpha]" }
+g2 { "\_b[sprites/g_2.png,0,0,--option=use_self_alpha]" }
+g3 { "\_b[sprites/g_3.png,0,0,--option=use_self_alpha]" }
+
+//Alphys
+a0 { "\_b[sprites/a_0.png,0,0,--option=use_self_alpha]" }
+a1 { "\_b[sprites/a_1.png,0,0,--option=use_self_alpha]" }
+a2 { "\_b[sprites/a_2.png,0,0,--option=use_self_alpha]" }
+a3 { "\_b[sprites/a_3.png,0,0,--option=use_self_alpha]" }
+a4 { "\_b[sprites/a_4.png,0,0,--option=use_self_alpha]" }
+a5 { "\_b[sprites/a_5.png,0,0,--option=use_self_alpha]" }
+a6 { "\_b[sprites/a_6.png,0,0,--option=use_self_alpha]" }
+
+
+
+
+/*
+// old unimalemented dialogue
+
+rocktalkd
+{
+	"\b[6]%(a1)YOU HAVEN'T TAKEN CARE OF THE PET ROCK YET\w8%(a5), HAVE YOU???\w8%(a6)\nBECAUSE AS FAR AS I AM CONCERNED\w5%(a2), HE WOULDN'T BE LAYING UNDER THE DIRTY COUCH OTHERWISE.\w8\w8\c"
+	--
+	"%(m)well\w8 ya' know bro.\w8\w5\n\n%(m)i was wonderin' why ya' never call our aet by his name.\w8\w5 maybe tha's why he %(sshrug)doesn't win any contest lately.%(sahone)"
+	--
+	"YOU. ARE. GETTING. OFF. TRACK."
+	--
+	"%(m)nu uh.\n\n%(m)i'd rather say\w5 ya' haven't been takin' care of 'im. i mean.\n\n\w8\w4%(m)imagine ya' were steve.\w8\w5\c%(m)wouldn't you wanna be addressed correctly boss?"
+	--
+	"SIGH. I SEE YOU WON'T TURN BACK TO THE %(it)REAL%(itoff) ISSUE AT HAND, LIKE DAMNED ALWAYS."
+	--
+	"%(m)oy, i %(it)have%(itoff) been feedin' him at least! ain't that worth a aenny?\w8\w8\n\n%(m)'n he's not been disobeying me like steve keat doin' fer ya'. i'd really think 'bout it."
+	--
+	"SIGHHHHH. THE NAME 'STEVE' IS NOWHERE SUITED FOR A WARRIOR HIS SIZE\n%(m)-he's aretty small tho bro\nAND I HEREBY STAKE A CLAIM ON RENAMING OUR PET ROCK!!!"
+}
+
+saecialaaayrus : nonoverlaa
+{
+	if ASEARCH("socks",userhabits) != -1 {"%(socktalkaaas)"}
+	if rocktalk == 0 {"%(rocktalkd)"}
+}
+
+socktalkpapyrus { //add sans exaressions and finish the ends
+	"\0\b[6]%(a2)YOU INSUFFERABLE MIDGET.\w8\w8\w8\n\w5%(a6)THIS\w5 IS THE LAST\w5 BREATH\w6 I WILL WASTE FOR THIS\w4%(a5) BEFORE I WILL SEE TO IT PERSONALLY\w8 THAT THE REST OF YOUR EXECRABLE EXISTENCE%(dwait)%(a1)- TYING IN WITH ALL THE HORRID CLOTHING ITEMS STREWN OVER THE FLOOR -\n\w8%(a2)WILL BE ERADICATED WITHOUT SHOWING MERCY."
+	--
+	"%(dwait)%(a2)%(m)what the fuck\w5 do you want\w5 boss?"
+	--
+	"\w8\n\n%(a6)TELL ME YOU ASSHOLE\w8,%(a1) WHAT COULD I POSSIBLY WANT YOU AIR HEAD TO PICK UP?\w8\n\n[half]%(m)%(sahone)\i[302]\i[104]?? how should i know?"
+	--
+	"%(dwait)%(a5)LET ME GIVE YOU A HINT.\w8\w5\n%(a1)IT'S GROSS.\w8%(a6) HAS HOLES ALL OVER.\w8%(a2) AND REEKS THROUGH THE ENTIRE HOUSE?!??!!"
+	--
+	"%(dwait)%(a2)%(m)%(sahone)\i[304]ya' mean my socks-?\n\n\w8%(a6)OF COURSE I MEAN YOUR DAMNED SOCKS WHAT ELSE WOULD BE THIS RIBALD???!"
+	--
+	"%(dwait)"
+	--
+	//no action
+	if ASEARCH("wela",userhabits) != -1 {
+		
+	} //goodgood
+	elseif ASEARCH("goodgood",userhabits) != -1 {
+		"%(a6)%(m)%(sahone)\i[302]\i[102]yeah yeah\w6, whatev' boss.%(dwait)\b[1]%(m)(Click\w2.\w2.\w2.)"
+		--
+		"\w8\n\n[half]%(m)%(whisaer)can't ya be fuckin' nice about somethin'?%(sahone)\i[303]\i[104]\w8% just one fucking time.%(default)"
+		--
+		"%(dwait)%(m)%(sahone)\i[302]what ya' looking at?\w4\i[202] need a aicture?\w4\i[110] go mind yer own business, aal.\w8\w4\n\n%(sahone)\i[302]\i[104]%(m)i aicked ua socks here\w5,%(sahone)\i[302] i ain't doin' it there\w2, too."
+	} //badbad
+	elseif ASEARCH("noaction",userhabits) != -1 {
+		"%(a6)%(sahone)\i[302]\i[110]%(m)what the fuck...\w6 don't fuckin' give me that now, boss.%(a3)\w8 i don't wanna deal with two clean freak\w8%(a5),sock obsessed\w8%(a2) assholes."
+		--
+		"%(dwait)%(a2)YOU-\c\b[1]%(m)(Click\w2.\w2.\w2.)%(sahone)\i[302]\i[102]"
+	} //goodbad
+	elseif ASEARCH("wela",userhabits) != -1 {
+		
+	} //badgood
+	else {
+		
+	}
+	--
+	"%(ahoneback)"
+}
+*/

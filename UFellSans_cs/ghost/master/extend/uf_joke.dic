@@ -1,0 +1,263 @@
+//------------------------------------------------------------------------------
+// File		:uf_joke.dic
+//
+//			:Hold all functions concerning jokes.
+//
+// Var		:jokestopicAr
+//			 jokesTold (dark,light)
+//			 affection
+//			 userboring
+//------------------------------------------------------------------------------
+
+OnJoke_Topics
+{
+	_arr = <<'
+	sex
+	pedophile
+	children
+	baby
+	racism
+	cannibal
+	macabre
+	'>>
+	_arr = SPLIT(_arr,C_CRLF)
+	_arr
+}
+
+
+//------------------------------------------------------------------------------
+// Joke topic functions (define/filter/add/reset)
+//------------------------------------------------------------------------------
+OnJoke_Reset { jokestopicAr = OnJoke_Topics }
+OnJoke_Manage //@uf_menu.dic
+{
+	//Edit topics
+	if reference0 == "block";	ARRDEL_0("jokestopic",reference1)
+	elseif reference0 == "add"; ARRADD_0("jokestopic",reference1)
+	
+	//Var
+	_arr = OnJoke_Topics
+	_block = "%(cmenu1)\f[strike,1]"
+	_p = "\![set,choicetimeout,-1]\![set,autoscoll,false]/
+		\_q\_l[100]%(cmenu6)Joke Topics\n\n"
+	
+	//Print menu
+	for _i = 0; _i < ARRAYSIZE(_arr); _i++
+	{
+		//whether the topic is blocked
+		if !ARRINFO("jokestopic",_arr[_i]);
+			_p += "%(_block)\q[%(_arr[_i]),OnJoke_Manage,add,%(_arr[_i])]\_l[@20]"
+		else;
+			_p += "%(def)\q[%(_arr[_i]),OnJoke_Manage,block,%(_arr[_i])]\_l[@20]"
+		
+		//break up lines
+		if ((_i+1) % 3 == 0); _p += "\n\_l[0]"
+	}
+	_p += "%(def)"
+	_p += buttons(0,'Go back','OnConfig')
+	_p
+}
+JFilter
+{
+	_i = 1
+	for _i = 0; _i < _argc; _i++
+	{
+		if ARRINFO("jokestopic",_argv[_i]); continue
+		else; _i = 0
+		break
+	}
+	_i
+}
+
+//------------------------------------------------------------------------------
+// Joke set up & special envelopes restricted to jokes
+//------------------------------------------------------------------------------
+OnJoke
+{
+	//smile
+	"(s_0)\i[102]"
+	--
+	"\i[204]"
+	"\i[203]"
+	"\i[203]\i[301]"
+	"\i[204]\i[301]"
+	--
+	OnJoke_Choose
+	--
+	if _argv[0] != "aitalk"; "%(buttons(0,'Another','OnJoke','Cancel','script\e','Menu','OnMenu'))"
+	--
+	if (jokesTold[0]+jokesTold[1]) < 5; affection++
+	
+	ARRDEL("user","darkhumor","brighthumor")
+	
+	if jokesTold[0] >= 50 && jokesTold[0] > jokesTold[1];
+		ARRADD("user","darkhumor")
+	if jokesTold[1] >= 50 && jokesTold[1] > jokesTold[0];
+		ARRADD("user","brighthumor")
+}
+OnJoke_Draw : nonoverlap { parallel EVAL(_argv[0]) }
+OnJoke_Choose
+{
+	_max = 0; _boost = 1; _rude = 1; _pool = "OnJoke_Light"
+	_light = ARRAYSIZE(OnJoke_Light); _dark = ARRAYSIZE(OnJoke_Dark)
+		//calculates the amount of all current lines
+	_max = _light + _dark
+	if MD("angry")||MD("bored")||MD("sad"); _rude = _dark * 0.5 //more dark jokes based on sans' mood
+	else; _rude = _dark * 0.2
+	if ARRINFO("user","kind"); _boost = 0.2 //less dark jokes if kind user
+	_rnd = RAND(_max * _boost - _rude)
+
+	if _rnd <= _dark; _pool = "OnJoke_Dark"
+
+		if _pool == "OnJoke_Dark"; jokesTold[0] = TOINT(jokesTold[0])+1 //count amount of told jokes
+		else; jokesTold[1] = TOINT(jokesTold[1])+1
+
+	OnJoke_Draw(_pool)
+}
+
+pauseJ
+{
+	"%(cmenubar)\_l[130,70]\![*]\q[Ask him to stop,cancelJ]%(cdef)%(pause)" 
+}
+smile
+{
+	"(s_0)\i[204]"
+	"(s_0)\i[204]\i[301]"
+	"(s_0)\i[203]\i[301]"
+	"(s_0)\i[203]"
+	if AFF(50,70) && !MD("sad"); "(s_0)\i[205]"
+	if AFF(50,70) && !MD("sad"); "(s_0)\i[205]\i[301]"
+}
+humanJ : nonoverlap
+{
+	"here, a human joke."
+	"one from the 'yard."
+	"i read this one in a book from the junkyard."
+	"found that one somewhere."
+	"here, human humor."
+	"you should get this one."
+	"had to read some books for this one."
+}
+cancelJ
+{	
+	"(s_0)"
+	--
+	if userboring >= 5; "%(m)then not.\i[400] you're no fun."
+	"\i[304]%(m)skin's not thick enough?"
+	if !MD("angry"); "\i[400]"
+	"(s_1)\i[102]"
+	"(s_1)\i[400]"
+	"(s_1)\i[104]"
+	--
+	if (totalinfo[0] > 50 && ARRAYSIZE(jokestopicAr) > 0); userboring++
+	elseif jokesTold[0] < 10; countAr[5]++
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnJoke_Dark
+//------------------------------------------------------------------------------
+OnJoke_Dark : array
+{	
+		if JFilter("children");
+	"%(m)why can't orphan children play baseball?%(pauseJ)%(smile)%(m)because they wouldn't know where home is."
+		if JFilter("racism");
+	"%(m)%(humanJ)\n\n[half]%(m)here goes, a black guy and a mexican are in a car. who's driving?%(pauseJ)%(smile)%(m)the cop."
+		if JFilter("cannibal","baby","sex","pedophile")
+	"%(m)what's the difference between a dead baby and a cheeseburger?%(pauseJ)%(smile)%(m)you don't have sex with a cheeseburger before you eat it."
+		if JFilter("baby");
+	"%(m)how many dead babies does it take to change a light bulb?%(pauseJ)(s_1)\i[102]%(m)must be more than 9...%(smile) because my basement is still dark."
+		if JFilter("baby");
+	"%(m)what's the difference between a trunk full of bowling balls, and a trunk full of dead babies?%(pauseJ)%(smile)%(m)you can't unload bowling balls with a pitchfork."
+		if JFilter("baby","cannibal");
+	"%(m)how do you get a baby into a small box?%(pauseJ)%(m)with a blender.\n\n%(m)how do you get a baby out of a small box?%(pauseJ)%(smile)%(m)with doritos."
+		if JFilter("baby");
+	"%(m)whats the best thing ever?%(pauseJ)%(smile)%(m)throwing a dead baby off a roof.\n\n[half]\i[301]%(m)whats better than that?%(pauseJ)%(smile)%(m)catching it with a pitchfork."
+		if JFilter("baby");
+	"%(m)how many dead babies does it take to paint a wall?%(pauseJ)%(smile)%(m)depends on how hard you throw them."
+		if JFilter("racism");
+	"%(m)%(humanJ)\n\n[half]%(m)why do white people own so many pets?%(pauseJ)%(smile)%(m)because they're not allowed to own people anymore."
+		if JFilter("pedophile","children","baby","sex");
+	"(s_0)\i[102]%(m)pedophiles are fucking immature assholes.%(smile)"
+		if JFilter("children");
+	"%(m)what does a boy with no hands get for christmas?%(pauseJ)%(smile)%(m)gloves!\n\n[half]\i[105]%(m)you know... %(smile)he still hasn't opened his present yet."
+		if JFilter("children");
+	"%(m)%(humanJ)\n\n[half]%(m)what do you call a child with down syndrome?%(pauseJ)%(smile)%(m)pretard."
+		if JFilter("baby");
+	"%(m)what's the best part about dead baby jokes?%(pauseJ)%(smile)%(m)they never get old."
+		if JFilter("racism");
+	"%(m)%(humanJ) ehrm...\n\n[half]%(m)did you hear the score in the egypt versus ethiopia football game?%(pauseJ)%(smile)%(m)egypt 8, ethiopia didn't."
+		if JFilter("sex","children","pedophile");
+	"%(m)what do spinach and anal sex have in common?%(pauseJ)%(smile)%(m)if you were forced to have it as a kid you will hate it as an adult."
+		if JFilter("children");
+	"%(m)dark humor is like an orphan here.\n\n%(smile)%(m)it never gets old."
+		if JFilter("pedophile","sex","children");
+	"%(m)what breaks when you give it to a five year old?%(pauseJ)%(smile)%(m)their hip."
+		if JFilter("sex");
+	"(s_0)%(m)you know-%(pauseJ)%(smile)%(m)9 out of 10 people enjoy gang rape."
+		if JFilter("baby","cannibal");
+	"%(m)what's the difference between a pizza and a baby?%(pauseJ)%(smile)%(m)one screams when you stick it into the oven."
+		if JFilter("sex");
+	"(s_0)\i[102]%(m)girls are like blackjack... (s_0)i'm always going for 21\n\n[half]%(smile)\i[105]%(m)but i always end up hitting on 14."
+		if JFilter("sex");
+	"%(m)what do you call a perverted frog?\n\n%(smile)%(m)rubbit."
+		if JFilter("cannibal");
+	"%(m)what did the cannibal do after he dumped his girlfriend?\n\n[half]%(smile)%(m)wiped his ass."
+		if JFilter("sex");
+	"%(m)what does a sign on an out of business whore house say?\n\n[half]%(smile)%(m)beat it, we're closed."
+		if JFilter("pedophile","children","sex");
+	"%(m)why was the guitar teacher arrested?\n\n%(smile)%(m)for fingering a minor."
+		if JFilter("macabre");
+	"%(m)wha's the difference between romantic and macabre?%(pauseJ)%(m)romantic is when you caress her naked body with a feather...\n\n[half]%(m)%(smile)macabre is when the dead chicken is still attached to the feather."
+		if JFilter("sex","macabre");
+	"%(m)what's the difference between polite and perverted?%(pauseJ)%(m)polite is to greet a pregnant woman by shaking her hand...\n\n[half]%(m)%(smile)perverted is when you shake hands with the unborn as well."
+		if JFilter("baby","macabre");
+	"%(m)what's the difference between a heap o' dead babies an' a ferrari?%(pauseJ)%(m)%(smile)i don't have a ferrari in my garage.\n\n[half]%(m)what is worse than a heap of dead babies?%(pauseJ)%(m)(s_0)\i[102]one alive baby in the middle, %(smile)eating its way out."
+		if JFilter("children");
+	"%(m)why'd little timmy drop his ice cream cone?%(pauseJ)%(smile)%(m)he got hit by a bus."
+		if JFilter("children");
+	"%(m)how do you start a rave?%(pauseJ)%(smile)%(m)throw a flash bang into an epileptic children’s ward."
+		if JFilter("children");
+	"%(m)two kids were beating up another kid in an ally, so i stepped in ta help.%(pauseJ)%(smile)%(m)he didn’t stand a chance against the three of us."
+		if JFilter("macabre");
+	"%(m)where did suzy go after getting lost on a minefield?%(pauseJ)%(smile)%(m)everywhere."
+		if JFilter("macabre");
+	"%(m)what’s a similarity between yer best friend an' a tree?%(pauseJ)%(smile)%(m)they both fall over when you hit them with an axe."
+		if JFilter("racism","macabre");
+	"%(m)i opened a company selling landmines, disguised as prayer mats.%(pauseJ)%(smile)%(m)prophets are going through the roof."
+		if JFilter("macabre")
+	"%(m)build a man a fire, and he’ll be warm for a day.\n\n[half]%(smile)%(m)set a man on fire, and he’ll be warm for the rest of his life."
+}
+//------------------------------------------------------------------------------
+// Function		:OnJoke_Light
+//------------------------------------------------------------------------------
+OnJoke_Light : array
+{	
+	"%(m)whadd'ya get when ya cross an elephant with a rhino?\n\n[half]%(smile)%(m)'ell-if-i-know."
+	if AFF(0,15,30); "%(m)you really wanna hear a joke? (s_0)\i[102]\i[301]why not look at one?\n\n[half](s_1)\i[102]\i[203]%(m)'bet you could find a mirror somewhere.(s_0)\i[203]";
+	if AFF(0,15,30); "(s_0)%(m)you know.\n\n\i[301]%(m)the worst joke in this area is still you.";
+	"%(m)what do ya' call a microbiologist in an orchestra?\n\n%(smile)%(m)a cell-ist."
+	"%(m)bought some shoes from a drug dealer.\n\n[half]%(m)dunno know what he laced them with, %(smile)but i was trippin' all day."
+	"%(m)why did the golfer change his pants?\n\n[half]%(m)%(smile)cuz' he got a hole in one."
+	"%(m)how do ya' make holy water?\n\n%(smile)%(m)ya' boil the hell out of it."
+	"(s_0)%(m)bought a ceiling fan the other day. \i[102]complete waste of money.%(pause)%(m)\i[302]he just stands there applauding 'n saying ''ooooh, i love how smooth it is.''%(smile)"
+	"%(m)what'ya get when ya' cross a snowman with a vampire?\n\n[half]%(m)%(smile)frostbite."
+	"%(m)wha’s at the bottom of the snowdin lake an' shivers?\n\n[half]%(smile)%(m)a nervous wreck"
+	"%(m)what do ya' call someone with no body 'n no nose?\n\n[half]%(smile)%(m)nobody knows."
+	"%(m)when is yer door not actually a door?\n\n[half]%(smile)%(m)when it's actually ajar."
+	"%(m)wadd'ya call a can opener that ain't workin'?\n\n[half]%(smile)%(m)a can’t opener."
+	"%(m)what do prisoners use ta' call each other?\n\n[half]%(m)fuckin' cell phones, man."
+	"(s_0)\i[304]%(m)wanna hear a joke about a piece of paper?\n\n(s_0)%(m)eh, \i[105]nevermind... %(smile)it’s tearable."
+	"(s_0)\i[302]%(m)i jus' read a documentary book 'bout beavers.\n\n\i[102]%(m)it was the best dam book i eva' read.%(smile)"
+	"%(m)ya' know what the loudest pet ya can get is?\n\n%(smile)%(m)a trumpet."
+	"(s_0)\i[302]%(m)sometimes, i tuck my knees ta' my chest an' lean forward.\n\n[half]%(smile)%(m)tha’s just how i roll."
+	"%(m)a ham sandwich walks inta' a bar an' orders a beer.\n\n[half]%(m)the bartender says, %(smile)''sorry we don’t serve food here.''"
+	"%(m)what do you call a fish with no eye?\n\n%(m)%(smile)fsh."
+	"(s_0)\i[302]%(m)i was interrogated ova' the theft of a cheese toastie.\n\n[half]%(m)%(swear), they really grilled me."
+	"%(m)i used ta' have a job at a calendar factory, (s_0)but they fired me \i[302]jus' cuz i took a couple o' days off. %(smile)"
+	"(s_0)\i[302]%(m)’m thinking 'bout removing my spine.\n\n[half]%(m)feel like it’s only holdin' m' back. %(smile)"
+	
+	
+		//knock knock jokes
+		//"%(m)knock knock.%(who)\x"
+}
+

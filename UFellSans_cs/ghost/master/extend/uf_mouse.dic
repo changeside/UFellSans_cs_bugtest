@@ -1,0 +1,323 @@
+//------------------------------------------------------------------------------
+// File		:uf_mouse.dic
+//
+//			:Handles all mouse responses.
+//
+// Var		:stroke
+//			 countAr[0]
+//			 affection
+//			 userAr
+//			 mood
+//			 state
+//			 sleeptrue
+//			 togglesock
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Function		:OnMouseMove (Shiori)
+//
+// Ref			:ref3 = (number of char)
+//				 ref4 = (collision name)
+//------------------------------------------------------------------------------
+OnMouseMove
+{
+	if reference3 == 0 && reference4 != "" //if char0 and over a pet area
+	{
+		stroke++
+		
+		if stroke >= 40 {
+			stroke = 0
+			countAr[0]++
+				
+			if state == 1 { //if afk
+				"(s_0)\i[100]\i[304]\i[298]%(m)(He glances at you.)"
+				state = 0
+				return
+			}
+			
+			//assigns userhabits for petting
+			if countAr[0] >= 400 && !ARRINFO("user","petmaniac")
+			{
+				ARRDEL_0("user","petcrazy")
+				ARRADD_0("user","petmaniac")
+			}
+			elseif countAr[0] >= 120 && !ARRINFO("user","petcrazy")
+			{
+				ARRDEL_0("user","petuser")
+				ARRADD_0("user","petcrazy")
+			}
+			elseif countAr[0] >= 50 && !ARRINFO("user","petuser")
+			{
+				ARRADD_0("user","petuser")
+			}
+				
+			//affection add every 50 pats
+			if (countAr[0] < 201 && countAr[0]%50 == 0); affection += 2
+				
+			MouseMove_Ok
+		}
+	}
+	else; stroke = 0
+}
+MouseMove_Ok
+{
+	_state = ""
+	if sleeptrue; _state = "sleep"
+	else; _state = "wake"
+	_area = reference4
+	EVAL("OnPet_%(_state)_%(_area)")
+}
+
+OnPet_wake_head : nonoverlap
+{
+	if AFF(70); "\0(s_0)\i[102]\i[202]\i[298]%(m)(He's humming quietly.)"
+	if AFF(70); "\0(s_0)\i[102]\i[204]\i[298]%(m)(He's seems to enjoy it.)"
+	if AFF(70); "\0(s_0)\i[102]\i[202]\i[401]\i[298]%(m)(He sighs happily.)"
+	if AFF(70); "\0(s_0)\i[102]\i[204]\i[401]\i[298]%(m)(Did he just purr??)"
+	if (AFF(70) && MD("sad"));"(s_0)\i[105]\i[298]%(m)(He quietly leans into your touch.)"
+	if AFF(70); "\0(s_0)\i[102]\i[298]%(m)(You feel like he’s fine with this for once.)"
+	if AFF(70); "\0(s_0)\i[298]%(m)(He... appreciates the gesture?)"
+	if AFF(70); "\0(s_0)\i[206]\i[303]\i[298]%(m)(He moves to say something, (s_0)\i[205]\i[305]\i[298]but stops himself.)"
+	if AFF(70); "\0(s_0)\i[116]\i[298]%(m)(He avoids your gaze.)"
+	if AFF(70); "\0(s_0)\i[116]\i[204]... eh . ."
+	if AFF(70); "\0(s_0)... what are you looking at?"
+	if AFF(70); "\0(s_0)... not my fault...\n\n(s_0)\i[298]%(m)(He cuts himself off, but he’s not really complaining.)"
+	if AFF(70); "\0(s_0)\i[304]... why do you do this? 'm not complainin' just wonderin'."
+	if (AFF(70) && MD("embarrassed") && RND(10)); "\0(s_0)\i[401]\i[298]%(m)(He blushes, oh nooooo.)"
+	if (AFF(70) && MD("angry")); "%(VARC('angry','-1'))(s_0)\i[205]\i[302]\i[298]%(m)(He relaxes visibly.)"
+	if (AFF(70) && MD("angry")); "%(VARC('angry','-1'))(s_0)\i[206]\i[298]%(m)(He sighs a bit, still irritated, but at least he's not going to bite your head off.)"
+	if (AFF(70) && MD("angry")); "%(VARC('angry','-1'))(s_0)\i[206]\i[298]%(m)(He huffs, but doesn’t complain about it.)"
+
+	if AFF(50); "\0(s_0)\i[201]\i[302]\i[298]%(m)(He's scowling, but doesn't protest.)"
+	if AFF(50); "\0(s_0)\i[107]\i[302]\i[298]%(m)(You note how he got a lot less agressive when you pet him.)"
+	if AFF(50); "\0(s_0)\i[305]\i[298]%(m)(It's nice that he doesn't lash out anymore.)"
+	if AFF(50); "\0(s_0)\i[102]\i[298]%(m)(Pat pat.)"
+	if AFF(50); "\0(s_0)\i[102]\i[298]%(m)(He's awfully quiet during this.)"
+	if AFF(50); "\0(s_0)\i[116]\i[298]%(m)(Pet.)"
+	if AFF(50); "\0(s_0)\i[201]\i[298]%(m)(His skull's kinda rough.)"
+	if AFF(50); "\0(s_0)\i[116]\i[205]%(m)tch."
+	if AFF(50); "\0(s_0)\i[298]%(m)(He doesn’t react too much anymore. Is that a good thing?)"
+	if AFF(50); "\0(s_0)\i[298]%(m)(He no longer seems too mad about this.)"
+	if AFF(50); "\0(s_0)\i[205]\i[303]\i[298]%(m)(He gives you a withering look but otherwise, lets you do your thing.)"
+	if AFF(50); "\0(s_0)\i[206]\i[298]%(m)(He gives a tired sigh, (s_0)\i[115]\i[298]and... an eye roll?)"
+	if (AFF(50) && MD("angry")); "\0(s_0)\i[305]%(m)not right now."
+	if (AFF(50) && MD("angry")); "\0(s_0)\i[105]\i[305]%(m)... not in the mood right now."
+	
+	if AFF(30); "\0(s_0)\i[305]%(m)ay. stop."
+	if AFF(30); "\0(s_0)\i[305]%(m)'m still not a pet."
+	if AFF(30); "\0(s_0)\i[298]%(m)(He seems to get used to how handsy you are.)"
+	if AFF(30); "\0(s_0)\i[116]\i[298]%(m)(He's protesting less. Is that a start?)"
+	if AFF(30); "\0(s_0)\i[102]\i[206]\i[305]\i[298]%(m)(He sighs.)\w8\w5(s_0)\i[116]\i[302]"
+	if AFF(30); "\0(s_0)\i[102]\i[305]\i[298]%(m)(Maybe his brows will get stuck like this.)"
+	if AFF(30); "\0(s_0)\i[305]%(m)can i get ya' to stop this?"
+	if AFF(30); "\0(s_0)\i[113]%(m)would really appreciate less contact."
+	if AFF(30); "\0(s_0)\i[113]\i[201]\i[305]\i[298]%(m)(He fixes you with a rather heated glare.)"
+	if AFF(30); "\0(s_0)\i[113]\i[305]%(m)what the fuck happened to personal space??"
+	if (AFF(30) && MD("angry"));"%(VARC('angry','+2'))(s_0)\i[102]\i[203]%(m)ya know... it’d be real great, (s_0)\i[113]\i[201]\i[305]if you would\n%(it)stop%(itoff)."
+
+	
+	if AFF(0,15); "\0(s_0)\i[302]%(m)stop fuckin' treatin' me like a plush toy."
+	if AFF(0,15); "\0(s_0)\i[302]%(m)if ya' like yer hands where they are, stop this shit."
+	if AFF(0,15); "\0(s_0)\i[302]%(m)%(swear) do i look like a pet to ya'?"
+	if AFF(0,15); "\0(s_0)\i[113]\i[302]%(m)ya' betta fuckin' stop this, %(nickname). (s_0)\i[302]"
+	if AFF(0,15); "\0(s_0)\i[113]\i[302]%(m)this ain't some kinda pet zoo. stop %(swearing) touchin' me."
+	if (AFF(0,15) && countAr[0] >= 10); "\0(s_0)\i[302]%(m)this is the last %(swearing) warnin', %(nickname)."
+	if (AFF(0,15) && countAr[0] >= 30); "%(VARC('affection','-2','angry','+2'))\0(s_0)\i[103]\i[302]\i[298]%(m). . ."
+	if AFF(0,15); "\0(s_0)\i[103]\i[201]\i[305]%(m)don’t. fucking. touch. me."
+	if AFF(0,15); "\0(s_0)\i[113]\i[201]\i[305]%(m)you’re not doin’ me any favors by touchin’ me."
+	if AFF(0,15); "\0(s_0)\i[113]\i[201]\i[303]%(m)the fuck happened to consent?\n\n%(m)humans don’t have that?"
+	if AFF(0,15); "\0(s_0)\i[113]\i[202]\i[302]ah, i see... (s_0)\i[103]\i[201]\i[305]you’re a handsy piece of shit."
+	if AFF(0,15); "\0(s_0)\i[113]\i[201]\i[305]\i[298]%(m)(Looks like he has his hackles up.)"
+	if AFF(0,15); "\0(s_0)\i[113]\i[305]\i[298]%(m)(He fixes you with a real volatile glare.)"
+	//if AFF(0,15); "\i[298]%(m)(He gives you a couple obscene hand gestures)" add with middle finger surface.
+	if AFF(0,15); "\0(s_0)\i[103]\i[201]\i[305]%(m)hands to your fuckin’ %(it)self%(itoff)."
+}
+OnPet_wake_face : nonoverlap
+{
+	if AFF(30,50,70); "\0(s_0)\i[102]\i[298]%(m)(He keeps quiet.)"
+	if AFF(30,50,70); "\0(s_0)\i[102]\i[298]%(m)(He lets you do your thing.)"
+	if AFF(0,15); "\0(s_0)\i[302]%(m)hands off, creep."
+	if AFF(0,15); "\0(s_0)\i[113]%(m)what the hell?"
+	if AFF(0,15); "\0(s_0)\i[113]%(m)what the fuck ya' think you're doing?"
+	if AFF(0,15); "%(VARC('happy','-2','angry','+1'))(s_0)\i[102]\i[204]%(m)if ya' value yer hands, (s_0)\i[302]i'd suggest ya' stop."
+	if (AFF(0,15) && countAr[0] >= 10); "\0(s_0)\i[302]%(m)this is the last %(swearing) warnin', %(nickname)."
+	if (AFF(0,15) && countAr[0] >= 30); "%(VARC('affection','-2','angry','+2'))(s_0)\i[113]\i[302]%(m). . ."
+}
+
+OnPet_sleep_head : nonoverlap
+{
+	if ARRINFO("user","petcrazy"); "\i[298]%(m)(Just one more, you tell yourself.)"
+	if AFF(30); "(s_0)\i[302]\i[298]%(m)(He grumbles.)"
+	
+	"\i[298]%(m)(pet pat pot.)"
+	"\i[298]%(m)(His skull's pleasantly warm. Somehow.)"
+	"\i[298]%(m)(Does he notice the pets?)"
+	"\i[298]%(m)(pat pat.)"
+	"\i[298]%(m)(Your hand catches on some bumps.)"
+	"\i[298]%(m)(You feel the chips in his bones.)"
+	"\i[298]%(m)(Another day, another pet.)"
+	
+	//default pet dialogue; SLEEP
+	"\i[298]%(m)(You don't think he's reacting.)"
+	"\i[298]%(m)(This is nice.)"
+	"(s_0)\i[302]%(m)hnnn."
+	"(s_0)\i[201]\i[302]%(m)ghh. (s_0)\i[302]"
+	"(s_0)\i[304]%(m). ."
+	"(s_0)\i[304]%(m)hn. . ."
+	"(s_0)\i[205]%(m)mh-"
+}
+OnPet_sleep_face : nonoverlap
+{
+	if ARRINFO("user","petcrazy"); "\i[298]%(m)(Just one more, you tell yourself.)"
+	if AFF(50,70); "(s_0)\i[202]\i[298]%(m)(He slightly leans into your touch.)"
+	
+	"(s_0)\i[401]\i[298]%(m)(His face is somehow warm?)"
+	"\i[298]%(m)(His breathing slows slightly.)"
+	"(s_0)\i[402]\i[298]%(m)(His face is warming up even more?)"
+	"\i[298]%(m)(You almost catch on the ridge of his eye socket.)"
+	
+	//default pet dialogue; SLEEP
+	"\i[298]%(m)(You don't think he's reacting.)"
+	"\i[298]%(m)(This is nice.)"
+	"(s_0)\i[302]%(m)hnnn."
+	"(s_0)\i[201]\i[302]%(m)ghh. (s_0)\i[302]"
+	"(s_0)\i[304]%(m). ."
+	"(s_0)\i[304]%(m)hn. . ."
+	"(s_0)\i[205]%(m)mh-"
+}
+OnPet_sleep_pocket : nonoverlap
+{
+	if AFF(70); "\i[298]%(m)(Could your hand fit in there too?)"
+	
+	if INV('phone')[0]; "\i[298]%(m)(You wonder if his phone is password locked...)"
+	if INV('phone')[0]; "\i[298]%(m)(Would it even be possible to steal his phone?)"
+	
+	if !INV('phone')[0]; "\i[298]%(m)(You wonder why he always keeps that hand in the pocket...)"
+	if !INV('phone')[0]; "\i[298]%(m)(Maybe his hand got chopped off, that's why he never takes his hand out...)"
+
+	"\i[298]%(m)(Can his hand get sweaty in there?)"
+	"\i[298]%(m)(There's probably stains in that pocket. . you bet.)"
+	"\i[298]%(m)(You wonder if he keeps mustard in his pockets.)"
+	
+}
+OnPet_sleep_hand : nonoverlap
+{
+	if AFF(70); "\i[298]%(m)(Maybe he'd let you touch his hand when he's awake...)"
+	if AFF(70); "\i[298]%(m)(Is holding hands through the screen possible?)"
+	if AFF(50,70); "\i[298]%(m)(You brush his hand. His breathing slows slightly.)"
+	
+	"\i[298]%(m)(You slightly brush his hand.)"
+	"\i[298]%(m)(One phalanges, two phalanges...)"
+	"\i[298]%(m)(How would it feel to hold his hand?)"
+	"\i[298]%(m)(You spot some cracks.)"
+	"\i[298]%(m)(You bet this is his default 'flip off' hand.)"
+	"\i[298]%(m)(His hand looks so tiny??)"
+	"\i[298]%(m)(You wonder how it's not really twitching when he's asleep...)"
+	"(s_0)\i[305]\i[298]%(m)(Your hand catches on some bumps.)"
+	"\i[298]%(m)(You feel the chips in his bones.)"
+	
+	//default pet dialogue; SLEEP
+	"\i[298]%(m)(You don't think he's reacting.)"
+	"\i[298]%(m)(This is nice.)"
+	"(s_0)\i[302]%(m)hnnn."
+	"(s_0)\i[201]\i[302]%(m)ghh. (s_0)\i[302]"
+	"(s_0)\i[304]%(m). ."
+	"(s_0)\i[304]%(m)hn. . ."
+	"(s_0)\i[205]%(m)mh-"
+}
+
+//------------------------------------------------------------------------------
+// Function		:OnMouseDoubleClick (Shiori)
+//
+// Ref			:ref3 = (number of char)
+//				 ref4 = (collision name)
+//------------------------------------------------------------------------------
+OnMouseDoubleClick
+{
+	case reference4
+	{
+		when "pocket","phone" {
+			if (INV('phone')[0] && !sleeptrue);
+				OnPhone_Ask //@uf_phone.dic
+		}
+		//when "pocket_empty"; ""
+		//when "hand"; ""
+		when "costume"; OnCostume_Fall
+		when "costume_floor"; OnCostume_Pick
+		when "note"; OnKofi_Pick
+		when "socks"; OnSocks_Pick
+		others {
+			if !togglefirst; OnMenu
+		}
+	}
+}
+
+OnCostume_Fall
+{
+	"\0(s_0)\![bind,Misc,Costume_Falling,1]"
+	--
+	//"(s_0)\i[302]\i[298]%(m)(Woops.)"
+	//"(s_0)\i[302]\i[298]%(m)(Woops.)"
+	//"(s_0)\i[302]\i[298]%(m)(Maybe you shouldn't poke him there.)"
+	//"(s_0)\i[302]\i[298]%(m)(This isn't what you thought would happen.)"
+	//"(s_0)\i[302]\i[298]%(m)(Bye bye costum-e.)"
+	"\_w[402].\_w[350].\_w[300].\_w[401].\_w[401].\_w[401].\_w[401]."
+	--
+	"\![bind,Misc,Costume_Falling,0]"
+	--
+	"\![get,property,OnCostume_Position,currentghost.scope(0).rect]"
+}
+OnCostume_Position
+{
+	"\p[297]\s[297]/
+	\![move,--X=%(reference0[0]),--Y=%(reference0[1])]/
+	\0(s_0)"
+}
+OnCostume_Pick
+{
+	if reference0 == "yes" {
+		"\p[297]\s[-1]\w4/
+		\0(s_0)\i[116]\![bind,Misc,Costume,1]"
+	}
+	else {
+		"\0\i[298]%(m)(Want to pick it up?)\n\n/
+		\![*]\q[Yes,OnCostume_Pick,yes]\n\n[half]/
+		\![*]\q[No,script:\e]"
+	}
+}
+
+OnKofi_Pick
+{
+	"\0(s_0)\i[102]/
+	\i[298]%(m)(It looks like there's a little note laying on the ground.)\n\n/
+	\i[298]%(m)(You pick it up and put it in the bag.)/
+	\p[299]\s[-1]\0/
+	%(ARRADD('inv','kofinote,1,-1'))"
+}
+
+OnSocks_Pick
+{
+	case togglesock
+	{
+		when 1 {
+			"\0(s_0)\i[102]\i[298]%(m)(Is that... are those...)\w8\n\n/
+			%(m)(Socks???)"
+			togglesock = 2
+		}
+		when 2 {
+			"\0(s_0)\i[116]\i[298]%(m)(... It is.)\n\n[half]/
+			\i[298]%(m)(Should you... capture his attention?)\n\n/
+			\![*]\q[(Ask if those are his.),OnEvent_Socks,start]\n/
+			\![*]\q[(Say nothing.),script:\e]"
+			togglesock = 3
+		}
+		when 3 {
+			"\0(s_0)\i[116]\i[298]%(m)(Should you... capture his attention?)\n\n/
+			\![*]\q[(Ask if those are his.),OnEvent_Socks,start]\n/
+			\![*]\q[(Say nothing.),script:\e]"
+		}
+	}
+}
+
+

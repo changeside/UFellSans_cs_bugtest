@@ -1,0 +1,521 @@
+//------------------------------------------------------------------------------
+// File		:uf_user.dic
+//
+//			:All user related saves, infos, functions.
+//
+// Var		:bornmonth (int/ERASED)
+//			 userbirthday
+//			 togglefirst (1/ERASED)
+//			 username
+//			 upperworld
+//			 countAr
+//			 affection
+//			 togglesock
+//			 sleeptrue
+//------------------------------------------------------------------------------
+
+
+
+//------------------------------------------------------------------------------
+// Setting the users birthday (first on random boot/afterwards)
+//------------------------------------------------------------------------------
+OnBirthday
+{
+	if PrintBirthday == "";
+		"\w8\w8\c\i[298]%(m)(First enter the months number.)"
+	else;
+		"\0(s_0)%(m)different birthday? ya' got it wrong before?\n\n%(m)remember, enter the month first."
+	--
+	"\w8\![open,sliderinput,OnBirthday_Month,-1,1,1,12]"
+}
+OnBirthday_Month
+{
+	bornmonth = reference0
+	_maxday = 0
+	
+	case bornmonth
+	{
+		when 1,3,5,7,8,10,12; _maxday = 31
+		when 2; _maxday = 28
+		others; _maxday = 30
+	}
+	
+	if PrintBirthday == "";
+		"\0\i[298]%(m)(Then the day.)"
+	else;
+		"\0(s_0)%(m)now the day."
+	--
+	"\w8\![open,sliderinput,OnBirthday_Day,-1,1,1,%(_maxday)]"
+}
+OnBirthday_Day
+{
+	userbirthday = "%(reference0),%(bornmonth)"
+	ERASEVAR("bornmonth")
+	
+	OnBirthday_Done
+}
+OnBirthday_Done
+{
+	if DAY(userbirthday) //if today is the user's birthday
+	{
+		"\0(s_0)\i[301]\i[298]%(m)(He looks surprised.)\n\n%(m)(But seems to accept it as it is.)"
+		--
+		if AFF(30,50,70);
+			"\n\n(s_0)\i[304]%(m)happy birthday then. . . (s_0)\i[105]i guess."
+	}
+	else
+	{
+		"\0(s_0)%(m)%(PrintBirthday), huh? 'k."
+	}
+	--
+	"\x%(OnConfig)"
+}
+
+
+//------------------------------------------------------------------------------
+// Setting the users name; check for special names (firstboot/afterwards)
+//------------------------------------------------------------------------------
+OnTeachname //if firstboot; OnTeachname gets skipped
+{
+	if AFF(0,15)
+	{
+		if RND(70); "\0(s_0)%(m)short question, %(nickname). \i[301]do i look like i care?\e"
+		else; "\0(s_0)\i[305]"
+	}
+	else
+	{
+		if MD("angry"); "\0(s_0)\i[305]%(m)fine."
+		else {
+			"\0(s_0)%(m)wanna change yer name? go for it."
+			"\0(s_0)%(m)different name, huh?"
+		}
+	}
+	--
+	"\![open,inputbox,OnTeachname_Check,-1]"
+}
+OnTeachname_Check 
+{
+	_temp = reference0
+	_no = "\![open,inputbox,OnTeachname_Check,-1]"
+
+	_temp = TOLOWER(_temp)
+    _temp = REPLACE(_temp," ","") //removes spaces
+    _temp = REPLACE(_temp,".","") //removes periods
+    _temp = REPLACE(_temp,"-","") //removes dashes
+
+	case _temp
+	{
+		when "sans"
+		{
+			"\0(s_0)\i[113]%(m)nope.%(_no)"
+			if MD("amused"); "\0(s_0)\i[301]%(m)came a few years too late for that name.%(_no)"
+		}
+		when "daddy","slut","hoe","bitch","mommy","whore"
+		{
+			username = "weirdo"
+			--
+			"\0(s_0)\i[113]\i[302]\i[400]\i[401]\i[298]%(m)...\n\n%(m)(Guess he doesn't approve of that name. What a shame.)"
+			--
+			if togglefirst != 1; "\x%(OnConfig)"
+		}
+		when "dick","cunt","cock","pussy"
+		{
+			username = "weirdo"
+			--
+			"\0(s_0)\i[102]\i[304]\i[400]%(m)nice try, but no."
+			--
+			if togglefirst != 1; "\x%(OnConfig)"
+		}
+		when ""
+		{
+			username = "human"
+			--
+			if AFF(0,15)
+			{
+				"\0(s_1)\i[102]%(m)could have fuckin spared me this effort then."
+				"\0(s_1)\i[102]%(m)less ta' remember."
+			}
+			else
+			{
+				"\0(s_0)\i[301]%(m)not really creative, huh?\n\n(s_0)%(m)'sup human."
+				"\0(s_1)\i[102]%(m)less ta' remember.\n\n(s_0)%(m)'sup human."
+			}
+			--
+			if togglefirst != 1; "\x%(OnConfig)"
+		}
+		when "gaster"
+		{
+			"\0(s_0)\i[116]\i[302]%(m)that name rings a bell. . . \n(s_0)%(m)anyway, want a fancy title?\n\n[half]"
+			-- 
+			"\![*]\q[Nope,OnTeachname_Titles,%(reference0)]\n/
+			\![*]\q[Master,OnTeachname_Titles,%(reference0),master]\n/
+			\![*]\q[Professor,OnTeachname_Titles,%(reference0),professor]\n/
+			\![*]\q[Doctor,OnTeachname_Titles,%(reference0),doctor]"
+		}
+		when "papyrus"
+		{
+			if !ARRINFO("papyrus","name")
+			{
+				"\0(s_0)\i[113]\i[302]\i[298]%(m)(Uh oh. You seemed to have made him suspicious.)\n\n(s_0)\i[113]\i[302]%(m)no. %(_no)"
+				--
+				ARRADD("papyrus","name","nameteach")
+			}
+			else {
+				"\0(s_0)\i[113]\i[205]%(m)yeah, (s_0)\i[302]no.%(_no)"
+			}
+		}
+		when "undyne"
+		{
+			if !ARRINFO("undyne","name")
+			{
+				"\0(s_0)\i[302]\i[298]%(m)(...)\n\n(s_0)\i[102]%(m)nah.%(_no)"
+				--
+				ARRADD("undyne","name","nameteach")
+			}
+			else {
+				"\0(s_0)%(m)nah, might wanna take... \i[105]a different name.%(_no)"
+			}
+		}
+		when "toriel"
+		{
+			if !ARRINFO("toriel","name")
+			{
+				"\0(s_0)\i[304]%(m)... i doubt it, kid.%(_no)"
+				--
+				ARRADD("toriel","name","nameteach")
+			}
+			else {
+				"\0(s_0)%(m)eh, no chance.%(_no)"
+			}
+		}
+		when "asgore"
+		{
+			if !ARRINFO("asgore","name")
+			{
+				"\0(s_0)\i[302]\i[298]%(m)(He just stares at you.)%(_no)"
+				--
+				ARRADD("asgore","name","nameteach")
+			}
+			else
+			{
+				"\0(s_0)%(m)do yerself a favor an' just. don't.%(_no)"
+			}
+		}
+		when "alphys"
+		{
+			if !ARRINFO("alphys","name")
+			{
+				"\0(s_0)\i[302]%(m)...%(_no)"
+				--
+				ARRADD("alphys","name","nameteach")
+			}
+			else
+			{
+				"\0(s_0)\i[115]\i[302]%(m)uh, nope.%(_no)"
+			}
+		}
+		when "grillby"
+		{
+			if !ARRINFO("grillby","name")
+			{
+				"\0(s_0)\i[302]\i[298]%(m)(He doesn't say anything, but you get the feeling you should choose a different name.)%(_no)"
+				--
+				ARRADD("grillby","name","nameteach")
+			}
+			else
+			{
+				"\0(s_0)%(m)nah.%(_no)"
+			}
+		}
+		when "flowey"
+		{
+			if !ARRINFO("flowey","name")
+			{
+				"\0(s_0)\i[302]%(m)funny name ta' have. bet yer parents hated ya'.\n\n(s_0)\i[102]\i[207]%(m)betta' choose 'nother one, can't honestly wanna have t' name of a pathetic rut do ya'?%(_no)"
+				--
+				ARRADD("flowey","name","nameteach")
+			}
+			else
+			{
+				"\0(s_0)%(m)believe me, ya' ain't wanna be called that.%(_no)"
+			}
+		}
+		others
+		{
+			if AFF(30,50,70)
+			{
+				"\0(s_0)%(m)want a fancy title?\n\n[half]"
+				"\0(s_0)\i[102]\i[298]%(m)(He hums.)\n(s_0)%(m)ya' want a title?\n\n[half]"
+				--
+				"\![*]\q[Nope,OnTeachname_Titles,%(reference0)]\n/
+				\![*]\q[Master,OnTeachname_Titles,%(reference0),master]\n/
+				\![*]\q[Professor,OnTeachname_Titles,%(reference0),professor]\n/
+				\![*]\q[Doctor,OnTeachname_Titles,%(reference0),doctor]\n/
+				\![*]\q[Captain,OnTeachname_Titles,%(reference0),captain]\e"
+			}
+			else
+			{
+				username = TOLOWER(reference0)
+				--
+				OnTeachname_Done
+			}
+		}
+	}
+	--
+		//delete first boot for names without title question
+	ERASEVAR("togglefirst")
+}
+OnTeachname_Titles
+{
+	username = reference1 + " " + TOLOWER(reference0)
+	--
+	OnTeachname_Done
+}
+OnTeachname_Done
+{
+	if "captain" _in_ username && togglefirst
+	{
+		"%(VARC('amused','+3'))(s_0)\i[102]\i[204]\i[301]%(m)kay. (s_0)\i[114]maybe i'll remember, (s_0)maybe i won't. all depends on how you're gonna act, \i[203]\i[301]%(it)captain%(itoff).\n\i[102]\i[298]%(m)(You hear him laughing.)"
+	}
+	elseif "captain" _in_ username
+	{	
+		"%(VARC('amused','+3'))(s_0)\i[112]\i[203]%(m)sure thing\w8\w8\w8 \i[301]%(it)captain%(itoff).\n\i[298]%(m)(You hear laughing. Is he mocking you?)"
+	}
+	elseif "human" _in_ username
+	{
+		"\0(s_0)%(m)strange name, \i[302]but 'm not judging."
+		"\0(s_0)%(m)strange name, \i[116]\i[302]but who am i to judge."
+	}
+	elseif togglefirst
+	{
+		"\0(s_0)\i[102]%(m)k, maybe i'll remember, maybe i won't.\n\n%(m)(s_0)all depends on how yer gonna act, %(username)."
+	}
+	elseif AFF(0,15)
+	{
+		"\0(s_0)\i[116]\i[304]%(m)ugh."
+		"\0(s_0)\i[102]\i[304]"
+	}
+	elseif MD("angry")
+	{
+		"\0(s_0)%(m)dully noted."
+		"\0(s_0)%(m)'k."
+	}
+	else
+	{
+		"\0(s_0)%(m)congrats."
+		"\0(s_0)\i[102]%(m)gotcha."
+	}
+	--
+	if !togglefirst; "\x%(OnConfig)"
+	else; ERASEVAR("togglefirst")
+}
+
+
+//------------------------------------------------------------------------------
+// Functions that add to the userAr array (mostly from uf_aitalk.dic)
+//------------------------------------------------------------------------------
+OnHabits_Shelf //@uf_aitalk.dic
+{
+	if reference0 == "tall"{
+		"\0(s_0)\i[304]%(m)well, ain't ya lucky?"
+	}
+	if reference0 == "small" {
+		if AFF(50,70); "\0(s_0)%(m)ah\i[102], i know yer pain."
+		if AFF(0,15,30); "\0(s_0)\i[112]\i[203]\i[301]\i[298]%(m)(He's laughing.)"
+	}
+	ARRADD_0("user",reference0)
+}
+OnHabits_Artist //@uf_aitalk.dic
+{
+	if reference0 == "agree" {
+		if AFF(50,70); "(s_0)\i[202]%(m)maybe i'll tell 'er.\n\n%(m)but it was more o' a joke %(nickname)."
+		if AFF(30); "(s_0)\i[304]%(m)... \i[203]jus' a joke %(nickname)."
+		if AFF(0,15); "(s_0)%(m)\i[301]'m surprised. (s_0)\i[106]\i[203]\i[304]ya' do know that was more o' a joke?"
+	}
+	if reference0 == "busy" {
+		if AFF(50,70); "(s_0)\i[304]%(m)was more o' a joke %(nickname).\n\n%(m)but good luck with yer %(stuff)."
+		if AFF(30); "(s_0)\i[301]%(m)jus' a joke\n\n\i[102]%(m)%(eh) betta finish yer stuff though."
+		if AFF(0,15); "(s_0)%(m)\i[301]sure sure, (s_0)\i[102]\i[206]\i[304]ya' do know that was more o' a joke than anythin'?"
+	}
+	if reference0 == "nonartist" {
+		if AFF(50,70); "(s_0)\i[304]%(m)well good ta' know %(nickname), \i[205]but it %(it)was%(itoff) more o' a joke."
+		if AFF(30); "(s_0)\i[114]\i[301]%(m)'s a joke %(nickname)."
+		if AFF(0); "(s_0)\i[102]\i[203]\i[301]%(m)ya' do know that was more o' a joke than anythin'?"
+	}
+
+	if reference0 == "nonartist"; ARRADD_0("user","nonartist")
+	else; ARRADD_0("user","artist")
+	ARRADD_0("alphys","hobby")
+}
+OnHabits_Hemisphere //@uf_aitalk.dic
+{
+	if reference0 == "lower" {
+		"\c\i[298]%(m)(Sans got it wrong. You make a face, but decide not to speak. Better not point out his mistakes.)/
+		\w8\w8\w5(s_0)\i[302]\n\n%(m)what's with that face, %(nickname)? \i[113]got something ta' say?%(pause)/
+		(s_0)\i[109]\i[301]%(m)huh? i got the season wrong? (s_0)\i[302]da fuck are you talking about...?/
+		%(pause)\i[108]\i[302]\i[400]%(m)dammit.. i keep forgettin' the surface's so big... (s_2)it's not the same everywhere.\n\n/
+		(s_0)\i[102]%(m)well, (s_0)\i[105]\i[302]fuck it. (s_0)\i[102]\i[302]'kay, (s_0)\i[304]i'll remember that."
+		--
+		upperworld = 0
+	}
+	if reference0 == "upper" {
+		"\c\i[298]%(m)(You're kind of surprised he got it right, given his circumstances...)/
+		\w8\w8\w5(s_0)\i[302]\n\n%(m)what. (s_0)\i[102]don't be so surprised %(nickname)."
+		--
+		upperworld = 1
+	}
+	
+	ARRADD_0("user","place")
+}
+OnHabits_Check //@uf_bootend.dic
+{
+	//Morning/Night person
+	if countAr[3]%10 == 0
+	{
+		if countAr[3] < 0; ARRADD_0("user","nightowl")
+		elseif countAr[3] > 0; ARRADD_0("user","earlybird")
+		else; ARRDEL_0("user","nightowl","earlybird")
+	}
+	
+	//Weekend booting
+	if countAr[2] >= 30; ARRADD_0("user","loner")
+	else; ARRDEL_0("user","loner")
+
+	//Personality traits
+	ARRDEL_0("user","kind","boring","rude")
+		
+	if (countAr[5] > 20	&& countAr[5]>countAr[6] && countAr[5]>countAr[7]);
+		ARRADD_0("user","kind")
+	if (countAr[6] > 20 && countAr[6]>countAr[5] && countAr[6]>countAr[7]);
+		ARRADD_0("user","rude")
+	if (countAr[7] > 20	&& countAr[7]>countAr[5] && countAr[7]>countAr[6]);
+		ARRADD_0("user","boring")
+
+	//Realclose - goodbye saying user
+	if countAr[4] > 20 && !ARRINFO("user","goodbye")
+	{
+		ARRADD_0("user","goodbye")
+		affection += 5
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+// Special events
+//------------------------------------------------------------------------------
+OnEvent_Socks
+{
+	//beginning (@uf_mouse.dic)
+	if reference0 == "start"; 
+		"(s_0)\i[305]%(m)course they are. (s_0)\i[113]\i[305]got a problem with that %(username)?\n\n/
+			%*\q[(Say it's fine but ask him to pick it up.),OnEvent_Socks,1,good]\n/
+			%*\q[(Tell him it's fine.),OnEvent_Socks,nopick]\n/
+			%*\q[(Say nothing and point to the socks.),OnEvent_Socks,1,bad]"
+	//first nagging
+	if reference0 == "1" && reference1 == "good";
+		"(s_0)\i[112]\i[203]%(m)laughing my fuckin ass off here. (s_0)\i[102]\i[203]make me, kid. wouldn't be the first one ta fail.\n\n/
+			%*\q[(Kindly ask again.),OnEvent_Socks,2,good]\n/
+			%*\q[(Let it go.),OnEvent_Socks,nopick]\n/
+			%*\q[(Start to stare him down.),OnEvent_Socks,2,goodbad]"
+	if reference0 == "1" && reference1 == "bad";
+		"(s_2)\i[102]\i[298]%(m)(Is he pretending to ignore you? ... yes, he is.)%(pause)(s_2)\i[298]%(m)(As he opens his eyes again to glance back at you, you think about making another attempt.)\n\n[half]/
+			%*\q[(Kindly ask.),OnEvent_Socks,2,badgood]\n/
+			%*\q[(Let it go.),nopick]\n/
+			%*\q[(Stare him down and keep pointing.),OnEvent_Socks,2,bad]"
+	//final nagging
+	if reference0 == "2" && reference1 == "good";
+		"(s_2)\i[105]\i[298]%(m)(He's looking away for some time... staring off to the side.)\n(s_2)\i[104]\i[203]\i[302]\i[298]%(m)(Until he sighs, deep and long.)/
+			\n\n[half](s_2)%(m)fuckin' fine, (s_0)\i[302]ya better thank me later on.\n\n[half](s_0)\i[107]\i[304]\i[400]%(m)%(whisper)can't believe ya' were so damn civilized about this.../
+			\w8\w8\w8\s[-1]\p[298]\s[-1]\w8\w8\0(s_0)\i[116]/
+			%(VARC('affection','+2'))/
+			%(ARRADD('user','socks','goodgood'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	if reference0 == "2" && reference1 == "goodbad" {
+		"(s_0)\i[305]\i[298]%(m)(He's looking right back at you.)\n%(m)(And... just.. keeps on doing so.)\n\n[half]/
+			(s_0)\i[102]\i[206]\i[298]%(m)(After a while, he heaves a sigh. (s_0)\i[108]\i[302]\i[298]he's grumbling but somehow, it doesn't sound too angry.)/
+			\s[-1]\p[298]\s[-1]\0\w8\w8\w8/
+			\w8\w8\w5\c(s_0)\i[102]%(m)there. (s_0)did it. \i[107]all gone. (s_0)\i[302]hope ya feel better now./
+			\n\n(s_0)\i[102]\i[206]\i[305]\i[298]%(m)(Another sigh. Wow, who spoiled his cereal today?)/
+			%(VARC('affection','+1'))/
+			%(ARRADD('user','socks','goodbad'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	}
+	if reference0 == "2" && reference1 ==  "bad";
+		"(s_0)\i[103]\i[201]\i[305]%(m)fuck.\w8 you.\w8\w8\w8(s_2)\i[104]\i[302]\c/
+			\i[298]%(m)(He doesn't offer much more. ouch. Perhaps your way wasn't the right approach.)\w8\w6/
+			\n%(m)(But it's too late to change it now. You gently pick up the socks\p[298]\s[-1]\0 and put them down somewhere out of the way.)/
+			%(VARC('affection','-2'))/
+			%(ARRADD('user','socks','badbad'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	if reference0 == "2" && reference1 == "badgood" {
+		"(s_0)\i[105]\i[400]\i[298]%(m)(Maybe he just needed a softer approach, (s_0)\i[102]\i[302]\i[298]because shortly after you ask, he made to pick them up. /
+			\s[-1]\p[298]\s[-1]\0You hear his grumbling all the way off your screen, but as he pops up again(s_0)\i[102]\i[205]\i[298], he looks less pissed than you'd anticipated.)/
+			\w8\w8\w8\w8\c(s_0)\i[302]%(m)there. look kid, \i[102]ain't i a fuckin' saint? (s_0)\i[102]now stop botherin' me and pretend to care about yer own shit.(s_0)\i[105]/
+			%(VARC('affection','-1'))/
+			%(ARRADD('user','socks','badgood'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	}
+	//cancel
+	if reference0 == "nopick";
+		"(s_0)\i[116]\i[301]\i[298]%(m)(You wonder if you shouldn't at least pick them up yourself.)/
+			\n\n[half]%(m)(But as it is, they don't really annoy you right	now.)/
+			\n\n%(m)(You can still get back to them later.)"
+	//closing warned
+	if _argv[0] == "close" && _argv[1] == "warning";
+		"(s_0)\i[298]%(m)(You make to wish Sans goodbye, but he butts in.)\n\n/
+			(s_0)\i[106]\i[400]%(m)look %(nickname). i know i kinda... ehr, messed up yer space but 'n honest thanks fer not harrasin' me here.%(pause)/
+			%(m)there.\n\n(s_2)\i[113]\i[302]/
+			%(m)that's the only one ya 'll get now fuck off./
+			%(VARC('affection','+3'))/
+			%(ARRADD('user','socks','noaction'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	//closing forced
+	if _argv[0] == "close" && _argv[1] == "force" && sleeptrue;
+		"(s_0)\i[302]%(m)z-\w8zz-\n\n/
+			\i[298]%(m)(You think you did the right thing.)\n\n/
+			%(m)(Too bad that Sans isn't awake to finally thank you...)/
+			%(VARC('affection','+3'))/
+			%(ARRADD('user','socks','noaction'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+	if _argv[0] == "close" && _argv[1] == "force" && !sleeptrue;
+		"(s_0)\i[109]\i[301]\i[298]%(m)(Closing seems to startle him this time.)\n\n/
+			(s_0)\i[302]\i[298]%(m)(You get the feeling that he wanted to tell you something.)\n\n[half]/
+			\i[206]%(m)(But just as he starts, he gets whisked away.)/
+			%(VARC('affection','+3'))/
+			%(ARRADD('user','socks','noaction'))/
+			%(EVAL(ERASEVAR('togglesock')))"
+}
+
+
+
+//THE PEBBLE EVENT; toggled over the mode == "PetRock" variable.
+
+// OnPebble {
+	// mode = "PetRock";
+	// --
+// }
+
+// OnJournal {
+	// "\_q\b[3]got to jott this down in case %(heshe) start%(sforword) to act malicious.\n\n/
+	// i've napped in my room durin' breaktime and foun' myself starin' at a vague blurry form after startlin' awake. /
+	// turns out that the fuckin' blurry ass was a human. in the flesh. somehow./
+	// %(dwait)i don't quite get what's actually goin' on yet but this ain't a situation to joke around with."
+// }
+
+
+/*
+THE UKAGAKA EVENT:
+"oh yeah. i found out what this place is btw.
+one of these fuckers was lyin on the ground at the dump. can ya believe I'd be able to get it up an runnin again? me neither kid.
+now... wouldn't it be a great time to fucking tell me what ya were trying to achieve by keepin me in the dark?"
+TODO: think of choices. honesty is valued, gives affection while sassy reminders give minus? maybe??
+enables comments about more in depth computer functions and stuff
+probably happens either after the Pebble Event or after the Sock event... after the Papyrus Event??
+
+figuring out how to approach that path with thr events. Sans probably already has suspicions and tests it out now.
+Sock event- test: can i bring stuff?
+OMG JOURNAL. THERE'S GOTTA BE AN OPTION TO VIEW HIS NOTES
+Pebble Event - test: can i send something else instead of myself?
+Papyrus event???? brother event? call=?? phone call?
+*/

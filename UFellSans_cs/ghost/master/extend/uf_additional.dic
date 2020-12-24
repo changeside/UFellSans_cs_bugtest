@@ -1,0 +1,563 @@
+//------------------------------------------------------------------------------
+// File		:uf_additional.dic
+//
+//			:Functionality (mostly isolated functions)
+//           (Biff,Clock,Note f.e.)
+//
+// Var		:togglemail (1/erased forever)
+//			 toggleclock (1/erased forever)
+//			 alarmAr
+//			 tempnb (int/erased)
+//			 toggleasktall (1/erased forever)
+//			 countAr
+//			 state
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// BIFF functions (start @uf_menu.dic)
+//------------------------------------------------------------------------------
+OnBIFFBegin
+{
+		//first mail check
+	if togglemail == 1; "\0(s_0)\i[298]%(m)(You ask him to check your email. You show him your account data.)\n\n[half](s_pout)\i[298]%(m)(Hopefully he can decipher it...)\n\n(s_0)\i[203]\i[301]%(m)'m just doin' this out of curiosity...\e"
+	--
+	if ARRINFO("user","loner"); "\0(s_0)%(beginning), maybe ya' have more emails than friends.(s_pout)"
+	"(s_0)%(m)%(beginning), lets see.(s_pout)"
+	"(s_0)%(m)oh, emails, haven't seen those in a while.(s_pout)"
+	"(s_0)%(m)email check, go.(s_pout)"
+}
+OnBIFFComplete
+{
+	if togglemail; ERASEVAR("togglemail")
+	--
+	case reference0 {	//amount of new mails
+		when 0 {
+			if ARRINFO("user","loner"); "\0(s_0)\i[112]\i[203]%(m)knew it."
+			"\0(s_0)%(m)welp, there are exactly zero new ones.\n\n%(m)this was useless."
+			if MD("angry"); "\0(s_0)\i[113]%(m)zero %(swearing) messages."
+			"\0(s_0)%(m)congratulations, ya' got zero new ones, %(nickname)."
+		}
+		when 1 {
+			"\0(s_0)%(m)ay, got a mail."
+			if ARRINFO("user","loner"); "(s_1)%(m)one still ain't much."
+		}
+		when 2-99 {
+			"\0(s_0)%(m)ya' got %(reference0) mails."
+			if ARRINFO("user","loner"); "(s_1)\i[304]%(m)tha's more than i anticipated. got me there %(nickname)."
+			if ARRINFO("user","loner"); "(s_0)\i[301]%(m)that all spam %(nickname)? don't imagine ya' ta get friend mails."
+		}
+		others {
+			"\0(s_0)\i[301]%(m)%(reference0) mails. . .\n\n%(m)%(swear)."
+		}
+	}
+}
+OnBIFFFailure
+{
+	if togglemail; ERASEVAR("togglemail")
+	--
+	case reference0 {	//error message
+		when "timeout"; "\0(s_0)%(m)connection timed out."
+		when "kick"; "\0(s_0)%(m)can't access the account %(nickname)." //if the ghost is blocked from access
+		when "defect"; "\0(s_0)%(m)wrong settings %(nickname), do it better.\![open,configurationdialog]"
+		others; "\0(s_0)%(m)%(stuff) went wrong.\n\n[half]%(m)('%(reference0)'was given as error.)"
+	}
+}
+
+//------------------------------------------------------------------------------
+// Clock functions (start @uf_menu.dic)
+//------------------------------------------------------------------------------
+OnSNTPBegin //reference0 = site used to check the clock
+{
+		//first clock check
+	if toggleclock == 1; "\0(s_0)\i[298]%(m)(You ask him how late it is.)\n\n(s_pout)\i[100]\i[304]%(m)don't you have a clock... or is yers off?\e"
+	--
+	"\0(s_0)%(m)%(beginning), gonna check the time, i guess.(s_pout)"
+	"\0(s_0)\i[298]%(m)(He takes out his phone, checking the time.)(s_pout)"
+}
+OnSNTPCompare
+{	
+	//month/day/year hour/minute/second
+	//reference1 = check
+	//reference2 = own clock
+	//reference3 = difference
+	if toggleclock; ERASEVAR("toggleclock")
+	--
+	"\0(s_0)%(m)my phone says '%reference1[1]/%reference1[2]/%reference1[0] %reference1[3]:%reference1[4]:%reference1[5]'.\n\n"
+	--
+ 	if reference3 == 0 { //clocks are the same
+ 		//"\0(s_0)%(m)our clocks match %(nickname)."
+	}
+ 	else {
+ 		"\0(s_0)\i[298]%(m)(Your time is different.)\n\n[half]"
+		--
+		"\![*]\q[Fix it,OnSNTPEXECUTE]\n/
+ 		\![*]\q[Leave it alone,script:\e]"
+	}
+	--
+	if RND(60); "(s_pback)"
+}
+OnSNTPEXECUTE
+{
+	"\0(s_0)\i[298]%(m)(You fixed your clock.)"
+}
+OnSNTPFailure
+{
+	if toggleclock; ERASEVAR("toggleclock")
+	--
+	"\0(s_0)\i[205]%(m)%(beginning), my phone time looks off too."
+}
+
+//------------------------------------------------------------------------------
+// RSS/headline functions (start @???)
+//------------------------------------------------------------------------------
+OnHeadlinesenseBegin
+{
+	//"\0(s_0)%(m)startin' %(reference0)."
+	"\0\i[298]%(m)(Checking %(reference0).)"
+}
+OnHeadlinesense.OnFind //reference2=current page(First/Next/Last/First and Last)
+{
+	_print = "\0\b2%(reference0):\n\n%reference3\n"
+ 	
+	case reference2 { //Bottom buttons
+		when "First","Next"; _print += "\![*]\q[Next,] - \![*]\q[Stop,script:\e]\e"
+		others; _print += "\![*]\q[Stop,script:\e]"
+	}
+}
+OnHeadlinesenseComplete //check successful, but no new updates.
+{
+	//"\0%(s)%(m)no update.\e"
+	"\0%(m)(There's no new updates.)"
+}
+OnHeadlinesenseFailure
+{
+	case reference0 {
+		when "can't download" {
+			"\0%(m)(Couldn't download the feed.)"
+			//"\0%(s)%(m)%(beginning)\w6, download failed.\e"
+		}
+		when "can't analyze" { //if it can't be read
+			//"\0%(s)%(m)i can't read this\w3, %(nickname).\e"
+			"\0%(m)(Analyzing failed.)"
+		}
+		others {
+			"\0%(m)(Something went wrong.)"
+		}
+	}
+}
+
+
+//------------------------------------------------------------------------------
+// Alarm functions (start @uf_menu.dic)
+//------------------------------------------------------------------------------
+OnAlarm
+{
+		//check that array is initialized
+	if ISVAR("alarmAr") == 0; OnAlarm_Init
+    _mode = ""
+	_format = "_arr[2][0]+':'+_arr[2][1]+':'+_arr[2][2] + /
+	'\_l[90]' + SHIORI3FW.MakeShortText('('+_arr[3][0]+','+_arr[3][1]+' | '+_arr[4]+')',17) + /
+	'\_l[210]' + 'EBUTTON' + 'XBUTTON' +/
+	'\n\_l[17]'+ SHIORI3FW.MakeShortText(_arr[1],25)"
+	_list = OnList("alarmAr","OnAlarm",5,"|",1,1,0,1,_format)
+
+	"\![set,choicetimeout,-1]\_q/
+	\0\b4\_l[-10]/
+	%(cmenu6)%(b)Timed reminders\f[bold,0]/
+	\_l[190]|\q[Exit,script:\e]|   |\q[Back,OnUtility]|\n[150]/
+	%(cmenu2)\_l[-10]\q[Add alarm,OnAlarm_Add]\n\n/
+	%(cmenu5)%(_list)\n"
+}
+OnAlarm_Add
+{
+	_arr = "0|alarm name|hour,min,sec|every X day(s),start day|fixed day,fixed day"
+	SETDELIM(_arr,"|")
+	_info = EVAL("_arr[2][0]+':'+_arr[2][1]+':'+_arr[2][2]+'|'+ _arr[1] + '|' + _arr[3][0]+','+_arr[3][1]+'|'+ _arr[4]")
+	"\![open,inputbox,OnAlarm_Add0,-1,%(_info)]"
+}
+OnAlarm_Add0
+{	//input = hour:min:sec|alarm name|start day,every x days|fixed days
+	_temp = reference0
+	SETDELIM(_temp,"|")
+		//check if input is valid; save if correct (1) else; reopen input box
+	_format = OnAlarm_CheckFormat(_temp)
+	if _format == 1{
+		_temp[0] = REPLACE(_temp[0],":",",")
+		_counter = OnAlarm_Counter(_temp[2])
+		alarmAr ,= "1|%(_temp[1])|%(_temp[0])|%(_temp[2]),%(_counter)|%(_temp[3])"
+		OnAlarm
+	}
+	else; "\![open,inputbox,OnAlarm_Add0,-1,%(_format)]"
+}
+OnAlarm_Edit
+{
+	_arr = alarmAr[tempnb] //fetch array line
+	SETDELIM(_arr,"|")
+	
+	_info = EVAL("_arr[2][0]+':'+_arr[2][1]+':'+_arr[2][2]+'|'+ _arr[1] + '|' +_arr[3][0]+','+_arr[3][1]+'|'+ _arr[4]")
+
+	"\![open,inputbox,OnAlarm_Edit0,-1,%(_info)]"
+}
+OnAlarm_Edit0
+{
+	_temp = reference0
+	SETDELIM(_temp,"|")
+
+		//check if input is valid; save if correct (1) else; reopen input box
+	_format = OnAlarm_CheckFormat(_temp)
+	if _format == 1 {
+		_arr = alarmAr[tempnb]
+		SETDELIM(_arr,"|")
+		_arr[2] = REPLACE(_temp[0],":",",")
+		_arr[1] = _temp[1]
+		_arr[3] = _temp[2] + "," + OnAlarm_Counter(_temp[2])
+		_arr[4] = _temp[3]
+		alarmAr[tempnb] = _arr
+	
+		ERASE(tempnb)
+		OnAlarm
+	}
+	else; "\![open,inputbox,OnAlarm_Edit0,-1,%(_format)]"
+	
+}
+OnAlarm_CheckFormat //return 1 or string with correct&reset false input
+{
+	_temp = reference0; _check = 1; _fixed = IARRAY //"0|meds|20,02,40|05/12,1,0|" input = hour:min:sec|alarm name|start day,every x days|fixed days
+	SETDELIM(_temp,"|")
+		//time
+	if RE_MATCH(_temp[0],'^((?:[0-9]):[0-5]\d:[0-5]\d$)') == 1 { //if 0:12:30 f.e. instead of 00:12:30
+		_temp[0] = "0" + _temp[0]
+		_check = 0
+	}
+	elseif RE_MATCH(_temp[0],'^((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$)') == 0 { //if not valid at all
+		_temp[0] = "hour:min:sec"
+		_check = 0
+	}
+		//every x days
+	if RE_MATCH(_temp[2],'^(?:[012]\d|3[0-1])\/(?:0[1-9]|1[0-2],([1-9]\d*))') == 0 && _temp[2] != "" { //if day not correct, not a number && not empty
+		_temp[2] = "start day,every X day(s)"
+		_check = 0
+	}
+		//fixed days
+	_fixed = SPLIT(_temp[3],",")
+	for _x = 0; _x<ARRAYSIZE(_fixed); _x++ {
+		if RE_MATCH(_fixed[_x],'^((?:[012]\d|3[0-1]|X)\/(?:0[1-9]|1[0-2]|X)$)') == 0 && _fixed[_x] != "" { //if not 'X or day/X or month'
+			_fixed[_x] = "fixed day"
+			_check = 0
+		}
+		if _check == 0; _temp[3] = TOSTR(_fixed)
+	}
+	
+	if _check == 0; _temp
+	else; 1
+}
+OnAlarm_Counter //reference0 = START DAY,every X day
+{
+	if _argv[0] == ""; return
+	_cur = IARRAY; _start = IARRAY; _diff = 0
+	_temp = SPLIT(_argv[0],",")
+	_time = _temp[0]
+	SETDELIM(_time,"/")
+		//difference between today and start day
+	_cur =  GETTIME(GETSECCOUNT())
+	_start = GETTIME(GETSECCOUNT(year,_time[1],_time[0]))
+	_diff =  _start[7] - _cur[7] //days from the beginning of the year
+
+	if TOINT(_temp[1]) == 1; 0 		//if occurs every day; then counter doesn't matter
+	if _diff < 0 { 					//if start day is in the past
+		_diff = _diff*(-1)
+		for _i = 0; _i < _diff; _i++ {
+			if (_diff+_i)%TOINT(_temp[1]) == 0; break
+		}
+		_diff = _i
+	}
+	elseif _diff > 0; _diff = _diff	//if start day is in the future; first alarm is start day
+	else; 0 						//if the same day
+	_diff
+}
+OnAlarm_CounterSet
+{
+	_cur = '^(.*\|.*\|)(\d*\/\d*,\d,)' //only catch those with counters
+	_alarm = RE_ASEARCHEX(_cur,alarmAr)
+	foreach _alarm; _i {
+		_temp = alarmAr[_i]
+		SETDELIM(_temp,"|")
+		_time = SPLIT(_temp[3],",")
+		_time[2] = IARRAY
+		_temp[3] = _time + "," + OnAlarm_Counter(_time)
+		alarmAr[_i] = _temp
+	}
+}
+OnAlarm_Init //0/1 button state|alarm name|hour,min,sec|start day,every X days,counter|fixed days
+{
+    alarmAr = IARRAY
+    alarmAr ,= "0|meds|20,02,40|05/12,1,0|"
+    alarmAr ,= "0|appointment|09,30,00||01/X,20/05,20/11" //every first of the month && 20th 05
+	alarmAr ,= "0|birthday|08,00,00||12/03" //every 12th march
+    alarmAr ,= "0|alarm name|h,min,sec|start day,every X day(s),counter|fixed days"
+}
+
+OnAlarm_Remind
+{
+	_alarms = IARRAY
+	foreach alarmNotify ; _nb {
+		_temp = alarmAr[_nb]
+		SETDELIM(_temp,"|")
+		_alarms ,= _temp[1]
+	}
+	OnAlarm_Dialogue(ARRAYSIZE(alarmNotify),_alarms)
+	--
+	alarmNotify = IARRAY
+}
+OnAlarm_Dialogue : nonoverlap
+{
+	_nb = _argv[0]
+	_argv[0] = IARRAY
+	--
+		//One alarm
+	if _nb == 1&&sleeptrue; "\i[298]%(m)(It's %(Time). You remind yourself of\n''%(_argv)''.)"
+	if _nb == 1&&!sleeptrue; "%(m)ay. it's %(Time). reminding you about\n''%(_argv)''."
+		//Multiple alarms
+	if _nb > 1&&sleeptrue; "\i[298]%(m)(You set alarms for about %(Time) .)\n%(m)(Don't forget ''%(_argv)'')"
+	if _nb > 1&&!sleeptrue; "%(m)you set alarms for about %(Time) .\n%(m)don't forget ''%(_argv)''"
+}
+
+//------------------------------------------------------------------------------
+// Program shortcut functions (start @uf_menu.dic) (purchasable)
+//------------------------------------------------------------------------------
+//EXECUTE ( path [, option ])
+
+//------------------------------------------------------------------------------
+// AI chat functions (not yet purchasable)
+//------------------------------------------------------------------------------
+OnSansChat {
+	OnTalkArray
+	--
+	"\![open,inputbox,OnSansReact,-1]"
+}
+
+OnSansReact {
+	_ref = TOLOWER(reference0)
+	_ref = REPLACE(_ref," ","/")
+	txt = ""
+	_ref = SPLIT (_ref,"/")
+	--
+	//seach question
+	//search verb
+	foreach _ref;wrd
+	{
+		//search pronoun
+		if wrd == word[0][0] {//be
+			//search next verb
+			foreach _ref;wrd {
+				if wrd == word[1][0] {
+				"yeah me too. i'm hella tired."
+				}
+			}
+			
+		}
+	}
+	--
+	OnSansChat
+}
+
+OnTalkArray
+{
+	word = IARRAY
+	word[0] = "be,go/going/went/gone,fly/flew/flying,drive,sleep"//verbs
+	word[1] = "tired,happy,sad" //additional verbs
+	word[2] = "i,you,he,she,it,they,we"//pronoun
+	/*word[0] = "petting,pat,pet,patting"
+	word[1] = "apologize,sorry"
+	word[2] = "tired,exhausted"
+	word[3] = "sans,you"
+	word[4] = "i,me,mine"*/
+}
+
+
+//------------------------------------------------------------------------------
+// Asking Sans functions (start @uf_menu.dic) (purchasable)
+//------------------------------------------------------------------------------
+OnAsk
+{
+	_p = OnRenderInterface("Ask",_argv[1],6)
+	_d = OnAsk_Dialogue
+	
+	"\b2\_q%(m)you ehr wanted to know somethin'?\n\n[half]/
+	%(_p)/
+	%(buttons(2,'Go back','OnChat'))"
+}
+OnAsk_Array
+{
+	_arr = IARRAY
+	
+	//_ref = "%(temparray)" ???
+	//if "snickersans" _in_ _ref; askinv ,= "|What did you find so funny?|snickersans|OnAskSans||";
+	
+	_arr ,= "|(Why do you name me specific things?)||OnAsk_Nickname||"
+	if toggleasktall; _arr ,= "|(How tall are you?)||OnAsk_Height||"
+		else; _arr ,= "|(How do you feel about being tiny?)||OnAsk_Height||"
+	_arr ,= "|(Do you like pineapple on pizza?)||OnAsk_Pizza||"
+	_arr ,= "|(Do you like me?)||OnAsk_Affection||"
+	_arr ,= "|(How are you feeling?)||OnAsk_Mood||"
+	_arr ,= "|(What's your fav food?)||OnAsk_Food||"
+	_arr ,= "|(Do you like this place?)||OnAsk_Place||"
+	_arr
+}
+OnAsk_Nickname
+{
+	_nick = nickname("special")
+	--
+	if _nick == ""; "%(m)i dunno what ya' mean.\e"
+	else; "(s_0)%(m)you mean like %(_nick)? \i[102]'m more perceptive than ya'd think %(nickname).\n\n"
+	--
+	if AFF(50,70); "%(m)don't worry 'bout it."
+	if AFF(30); "(s_1)\i[102]"
+	if AFF(0,15); "\i[298]%(m)..."
+}
+OnAsk_Height
+{
+	if toggleasktall {
+		"(s_0)\i[302]%(m)... if ya' really need ta' know 'm around 3 feet 2.. who cares.\i[116]"
+		ERASEVAR(toggleasktall)
+	}
+	else; "(s_0)\i[302]%(m)...\n\n\i[108]%(m)%(whisper)'m not tiny..."
+}
+OnAsk_Pizza
+{
+	"(s_0)\i[302]%(m)what the fuck's that bloody pineapple shit?\n\n%(m)inventin' grub now, are ya'?"
+}
+OnAsk_Affection
+{
+	if AFF(70); "(s_0)\i[105]\i[401]\i[298]%(m)..."
+	if AFF(30,50); "(s_0)\i[105]\i[400]\i[298]%(m)...\n\n%(m)(He pretends to not have heard you...)"
+	if AFF(0,15); "(s_0)\i[302]%(m)no."
+}
+OnAsk_Mood : nonoverlap
+{
+	countAr[1]++
+	--
+	if MD("bored"); "(s_0)\i[302]%(m)actually? 'm fuckin bored.\n%(m)do somethin' interesting."
+
+	if MD("sad"); "(s_0)\i[105]..."
+	if MD("sad"); "(s_0)\i[106]..."
+	if MD("sad"); "(s_0)\i[108]fine..."
+
+	if MD("pleased"); "(s_0)\i[112]\i[202]\i[301]good."
+
+	if MD("tired"); "(s_0)\i[199]\w8\w8\i[199]\w8\i[199]\w8\i[298]%(m)...\n\n\w8(s_0)\i[102]%(m)tired."
+
+	if MD("amused"); "(s_0)\i[112]\i[203]%(m)hehe. 'm feelin fine."
+
+	if MD("happy"); "(s_0)\i[102]\i[204]%(m)actually good."
+
+	if MD("relaxed"); "(s_0)\i[102]%(m)pretty good."
+
+	if MD("angry"); "(s_0)\i[201]\i[305]%(m)yer really askin' that?"
+
+	if MD("embarrassed"); "(s_0)\i[106]\i[400]\i[401]\i[298]%(m)..."
+
+	if MD("neutral"); "(s_0)\i[102]%(m)like always. i guess."
+	--
+	if countAr[1] < 5; affection++
+}
+OnAsk_Food
+{
+	"(s_0)\i[304]%(m)my favorite food? \i[102]i actually dunno.\n\n%(m)but if ya' ever wanna get me a drink, (s_0)\i[112]mustard will do."
+	--
+	if INV('mustard')[2] == -1; INV_2("mustard",0) //enables mustard giving if not enabled yet
+	elseif !INV('mustard')[0]; ARRADD_0("inv","mustard,0,0")
+}
+OnAsk_Place
+{
+	"(s_0)\i[102]%(m)of course i don't, (s_0)\i[302]why'd ya' even ask."
+}
+
+//------------------------------------------------------------------------------
+// State toggles (0=default;1=afk;2=fakeafk;3=busy)
+//------------------------------------------------------------------------------
+OnAFK
+{
+	if reference0 == "afk" && afkvar >= 2 {
+		state = 2
+		--
+		OnAFK_fake
+	}
+	elseif reference0 == "afk" {
+		state = 1; afkvar++
+		if affection < 40; VARC("relaxed","+2")
+		--
+		OnAFK_true
+	}
+	elseif reference0 == "busy" {
+		state = 3
+		--
+		OnAfk_busy
+	}
+	elseif reference0 == "busystop" {
+		state = 0
+		--
+		OnAfk_stop
+	}
+}
+OnAFK_fake : nonoverlap
+{
+	"\i[113]\i[302]%(m)shut the fuck up %(nickname).\n\n%(m)know you're not goin' anyway."
+	"\i[102]%(m)honestly?\n\n(s_0)\i[302]%(m)stop kiddin' me."
+	"\i[304]%(m)oh so you are goin'. fer the.. what? third time already?\n\n(s_0)\i[102]%(m)yeah. no."
+}
+OnAFK_true : nonoverlap
+{
+	"(s_0)\i[302]\i[298]%(m)(He frowns, (s_1)\i[102]\i[298]but ends up simply shrugging, giving a short nod.)(s_0)"
+	if AFF(30,50,70); "(s_0)\i[304]%(m)'kay. have fun i guess."
+	"(s_0)\i[301]\i[298]%(m)(You tell Sans you'll be gone for a bit, so he can do whatever he wants.)\n\n(s_0)\i[298]%(m)(... you don't know how to interpret the blank face.)"
+	"(s_0)\i[298]%(m)(You inform him of your absence.)\n\n\i[105]%(m)(He doesn't seem to care.)"
+}
+OnAfk_busy : nonoverlap
+{
+	"(s_0)\i[298]%(m)(You tell Sans you're working on something, but don't want to say goobye.)\n\n(s_0)\i[302]%(m)o..kay? i'll just.. be here then."
+	"(s_0)\i[298]%(m)(You tell him you're going to be busy right now.)\n\n(s_0)%(m)i'll just chill here then... \i[302]i guess."
+	"(s_0)%(m)\i[304]oh? fine i guess."
+	if AFF(30,50,70); "(s_0)\i[102]%(m)good luck with yer shit %(nickname)."
+}
+OnAfk_stop : nonoverlap
+{
+	"(s_0)\i[304]%(m)done?"
+	if AFF(30,50,70); "(s_0)\i[102]%(m)good job... (s_0)\i[105]\i[301]\i[400]probably."
+	if AFF(0,15); "(s_0)\i[301]\i[298]%(m)(He barely even aknowledges you.)"
+}
+
+
+//------------------------------------------------------------------------------
+// Rendering stars (NOT YET PURCHASABLE)
+//------------------------------------------------------------------------------
+OnStars
+{
+	_print = ""
+	for _i = 2; _i < 10; _i++;
+	{
+		_char = "\p[" + _i + "]"
+		_surface = "\s[" + (RAND(2)+294) + "]"
+		_print += "%(_char)%(_surface)"
+		if RAND(10) < 3; _print += "\![set,alpha,90]"
+		
+		//set position
+		_x = RAND(displaywidth)
+		_y = RAND(30)-10
+		_print += "\![move,--X=%(_x),--Y=%(_y),--time=0,--base=screen]"
+	}
+	--
+	_print
+}
+OnStars_Delete
+{
+	_print = ""
+	for _i = 2; _i < 10; _i++;
+	{
+		_char = "\p[" + _i + "]"
+		_surface = "\s[-1]"
+		_print += "%(_char)%(_surface)"
+	}
+	--
+	_print
+}

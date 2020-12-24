@@ -1,0 +1,334 @@
+//------------------------------------------------------------------------------
+// Important Notes
+//------------------------------------------------------------------------------
+
+OnTranslate modified (
+	Added EVAL function to process %() tags in yaya
+	Automatic waiting pauses
+	Automatic animation support
+)
+shiori array functions etc: JOIN, REVERSE, UNIQUE, SPLITEX, MAX, MIN, AVERAGE
+\c[line,number]; to clear balloon without reloading
+\C ;balloon exact same as last
+\* ;no timeout for choices (only in the same script)
+\_?;display script without executing tags
+sec since last talk; GETSECCOUNT()-SHIORI3FW.LastTalkTime
+parralel ARRAY; outputs all things in array in equal chance
+
+//------------------------------------------------------------------------------
+// To-Do
+//------------------------------------------------------------------------------
+
+SHIORI3FW.BalloonName (if not right; press auto download)
+	\![execute, install, url, URL, feed or nar]; Install nar file of specified URL or register RSS Feed.
+look at the balloon image display to add program icons etc to functions
+open ssp config ghost 2; let user enter speed of talk; save as var; consider when calculating animation display
+make user able to modify tspeed
+insert jokes:
+	People may think I’m cruel, but I have the heart of a child. 4 or 5, actually. I collect them.
+add heave up hand; initiate hand holding with another hover
+	add affection/lose affection
+fix talk frames
+fix 109 blinking and fix down to be more frown
+redo the thumbnail image
+fine tune random idle
+add mood nuances check (little sad, big sad etc)
+add timegreet envelope to boot dialogues
+uf_string.dic stuff
+	update functions look how auto update check works
+	put version and additional information in an easy to change file
+	add fancy update function
+MAKE SURE BIRTHDAY IS EMPTY ARRAY AT BEGINNING NOT ? OR ""
+(figure out how to convert to new download site) also patreoncode!
+add hourly reminders
+credit card
+
+//------------------------------------------------------------------------------
+// Variables
+//
+//				:All global variables + explanation.
+//------------------------------------------------------------------------------
+
+|| SHIORI; do not need to be initialized (except marked (!)) |
+(!)aitalkinterval		:default,270;rest,0,45,90,400
+ChainTalk
+ghostupmin (int)	
+hour; minute
+day; month; weekday
+SHIORI3FW.IsVisible (Array) +
+SHIORI3FW.LastSurface (Array)
+	"note"		| \p[299]
+	"socks"		| \p[298]
+	"costume"	| \p[297]
+SHIORI3FW.CanTalk
+displaybpp
+displaywidth
+displayheight
+
+|| Auto initialized |
+alarmAr
+ticAr
+gdigAr;gdigGold
+musicstateAr;temporderAr
+dresslogAr (Array)	:saves state of dress up items
+
+|| Initialized in an own function |
+OnMood_Init :happy,sad,angry,relaxed,bored,interested,amazed,embarrassed,pleased,tired,amused
+OnJoke_Reset:jokestopicAr
+
+|| ERASEVAR("varname"); global temp vars; START AT 1 UNLESS OTHERWISE SPECIFIED |
+togglefirst (1)		:Dialogue toggle; First boot (nameteach)
+togglerock (1)		:Dialogue toggle; pet rock (pet rock name dialogue in phone)
+togglesock (1-3)	:Dialogue toggle; socks
+togglemail (1)		:Dialogue toggle; OnBIFFBegin (mail check)
+toggleclock (1)		:Dialogue toggle; OnSNTPBegin (clock check)
+togglecall (1)		:Dialogue toggle; OnPhone_Ask (enabling user calling chars)
+toggleasktall (1)	:Dialogue toggle; His height (sans ask menu)
+tempnb (int)
+bornmonth (int)
+
+|| General toggles; never erased |
+phonetrue (0/1)		:Toggle for phone state
+sittrue (0/1)		:Toggle for sit state
+sleeptrue (0/1)		:Toggle for sleep state
+deletetrue (0/1)	:Toggle for enabling ghost delete button
+colortrue (0/1)		:Toggle for extra colors in balloon
+pausetrue (0/1)		:Toggle for click pause vs. wait
+datetrue (0-3)		:Toggle for dating; 2,3 for introduction at boot
+24htrue (0/1)		:Toggle for 24 hour format
+upperworld (0/1)	:Toggles different seasons (lower/upper hemisphere)
+medblocktrue (0/1)	:Toggle for blocking painmed giving. (only once a day)
+hourremindtrue (0/1):Toggle for hourly reminders
+polltrue (0-2)
+updatecheck (0/1)	:Checks for available updates
+
+|| General Variables |
+Version (real)		:OnVersionSet
+tspeed (int)		:tspeed = 25 //ms that it takes to print a letter; 0 = disabled
+pnumb (int)
+lastTalk (String)
+feedbackreminder (int)
+seccount (0-59)		:Counts seconds; resets per minute
+passmintotal (int)	:Counts total boot min for earch run. Uses seccount
+alarmNotify (Array)
+updateURL (String)	:OnUpdateURLSet("patreon"/"")
+patreonCode			:
+stroke (int)		:Counts mouse move stroke. Only in uf_mouse.dic
+timeClosed (Array)	:(_years,_months,_days,_hours,_mins)
+jokesTold (Array)	:(dark,bright)
+kofiC (int)			:
+backupPath (String)	:
+songAr (Array)
+songNb (-1/int)
+	
+|| Sans related |
+affection (0-100)	:Determines his openness/behaviour towards user; start 20
+timeAr (Array)		: Tracks state time; fixed places; int array; + (state); - (!state)
+	'boredtime'		|+
+	'sittime'		|-/+
+	'sleeptime'		|-/+
+	'musictime'		|
+
+|| User related |
+username (str)		:name of user, all lower caps
+userbirthday (Array)	:day,month
+pronoun (Array)		:Stores user pronouns for dialogue
+	"he/she/they/user defined"	|Subject
+	"him/her/them/user defined"	|Object
+	"his/her/their/user defined"	|Possesive Adjective
+	"his/hers/theirs/user defined"	|Possesive Pronoun
+	"himself/herself/themselves/user defined"	|Reflexive/Intensive
+	"s/s//user defined"	|verb ending with s
+usermood (String)	:
+state (0-3)			: 0 = not afk; 1 = afk; 2 = fake afk; 3 = busy
+afkvar (0-*)		: if >=2 state = 2 instead of 1
+money (int)			:
+daystreak (int)		:Counts times of consequently booting up
+countAr (int)		:Counts user actions
+	'pets'			|+ (affection 4 times per 50)
+	'askfeel'		|+ (affection 4 times)
+	'userloner'		|+ (eveningweekend boot)
+	'bootlate'		|-/+ (morning/evening boot)
+	'realclose'		|-/+ (affection 1 time if +20)
+	'kind'			|+
+	'rude'			|+
+	'boring'		|+
+invAr (Array)		:all items and unlockables. (itemname,amount,given) max amount listed below
+	"rose,1,1"
+	"mustard,*,*"
+	"painmeds,*,*"
+	"snow,*,-1"
+	"food,20,-1"
+	"phone,1,-1"
+	"kofinote,1,-1"
+	"costume,1,-1"
+	"askbutton,1,-1"
+	"programs,1,-1"
+userAr (Array)	:Stores all user related info
+	"petmaniac" | petC>=400
+	"petcrazy"	| petC>=120
+	"petuser"	| petC>=50
+	"tall"		| choice OnHabits_Shelf
+	/"small"
+	"artist"	| choice OnHabits_Artist
+	/"nonartist"
+	"place"		| OnHabits_Hemisphere
+	"nightowl"	| bootlate/bootearly comparison
+	/"earlybird"
+	"loner"		| userloner>=30
+	"kind"		| userkind/userrude/userboring comparison
+	/"boring"
+	/"rude"
+	"goodbye"	| realclose
+	"socks"	+	| choice OnEvent_Socks
+	"goodgood"
+	/"goodbad"
+	/"badbad"
+	/"badgood"
+	/"noaction"
+	"beverage" +
+	"coffee"
+	/"tea"
+	/"hot chocolate"
+	"darkhumor"	| based on amount of jokes told in uf_joke.dic
+	/"brighthumor"
+
+
+|| Character arrays, initialized once |
+ALLCHARS			:Common info to get
+	"name" +		| entering a char name(OnTeachname_Check); char envelope
+	"nameteach"
+
+papyrusAr (Array)	:
+	"job"		| papyrus envelope
+	"family"	| papyrus envelope/OnCalled_Papyrus
+grillbyAr (Array)	:
+	"barname"	| gbar envelope
+	"barfave"	| gbar envelope
+alphysAr (Array)	:
+	"name"		| aitalk:affectionnormal/OnCalled_Papyrus
+	"hobby"		| OnHabits_Artist
+	"job"		| alphys envelope
+	"date"		| OnCalled_Papyrus
+undyneAr (Array)	:
+	"name"		| OnCalled_Papyrus
+	"job"		| undyne envelope (p)/chain:shittyday
+	"date"		| OnCalled_Papyrus
+asgoreAr (Array)	:
+	"gyftmas"	| aitalk:christmasweek
+	"job"		| OnCalled_Papyrus
+mettatonAr (Array)	:
+	"name"		| OnCalled_Papyrus
+
+
+//------------------------------------------------------------------------------
+// Functions
+//
+//				:Repetetively used functions.
+//------------------------------------------------------------------------------
+menu auto print array formatting
+	Price|Print Name|Item ref|Function|Description|refs
+code extra
+	AFF(Value1,Value2,...) : Values-0,30,50,70; Affection check ADDED: 15?
+	PT(0/1/2/3,"hours passed") : every 50 hours
+	MD("Value") :Value-mood name; Mood check 
+	VARC('Var','(=)Value/-Value/+Value','Var2',...) : Int/Real variable handling
+	VARV('Var','Value','Var2',...) : Variable assigning
+	RND(Value) : Value-Percentage of Random draw
+	ARRINFO("array","value) : "array"=arrayAr
+	ARRADD("array","value","value",etc)
+	ARRDEL("array","value","value",etc)
+	PrintBirthday : Print user birthday 'January 1st'
+	DayCheck
+	ghostupinfo	: (hours, min); passed time since boot
+	totalinfo : (hours, min); total passed time
+	DRESS('Category','Name'): return 1/0 state of equip got dress items
+	INV('Item name'): 1/0 (exists); -1/amount; -1/amount given - check info
+		INV_0('Item name','value')/INV_1/INV_2 - edit information from the array
+
+//------------------------------------------------------------------------------
+// Files
+//
+//				:File explanation/summary.
+//------------------------------------------------------------------------------
+
+uf_bootend.dic
+	|First boot initialization + first boot/reset vars
+	|Regular startup
+	|Warned/Regular close
+uf_consistency.dic
+	|Print functions (easier for checks)
+	|Formatting shortcuts
+	|Grammar
+	|Char names
+	|randomized envelopes
+uf_func.dic (not fully cleaned up)
+	|if check functions
+	|inventory array handling
+	|time functions & information return
+	|Value changing functions
+	|Array functions
+	|Special print functions (buttons/lists)
+	|Surface calls
+uf_mood.dic
+	|entire sans mood system (minus MD function in uf_func.dic)
+	|function to check users mood
+uf_string.dic
+	|shiori time functions
+	|keypress/shortcut function
+	|char render (ghost/minimize change)
+	|file drop & wallpaper change
+	|update
+	|OnTranslate; animation/pauses/formatting add
+	|Anchor selecting
+	|Display change
+	|Installations/Uninstalling
+	|update data creating/battery notif/system notif
+	|functions related to right click menu/aya
+uf_additional.dic
+	|biff, clock fix, headlines
+	|alarm
+	|program shortcuts (NOT IMPLEMENTED!)
+	|AI chat (NOT IMPLEMENTED!)
+	|sans ask menu, afk handling (from sans chat)
+	|rendering stars (NOT IMPLEMENTED!)
+uf_aitalk.dic
+	|random talk
+	|start to called phone talks
+	|phoneunlock
+	|user: height, artist, hemisphere, (beverage NOT IMPLEMENTED!)
+uf_commu.dic
+	|template copy for ghost commu. not used.
+uf_game.dic
+	|Coin throw
+	|rock paper scissors
+	|tic tac toe
+	|gold digger
+uf_inventory.dic
+	|Shop
+	|Bag
+uf_joke.dic
+	|dark joke topics and light/dark jokes
+uf_log.dic
+	|kofi thanks dialogue etc.
+	|feedback dialogue
+	|backup
+	|Variable conversion from old ver.
+uf_menu.dic
+	|Sakuramenu; connecting all user accessible functions
+	|all accessible settings
+	|patreon code functions
+uf_mouse.dic
+	|petting
+	|calling someone start
+	|pick up note; costume; socks (sock event)
+	|double click menu
+uf_musicplayer.dic (not accessible rn)
+	|
+uf_phone.dic (note: good place to add info to char arrays!)
+	|being called dialogue pools
+	|calling characters
+uf_user.dic
+	|User birthday & name
+	|userAr choices and assigning
+	|Events
