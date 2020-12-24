@@ -301,10 +301,9 @@ OnPhone_Menu
 	if _u != ""; _calls += "\![*]\q[Call %(_u),OnCall_Undyne]\n\n[half]"
 	
 	if _calls == "";
-		"%(m)(It looks like you can't call anyone. Has Sans told you any names yet?)"
-	
-	"(s_pout)\b2\_q%(m)(Who do you want to call?)\n\n%(_calls)/
-	%(buttons(2,'Cancel','script:\e'))"
+		"\i[298]%(m)(It looks like you can't call anyone. Has Sans told you any names yet?)"
+	else; "(s_pout)\b2\_q%(m)(Who do you want to call?)\n\n%(_calls)/
+			%(buttons(2,'Cancel','script:\e'))"
 }
 
 OnCall_Papyrus : array

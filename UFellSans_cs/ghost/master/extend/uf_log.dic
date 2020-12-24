@@ -182,11 +182,11 @@ OnBackup_Save
 	FCLOSE(backupPath)
 	
 	if _argv[0] == "load";
-		"\c\0(s_0)\i[102]%(m)(Loaded the backup.)/
+		"\c\0(s_0)\i[102]\i[298]%(m)(Loaded the backup.)/
 		%(pause)%(OnBackup_Menu)"
 	elseif _argv[0] == "close"; ""
 	else;
-		"\0(s_0)\i[102]%(m)(Saved the backup.)/
+		"\0(s_0)\i[102]\i[298]%(m)(Saved the backup.)/
 		%(pause)%(OnBackup_Menu)"
 }
 OnBackup_Load

@@ -164,7 +164,7 @@ OnBag_Choose
 			"(s_0)\i[109]\i[301]\i[401]%(m)...\n\n(s_0)\i[113]\i[302]\i[401]%(m)thanks.\x"
 		}
 		when "painmeds";
-			"%(m)(Do you want to offer him some painkillers?)\n\n/
+			"\i[298]%(m)(Do you want to offer him some painkillers?)\n\n/
 			\![*]\q[Yes,OnBag_Painmeds,yes]\n/
 			\![*]\q[no,OnBag_Painmeds,no]\x"
 	}

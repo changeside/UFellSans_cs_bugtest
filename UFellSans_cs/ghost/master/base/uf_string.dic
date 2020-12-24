@@ -26,6 +26,17 @@
 
 
 //------------------------------------------------------------------------------
+// Shiori function occurs on cancelled input box (X)
+//------------------------------------------------------------------------------
+OnUserInputCancel //ensures important input gets inputted
+{
+	if togglefirst && reference0 == "OnTeachname_Check"; "\![raise,OnTeachname_Check,]"
+	if togglefirst && reference0 == "OnPronoun_Set";  "\i[298]%(m)(You should really tell him your pronouns...)\n\n\n%(m)(You tell him you use-)\n\n[half]/
+		\![*]\q[He/Him,OnFirstBoot_Pron,he]		\_l[140]\![*]\q[They/Them,OnFirstBoot_Pron,they]\n/
+		\![*]\q[She/Her,OnFirstBoot_Pron,she]	\_l[140]\![*]\q[User defined,OnFirstBoot_Pron,user]"
+}
+
+//------------------------------------------------------------------------------
 // Time track SHIORI functions
 //------------------------------------------------------------------------------
 OnSecondChange
@@ -292,7 +303,7 @@ OnUpdateBegin //Actual update
 OnUpdateReady
 {
 	tempnb = TOINT(reference0[0])
-	"\0\i[298]%(m)(There are %(reference[0]) new files.)"
+	"\0\i[298]%(m)(There are %(reference[0]+1) new files.)"
 	//"\0%(m)found %(reference[0]) new things.\w8\e"
 }
 OnUpdate.OnDownloadBegin
@@ -506,13 +517,13 @@ OnDisplayChange
 OnInstallBegin
 {
 	//"\0(s_0)%(m)do i just?\w8\w3\n%(m)%(beginning)\w3, there we go."
-	"\0(s_0)\i[298]%(m)(Installation begin.)"
+	if !togglefirst; "\0(s_0)\i[298]%(m)(Installation begin.)"
 }
 OnInstallComplete
 {
 	//reference1 = TOLOWER(reference1)
  	//--
-	"\0\i[298]%(m)(Installed %(reference1).)"
+	if !togglefirst; "\0\i[298]%(m)(Installed %(reference1).)"
 	// case reference0
 	// {
 		// when "shell"
@@ -538,7 +549,7 @@ OnInstallComplete
 }
 OnInstallFailure
 {
-	"\0\i[298]%(m)(Installation failed. Reason: %(reference0).)"
+	if !togglefirst; "\0\i[298]%(m)(Installation failed. Reason: %(reference0).)"
 	// --
 	// case reference0
 	// {
@@ -560,7 +571,7 @@ OnInstallFailure
 OnInstallRefuse
 {	
 	//reference0 = TOLOWER(reference0);
-	"\0\i[298]%(m)(This isn't for Sans.)\n\n[half]%(m)(Try %(reference0) instead.)"
+	if !togglefirst; "\0\i[298]%(m)(This isn't for Sans.)\n\n[half]%(m)(Try %(reference0) instead.)"
 	//"\0%(s)%(m)this ain't fer me.\w8 try out %(reference0) instead.\e"
 }
 
@@ -611,16 +622,16 @@ OnNarCreated 			{ "\0\i[298]%(m)(Done)." }
 OnBatteryLow
 {
 	//"\0%(s)%(m)%(beginning)\w6, this things battery's low.\w8\n%(m)there's %(reference0) left.\e"
-	"\0\i[298]%(m)(The battery is getting low. %(reference0) left.)"
+	if !togglefirst; "\0\i[298]%(m)(The battery is getting low. %(reference0) left.)"
 }
 OnBatteryCritical
 {
 	//"\0%(s)%(m)(oh)\w5, %(nickname)\w6, you should really check this.\e"
-	"\0\i[298]%(m)(There's only %(reference0) energy left!)"
+	if !togglefirst; "\0\i[298]%(m)(There's only %(reference0) energy left!)"
 }
 OnSysResourceLow
 {
-	"\0\i[298]%(m)(The system resources are low.)"
+	if !togglefirst; "\0\i[298]%(m)(The system resources are low.)"
 }
 
 

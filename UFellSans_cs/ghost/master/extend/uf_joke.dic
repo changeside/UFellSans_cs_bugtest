@@ -107,7 +107,8 @@ OnJoke_Choose
 	if ARRINFO("user","kind"); _boost = 0.2 //less dark jokes if kind user
 	_rnd = RAND(_max * _boost - _rude)
 
-	if _rnd <= _dark; _pool = "OnJoke_Dark"
+	if _dark == 0; _pool = "OnJoke_Light"
+	elseif _rnd <= _dark; _pool = "OnJoke_Dark"
 
 		if _pool == "OnJoke_Dark"; jokesTold[0] = TOINT(jokesTold[0])+1 //count amount of told jokes
 		else; jokesTold[1] = TOINT(jokesTold[1])+1
