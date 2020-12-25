@@ -199,8 +199,8 @@ snoopplace : nonoverlap
 snoopreaction : nonoverlap
 {
 	"\w8(s_0)\i[302]%(m)what the %(swear), %(nickname)?"
-	"(s_0)\i[302]%(m)what %(isare) %(heshe) stockin up 'ere?"
-	"(s_0)\i[302]%(m)why %(dodoes) %(heshe) have this?"
+	"(s_0)\i[302]%(m)what %(isare) %(pronoun[0]) stockin up 'ere?"
+	"(s_0)\i[302]%(m)why %(dodoes) %(pronoun[0]) have this?"
 	"(s_0)\i[304]%(m)\w3o\w5k... (s_0)\i[105]"
 	if AFF(0,15); "(s_0)\i[102]\i[204]\i[304]%(m)didn't expect anythin' else than even more shit."
 	if AFF(0,15); "(s_0)\i[304]%(m)'n i thought yer main place was trash."

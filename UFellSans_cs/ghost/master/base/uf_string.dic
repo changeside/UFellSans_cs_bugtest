@@ -3,7 +3,8 @@
 //
 //			:Shiori and SSP related functions (right click menu etc.)
 //
-// Var		:seccount
+// Var		:togglefirst
+//			 seccount
 //			 passmintotal
 //			 money
 //			 alarmNotify
@@ -15,6 +16,7 @@
 //			 timeAr
 //			 afkVar
 //			 SHIORI3FW.IsVisible
+//			 hourremindtrue
 //			 SHIORI3FW.LastSurface
 //			 updatecheck
 //			 Version
@@ -108,6 +110,10 @@ OnMinuteChange
 		"\0(s_0)\i[115]\i[302]%(m)look %(nickname). if ya' won't pick up yer trash\n\n/
 			\p[299]\s[-1]\0(s_0)\i[102]%(m)there.\n\n\i[298]%(m)(You put the note in your bag.)/
 			%(ARRADD('inv','kofinote,1,-1'))"
+
+		//hour reminders
+	if SHIORI3FW.CanTalk && hourremindtrue == 1 && minute < 5; OnHourremind //uf_additional.dic
+	if hourremindtrue == 2 && minute >= 5; hourremindtrue = 1
 }
 OnHourTimeSignal
 {
@@ -403,7 +409,7 @@ TextOnlyTranslator
 			else; 		_letters = _positions[_x] - (STRSTR(_temp,")",_positions[_x-1]) + 1)
 				//add waiting pauses & position to insert at
 			if _printat > _letters {
-				_NBTime = TOINT(_printat - _letters + 1) * 25
+				_NBTime = TOINT(_printat - _letters + 1) * tspeed
 				_wait ,= ("\_w[" + _NBTime + "]") //ms to wait
 				_insert ,= _positions[_x] - _letters
 			}

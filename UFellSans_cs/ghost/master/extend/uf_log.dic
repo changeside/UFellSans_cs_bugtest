@@ -7,6 +7,28 @@
 //			 backupPath
 //------------------------------------------------------------------------------
 
+OnCredits
+{
+	_p = OnRenderInterface("Credits","",6)
+	"\_q\b2%(cmenu6)%(b)Credit card%(def)\n\n[half]%(_p)/
+	%(buttons(2,'Go back','OnBag'))"
+}
+OnCredits_Array
+{
+	_arr = IARRAY
+	_arr ,= "!|%(m)Dialogue writing/aid||||%(cmenu1)"
+	_arr ,= "!|Sorin||||"
+	_arr ,= "!|Galla|THREE|||"
+	_arr ,= "!|Change|THREE2|||"
+	_arr ,= "!|%(m)Bug tester||||%(cmenu1)"
+	_arr ,= "!|Sorin||||"
+	_arr ,= "!|Tabuschka|THREE|||"
+	_arr ,= "!|Leaf|THREE2|||"
+	_arr ,= "!|%(m)%(st)Everything else%(stoff) Art/Programming/etc.||||%(cmenu1)"
+	_arr ,= "!|Change||||"
+	_arr
+}
+
 //------------------------------------------------------------------------------
 // Function		:OnKofi_*|kofisup|kofishoutout
 //
@@ -140,7 +162,7 @@ OnBackup_Menu //@uf_menu.dic
 	%(lightup)	%(backupPath)%(cdef)\n\n\n%(def)/
 	\![*]\q[Change Path,OnBackup_Define]\n/
     \![*]\q[Save file,OnBackup_Save]\n/
-	\![*]\q[Load file,OnBackup_Load]\n/
+	\![*]\q[Load a save file,OnBackup_LoadOther]\n/
 	%(buttons(4,'Cancel','script\e','Go back','OnConfig'))"
 }
 OnBackup_Define
@@ -189,24 +211,184 @@ OnBackup_Save
 		"\0(s_0)\i[102]\i[298]%(m)(Saved the backup.)/
 		%(pause)%(OnBackup_Menu)"
 }
+OnBackup_LoadOther
+{
+	"\C\![open,dialog,open,--id=OnBackup_Load,--title=Save your progress,--filter=Config file(cfg)|*.cfg,--ext=cfg]"
+}
 OnBackup_Load
 {
-	_path = "/yaya_variable.cfg"
-	FDEL(_path)
-	FCLOSE(_path)
-	
-	FMOVE(backupPath , "/")
-	RESTOREVAR()
-	
-	OnBackup_Save("load")
+	_open = FOPEN(reference2,"r")
+	_fline = FREAD(reference2)
+	_old = 0
+	while _fline != -1 //while not at end of file
+	{
+		_out += _fline
+		if "Version" _in_ _fline { 
+			_ver = TOREAL( SUBSTR(_fline,8,8) )
+			if _ver < 2.000000 {
+				_old = 1; 
+				break
+			}
+		}
+		_fline = FREAD(reference2)
+	}
+	if _old; OnVariable_Conversion(reference2)
+	else {
+		//load regular backup	
+		_open = FCOPY(reference2,"/")
+		_open = FCLOSE(reference2)
+		_open = FOPEN("/yaya_variable.cfg")	//delete current file
+		_open = FDEL("/yaya_variable.cfg")
+		_open = FCLOSE("/yaya_variable.cfg")
+		_name = "/" + SPLITPATH(reference2)[2] + ".cfg"
+		_open = FOPEN(_name,"r")
+		_open = FRENAME(_name,"/yaya_variable.cfg")
+		RESTOREVAR()
+	}
+	--
+	OnBackup_Menu
 }
-
-
 //------------------------------------------------------------------------------
 // Variable conversion (from old ver.)
 //------------------------------------------------------------------------------
-
 OnVariable_Conversion
 {
+		//vars that need to be reset first
+	passmintotal = 0
+	countAr[3] = 0
+	invAr = IARRAY
+	//convert and save in new file copy
+	_open = FCOPY(_argv[0],"/")
+	_open = FCLOSE(_argv[0])
+	_name = "/" + SPLITPATH(_argv[0])[2] + ".cfg"
+	_open = FOPEN(_name,"r")
+	_fline = FREAD(_name)
+
+	while _fline != -1
+	{
+		_var = SPLIT(_fline,",")
+		OnVariable_Fix(_var[0],_var[1])
+		_fline = FREAD(_name)
+	}
+
+	//Erasure of tempvars
+	if ARRINFO("user","socks") {
+		ERASE("togglesock")
+		"\p[298]\s[-1]"
+	}
+
+	//delete backup copy and save new  vars after modification
+	_open = FCLOSE(_name)
+	_open = FDEL(_name)
 	
+	SAVEVAR()
+}
+OnVariable_Fix
+{
+	//_argv[0] = old name
+	//_argv[1] = old value
+	
+	_nb = TOINT(_argv[1]) //for int values
+	_string = RE_REPLACE(_argv[1],'^"|"$','')
+	_arr = SPLIT(_argv[1],":") //for array values
+	_empty = ASEARCHEX("IARRAY",_arr)
+		if _empty == ARRAYSIZE(_arr); _arr = IARRAY
+		//fix array values
+		for _i = 0; _i < ARRAYSIZE(_arr); _i++ {
+			if RE_MATCH(_arr[_i],'^".*"$'); _arr[_i] = RE_REPLACE(_arr[_i],'^"|"$','') //string
+			if _arr[_i] == "IARRAY"; _arr[_i] = IARRAY
+		}
+		//fix old arr values
+		if ASEARCH("occupation",_arr); _arr[ASEARCH("occupation",_arr)] = "job"
+	
+	case _argv[0] {
+		when "aitalkinterval"; aitalkinterval = _nb
+		when "ghostupmin_last"; ghostupmin_last = _nb
+		when "rudeuser"; countAr[6] = _nb
+		when "kinduser"; countAr[5] = _nb
+		when "boringuser"; countAr[7] = _nb
+		when "loneruser"; countAr[2] = _nb
+		when "jokesTopic"; jokestopicAr = _arr
+		when "badjoketold"; jokesTold[0] = _nb
+		when "brightjoketold"; jokesTold[1] = _nb
+		when "daystreak"; daystreak = _nb
+		when "timenotif"; hourremindtrue = _nb
+		when "phoneok" {
+			if _nb == 1; ARRADD_0('inv','phone,1,-1')
+		}
+		when "money"; money = _nb
+		when "passallhour"; passmintotal += (_nb * 60)
+		when "passallmin"; passmintotal += _nb
+		when "affection"; affection = _nb
+		when "dating"; datetrue = _nb
+		when "knowgrillby"; grillbyAr = _arr
+		when "knowpapyrus"; papyrusAr = _arr
+		when "knowasgore"; asgoreAr = _arr
+		when "knowalphys"; alphysAr = _arr
+		when "knowundyne"; undyneAr = _arr
+		when "knowflowey"; floweyAr = _arr
+		when "username"; username = _string
+		when "userbirthday" {
+			if STRLEN(_string) > 4 {
+				_temp = RE_SPLIT(_string,'month |day')
+				userbirthday[0] = _temp[1]
+				userbirthday[1] = _temp[0]
+			}
+		}
+		when "pettimes"; countAr[0] = _nb
+		when "userhabits"; userAr = _arr
+		when "nightboot"; countAr[3] += _nb
+		when "morningboot"; countAr[3] -= _nb
+		when "realclose"; countAr[4] = _nb
+		when "weirdseasons"; upperworld = !_nb
+		when "snowCount" {
+			if _nb > 0; ARRADD_0("inv","snow,1,-1")
+		}
+		when "askButton","aksButton" {
+			if _nb == 1; ARRADD_0("inv","askbutton,1,-1")
+		}
+		when "mustardCount" {
+			if _nb > 0 && !INV("mustard")[0]; ARRADD_0("inv","mustard,%(_nb),-1")
+			elseif _nb > 0; INV_1("mustard",_nb)
+		}
+		when "mustardGiven" {
+			if _nb > 0 && !INV("mustard")[0]; ARRADD_0("inv","mustard,0,%(_nb)")
+			elseif _nb > 0; INV_2("mustard",_nb)
+		}
+		when "givemustard" {
+			if _nb == 1 && !INV("mustard")[0]; ARRADD_0("inv","mustard,0,0")
+			elseif _nb == 1 && INV("mustard")[2] == -1; INV_2("mustard",0)
+		}
+		when "foodCount" {
+			if _nb > 0 && !INV("food")[0]; ARRADD_0("inv","food,%(_nb),-1")
+		}
+		when "painKillers" {
+			if _nb > 0 && !INV("painmeds")[0]; ARRADD_0("inv","painmeds,%(_nb),0")
+			elseif _nb > 0; INV_1("painmeds",_nb)
+		}
+		when "painKillersGiven" {
+			if _nb > 0 && !INV("painmeds")[0]; ARRADD_0("inv","painmeds,0,%(_nb)")
+			elseif _nb > 0; INV_2("painmeds",_nb)
+		}
+		when "redRose" {
+			if _nb == 1; ARRADD_0("inv","rose,1,0") //not given
+			if _nb == 2; ARRADD_0("inv","rose,0,1") //given
+		}
+		when "costumey" {
+			if _nb == 1 {
+				ARRADD_0("inv","costume,1,-1")
+				"\p[297]\s[-1]"
+			} 
+		}
+		when "darkhumoron" {
+			if _nb; jokestopicAr = IARRAY
+		}
+		when "note" {
+			if _nb == 1 {
+				ARRADD_0("inv","kofinote,1,-1")
+				"\p[299]\s[-1]"
+			} 
+		}
+		when "colorenable"; colortrue = _nb
+	}
 }

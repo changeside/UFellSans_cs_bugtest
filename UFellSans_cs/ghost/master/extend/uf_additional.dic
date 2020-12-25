@@ -58,7 +58,7 @@ OnBIFFComplete
 }
 OnBIFFFailure
 {
-	if !INV('phone')[0] && reference0 == "defect"; "\![open,configurationdialog]"
+	if !INV('phone')[0] && reference0 == "defect"; "\![open,configurationdialog,BIFF]"
 	--
 		//if phone not yet unlocked
 	if !INV('phone')[0]; "\i[298]%(m)(Something went wrong... Maybe not correctly set up or %(reference0).)\e"
@@ -68,7 +68,7 @@ OnBIFFFailure
 	case reference0 {	//error message
 		when "timeout"; "\0(s_0)%(m)connection timed out."
 		when "kick"; "\0(s_0)%(m)can't access the account %(nickname)." //if the ghost is blocked from access
-		when "defect"; "\0(s_0)%(m)wrong settings %(nickname), do it better.\![open,configurationdialog]"
+		when "defect"; "\0(s_0)%(m)wrong settings %(nickname), do it better.\![open,configurationdialog,BIFF]"
 		others; "\0(s_0)%(m)%(stuff) went wrong.\n\n[half]%(m)('%(reference0)'was given as error.)"
 	}
 }
@@ -339,6 +339,19 @@ OnAlarm_Dialogue : nonoverlap
 	if _nb > 1&&sleeptrue; "\i[298]%(m)(You set alarms for about %(Time) .)\n%(m)(Don't forget ''%(_argv)'')"
 	if _nb > 1&&!sleeptrue; "%(m)you set alarms for about %(Time) .\n%(m)don't forget ''%(_argv)''"
 }
+
+
+//------------------------------------------------------------------------------
+// Hourly reminders (start @uf_string.dic)
+//------------------------------------------------------------------------------
+OnHourremind : nonoverlap
+{
+	hourremindtrue = 2
+	--
+	"\i[298]%(m)(It's now %(Time).)"
+	if INV('phone')[0] && (MD("happy")||MD("amused")); "(s_pout)%(m)by the way. it's %(Time) %(nickname)."
+}
+
 
 //------------------------------------------------------------------------------
 // Program shortcut functions (start @uf_menu.dic) (purchasable)

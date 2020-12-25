@@ -1,0 +1,60 @@
+<link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,600" rel="stylesheet" type="text/css">
+<link href="/Content/css?v=Ad5uBekyFYicCqkzt0AZPFiBwOjSAEOhMJo5iBn1tiA1" rel="stylesheet"/>
+
+<style>
+    .pn-flex {
+        border-radius: 0 !important;
+        box-shadow: none;
+    }
+
+    .kofi-blue-fill {
+        background: transparent!important;
+    }
+
+    a.btn-xs.btn-plusOne {
+        color: white;
+    }
+
+    .cuplogo-adjusted {
+        margin-left: 12px;
+        width: 36px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>CounterWidget</title>
+</head>
+<body>
+    <div style="cursor: pointer;" onclick="window.open('http://ko-fi.com/B0B1EAGS?ref=counter', '_blank');">
+<div class="simple-panel pn-flex text-center">
+        <h2></h2>
+
+
+<div class="kfds-lyt-center" style="padding: 16px;">
+    <img src="https://storage.ko-fi.com/cdn/kofi_stroke_cup.svg" height="20" />
+    <span class="kfds-left-mrgn-8">x</span>
+    <span class="koficounter-value kfds-font-size-small kfds-left-mrgn-8">146</span> 
+    <span class="kfds-font-size-paragraph kfds-left-mrgn-8">Received</span>
+</div>
+    <div class="pad10">
+            <a target="_blank" href="https://ko-fi.com/B0B1EAGS" class="kfds-btn-primary-light kfds-font-bold kfds-lyt-width-100 custom-color-secondary-bg">Support Now</a>
+    </div>
+</div>
+    </div>
+</body>
+</html>
+<script>
+    function plusOneClicked() {
+        window.location("https://ko-fi.com/B0B1EAGS");
+    }
+</script>

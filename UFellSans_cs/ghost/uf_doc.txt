@@ -18,30 +18,15 @@ parralel ARRAY; outputs all things in array in equal chance
 //------------------------------------------------------------------------------
 // To-Do
 //------------------------------------------------------------------------------
-
-SHIORI3FW.BalloonName (if not right; press auto download)
-	\![execute, install, url, URL, feed or nar]; Install nar file of specified URL or register RSS Feed.
 look at the balloon image display to add program icons etc to functions
-open ssp config ghost 2; let user enter speed of talk; save as var; consider when calculating animation display
-make user able to modify tspeed
-insert jokes:
-	People may think I’m cruel, but I have the heart of a child. 4 or 5, actually. I collect them.
 add heave up hand; initiate hand holding with another hover
 	add affection/lose affection
 fix talk frames
 fix 109 blinking and fix down to be more frown
 redo the thumbnail image
-fine tune random idle
 add mood nuances check (little sad, big sad etc)
 add timegreet envelope to boot dialogues
-uf_string.dic stuff
-	update functions look how auto update check works
-	put version and additional information in an easy to change file
-	add fancy update function
 MAKE SURE BIRTHDAY IS EMPTY ARRAY AT BEGINNING NOT ? OR ""
-(figure out how to convert to new download site) also patreoncode!
-add hourly reminders
-credit card
 
 //------------------------------------------------------------------------------
 // Variables
@@ -98,7 +83,7 @@ datetrue (0-3)		:Toggle for dating; 2,3 for introduction at boot
 24htrue (0/1)		:Toggle for 24 hour format
 upperworld (0/1)	:Toggles different seasons (lower/upper hemisphere)
 medblocktrue (0/1)	:Toggle for blocking painmed giving. (only once a day)
-hourremindtrue (0/1):Toggle for hourly reminders
+hourremindtrue (0-2):Toggle for hourly reminders (if 2; reminded. reset to 1 after 5 min)
 polltrue (0-2)
 updatecheck (0/1)	:Checks for available updates
 
@@ -227,7 +212,8 @@ mettatonAr (Array)	:
 //				:Repetetively used functions.
 //------------------------------------------------------------------------------
 menu auto print array formatting
-	Price|Print Name|Item ref|Function|Description|refs
+	! = simple sakuraskript; P = no choice marker BUT CHOICE still
+	Price/!/P|Print Name|Item ref/Column|Function|Description|refs/color
 code extra
 	AFF(Value1,Value2,...) : Values-0,30,50,70; Affection check ADDED: 15?
 	PT(0/1/2/3,"hours passed") : every 50 hours
@@ -274,6 +260,7 @@ uf_mood.dic
 	|entire sans mood system (minus MD function in uf_func.dic)
 	|function to check users mood
 uf_string.dic
+	|User input cancelled
 	|shiori time functions
 	|keypress/shortcut function
 	|char render (ghost/minimize change)
@@ -288,6 +275,7 @@ uf_string.dic
 uf_additional.dic
 	|biff, clock fix, headlines
 	|alarm
+	|hour reminders
 	|program shortcuts (NOT IMPLEMENTED!)
 	|AI chat (NOT IMPLEMENTED!)
 	|sans ask menu, afk handling (from sans chat)
@@ -310,6 +298,7 @@ uf_inventory.dic
 uf_joke.dic
 	|dark joke topics and light/dark jokes
 uf_log.dic
+	|credit card
 	|kofi thanks dialogue etc.
 	|feedback dialogue
 	|backup

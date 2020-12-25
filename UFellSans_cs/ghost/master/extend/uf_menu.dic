@@ -9,6 +9,7 @@
 //			 updatecheck
 //			 passmintotal
 //			 datetrue
+//			 tspeed
 //			 deletetrue
 //			 colortrue
 //			 polltrue
@@ -444,8 +445,10 @@ OnConfig
 }
 OnConfig_Array //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/color
 {
-	_delete = IARRAY; _hour = IARRAY;_colors = IARRAY; _hem = ""; _di = ""
+	_delete = IARRAY; _hour = IARRAY;_colors = IARRAY; _hem = ""; _di = ""; _animation = ""
 	_joke = IARRAY; _jnb = ARRAYSIZE(jokestopicAr); _jmax = ARRAYSIZE(OnJoke_Topics)
+		if tspeed == 0; _animation = "Disabled"
+		else;			_animation = "%(tspeed) ms"
 		if deletetrue;	_delete = ("On",lightup)
 		else; 			_delete = ("Off",greyedout)
 		if colortrue;	_colors = ("On",lightup)
@@ -455,8 +458,8 @@ OnConfig_Array //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/
 		elseif _jnb == 1; _joke = ("One dark topic",lightup)
 		else; 			  _joke = ("%(_jnb) dark topics",lightup)
 		if polltrue >= 1; polltrue = 1
-		if hourremindtrue;	_hour = ("On",lightup)
-		else;				_hour = ("Off",greyedout)
+		if hourremindtrue||hourremindtrue == 2; _hour = ("On",lightup)
+		else;									_hour = ("Off",greyedout)
 		if upperworld;	_hem = "Upper"
 		else; 			_hem = "Lower"
 		if !pausetrue;	_di = "Wait to proceed"
@@ -468,6 +471,7 @@ OnConfig_Array //Price/!/P|Print Name|Item ref/Column|Function|Description|refs/
 	_arr ,= "|Your pronouns: %(pronoun[0])/%(pronoun[1])/%(pronoun[3])||OnConfig_Pronoun" 
 	if PrintBirthday != ""; _arr ,= "|Your birthday: %(PrintBirthday)||OnBirthday||"	//@uf_user.dic
 	_arr ,= "!|Talk rate: \q[%(talkintervalprint),OnConfig_Talkinterval]"
+	_arr ,= "!|Message/Animation speed: \q[%(_animation),OnConfig_Textspeed]"
 	_arr ,= "!|Uninstall: %(_delete[1])\q[%(_delete[0]),OnConfig_Uninstall]"
 	_arr ,= "!|Patreon URL: \q[%(patreonCode),OnPatreon_CodeChange] \q[(X),OnPatreon_Default]"
 	if polltrue >= 1; _arr ,= "!|Current poll: \_a[https://goo.gl/forms/FS3kziJNDqXhBKJ72]Later Kofi Goal?\_a"
@@ -530,6 +534,18 @@ OnConfig_Talkinterval
 		when 0; aitalkinterval = 45
 		others; aitalkinterval = 270
 	}
+	OnConfig
+}
+OnConfig_Textspeed
+{
+	"\i[298]%(m)(Please enter roughly the same number in the slider!)\n/
+		%(m)(0 = animations disabled)/
+		\![open,configurationdialog,talk]/
+		\![open,sliderinput,OnTextspeed_Set,-1,%(tspeed),0,200]"
+}
+OnTextspeed_Set
+{
+	tspeed = reference0
 	OnConfig
 }
 OnConfig_Uninstall

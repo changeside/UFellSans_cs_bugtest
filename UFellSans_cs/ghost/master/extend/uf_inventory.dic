@@ -56,7 +56,7 @@ OnShopUndernet_Array
 {
 	_arr = IARRAY
 	
-	if !datetrue && !INV('rose')[0]; _arr ,= "200|Red rose|redrose|OnBuy|Show your romantic interest.|0"
+	if !datetrue && !INV('rose')[0]; _arr ,= "200|Red rose|rose|OnBuy|Show your romantic interest.|0"
 	_arr ,= "20|Painkillers|painmeds|OnBuy|Something to aleviate pains.|0"
 	_arr ,= "60|Spicy Mustard|mustard|OnBuy|Spicy and fresh. Tasty.|-1"
 	if INV('food')[1] < 21; _arr ,= "8|Gross food|food|OnBuy|Do you really want to buy him more disgusting things?|-1"
@@ -109,8 +109,9 @@ OnBag_Array
 {
 	_arr = IARRAY
 	
-	if INV('kofinote')[0]; _arr ,= "|Ko-Fi notice|kofi|OnKofi_Menu|Ko-Fi goals and details.|"
+	if INV('kofinote')[0]; _arr ,= "|Ko-Fi notice|kofi|OnKofi_Menu|Ko-Fi goals and details.|" //@uf_log.dic
 	_arr ,= "|Feedback|feedback|OnBug_Feedback|Feedback and bug report page.|"
+	_arr ,= "|Credit card|credits|OnCredits|All credits neatly listed.|" //@uf_log.dic
 	if INV('costume')[0] {
 		if DRESS("Misc","Costume"); _arr ,= "|Costum-e|costume|OnBag_Choose|Take the costum-e back.|off"
 		else; _arr ,= "|Costum-e|costume|OnBag_Choose|Tape the costum-e on.|on"
@@ -137,16 +138,18 @@ OnBag_Choose
 			"\p[97]\s[-1]\0\![raise,OnDressup_Change,Misc,Costume]"
 		when "rose"
 		{
-			if AFF(70) && datetrue == 0;
+			if AFF(70) && datetrue == 0 {
+				INV_1('rose','0')
+				INV_2('rose','1')
+				--
 				"(s_0)\i[109]\i[400]\i[401]\i[298]%(m)(He stares...)/
 				\n\n\s[-1]%(m)(Then disappears.)\w8\w8\c/
 				%(m)(It seems like your offer of courtship has startled him.)\n\n/
 				%(m)(You hope he doesn't think ill of you now..)/
 				/
-				%(VARC('dating','=2'))/
-				%(INV_1('rose','0'))/
-				%(INV_2('rose','1'))/
+				%(VARC('datetrue','=2'))/
 				\-"
+			}
 			else; 
 				"\i[298]%(m)(It may not yet be time for this...)\n\n%(m)(You should give this to Sans later.)%(pause)"
 		}

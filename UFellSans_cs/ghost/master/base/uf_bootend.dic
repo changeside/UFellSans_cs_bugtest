@@ -19,7 +19,7 @@ OnVariablesSet //_argv[0] = first/boot/reset
 	if _argv[0] != "boot"; OnJoke_Reset
 	--
 	//Global temp vars
-	if _argv[0] != "boot"; togglefirst = 1
+	if _argv[0] == "first"; togglefirst = 1
 	if _argv[0] != "boot"; togglerock = 1
 	if _argv[0] != "boot"; togglesock = 1
 	if _argv[0] != "boot"; togglemail = 1
@@ -44,10 +44,10 @@ OnVariablesSet //_argv[0] = first/boot/reset
 	if _argv[0] == "first"; updatecheck = 0
 	//Global var
 	Version = OnVersionSet
-	if _argv[0] == "first"; tspeed = 25
+	if _argv[0] == "first"; tspeed = 50
 	pnumb = 0
 	lastTalk = ""
-	if _argv[0] == "first"; feedbackreminder 
+	if _argv[0] == "first"; feedbackreminder = 0
 	seccount = 0
 	if _argv[0] != "boot"; passmintotal = 0
 	alarmNotify = IARRAY
@@ -82,6 +82,7 @@ OnVariablesSet //_argv[0] = first/boot/reset
 		undyneAr = IARRAY
 		asgoreAr = IARRAY
 		mettatonAr = IARRAY
+		floweyAr = IARRAY
 	}
 }
 //------------------------------------------------------------------------------

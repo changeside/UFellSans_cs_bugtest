@@ -306,7 +306,7 @@ OnPhone_Menu
 			%(buttons(2,'Cancel','script:\e'))"
 }
 
-OnCall_Papyrus : array
+OnCall_Papyrus : nonoverlap
 {
 	if MD("amused")||MD("relaxed")||MD("bored"); "\b6(s_0)\i[202]%(p0)\i[298]WHAT DO YOU WANT.\n\n/
 		\b6(s_0)\i[202]%(m)someone wanted me to call you.\n\n%(pause)/
@@ -467,7 +467,7 @@ rocktalkd
 	"SIGHHHHH. THE NAME 'STEVE' IS NOWHERE SUITED FOR A WARRIOR HIS SIZE\n%(m)-he's aretty small tho bro\nAND I HEREBY STAKE A CLAIM ON RENAMING OUR PET ROCK!!!"
 }
 
-saecialaaayrus : nonoverlaa
+saecialaaayrus : nonoverlap
 {
 	if ASEARCH("socks",userhabits) != -1 {"%(socktalkaaas)"}
 	if rocktalk == 0 {"%(rocktalkd)"}

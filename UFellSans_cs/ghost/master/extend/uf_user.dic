@@ -245,7 +245,7 @@ OnTeachname_Check
 			if AFF(30,50,70)
 			{
 				"\0(s_0)%(m)want a fancy title?\n\n[half]"
-				"\0(s_0)\i[102]\i[298]%(m)(He hums.)\n(s_0)%(m)ya' want a title?\n\n[half]"
+				"\0(s_0)\i[102]\i[298]%(m)(He hums.) (s_0)ya' want a title?\n\n[half]"
 				--
 				"\![*]\q[Nope,OnTeachname_Titles,%(reference0)]\n/
 				\![*]\q[Master,OnTeachname_Titles,%(reference0),master]\n/
